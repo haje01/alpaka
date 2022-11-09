@@ -1,0 +1,40 @@
+kafka:
+  defaultReplicationFactor: 1
+  numPartitions: 1
+  replicaCount: 1
+  metrics:
+    kafka:
+      enabled: false
+    jmx:
+      enabled: false
+  serviceMonitor:
+    enabled: false
+  zookeeper:
+    replicaCount: 1
+
+client:
+  enabled: true
+  name: kafka-client
+  podLabels: {}
+  podAnnotations: {}
+  image:
+    repository: "haje01/kafka-client"
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+k8dashboard:
+  enabled: false
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+dbcon:
+  enabled: false
+

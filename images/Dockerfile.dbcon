@@ -1,0 +1,21 @@
+# Kafka Source Connector 를 이용해 DB 데이터를 가져오기 위한 이미지
+FROM bitnami/kafka:latest
+
+COPY files/mysql-connector-java_8.0.30-1debian11_all.deb /tmp
+COPY files/confluentinc-kafka-connect-jdbc-10.5.0.zip /tmp
+
+# MySQL JDBC Driver 설치
+USER root
+RUN apt-get update && apt-get install unzip && \
+    apt-get install -y /tmp/mysql-connector-java_8.0.30-1debian11_all.deb && \
+    rm /tmp/mysql-connector-java_8.0.30-1debian11_all.deb
+USER 1001
+
+RUN mkdir -p /opt/bitnami/kafka/connect && \
+    cd /opt/bitnami/kafka/connect && \
+    cp /tmp/confluentinc-kafka-connect-jdbc-10.5.0.zip . && \
+    unzip confluentinc-kafka-connect-jdbc-10.5.0.zip && \
+    rm confluentinc-kafka-connect-jdbc-10.5.0.zip
+
+# Kubernetes 쪽에서 적절한 설정으로 connect-distributed.sh 호출
+# CMD /opt/bitnami/kafka/bin/connect-distributed.sh /opt/bitnami/kafka/config/dbcon.properties

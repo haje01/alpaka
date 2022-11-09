@@ -1,0 +1,30 @@
+{{- if .Values.dbcon.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-config
+  namespace: {{ include "common.names.namespace" . }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+data:
+  connect-distributed.properties: |-
+    bootstrap.servers = kafka-headless:{{ include "alpaka.servicePort" . }}
+    plugin.path = /opt/bitnami/kafka/connect
+    group.id = {{ include "alpaka.dbcon.group" . }}
+
+    key.converter=org.apache.kafka.connect.json.JsonConverter
+    value.converter=org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable=true
+    value.converter.schemas.enable=true
+
+    offset.storage.topic=connect-offsets
+    offset.storage.replication.factor=1
+
+    config.storage.topic=connect-configs
+    config.storage.replication.factor=1
+
+    status.storage.topic=connect-status
+    status.storage.replication.factor=1
+
+    offset.flush.interval.ms=10000
+{{- end -}}

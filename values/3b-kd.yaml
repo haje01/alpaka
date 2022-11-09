@@ -1,0 +1,47 @@
+kafka:
+  defaultReplicationFactor: 1
+  numPartitions: 8
+  replicaCount: 3
+  metrics:
+    kafka:
+      enabled: true
+    jmx:
+      enabled: true
+  serviceMonitor:
+    enabled: true
+  zookeeper:
+    replicaCount: 1
+
+k8dashboard:
+  enabled: true
+  service:
+    externalPort: 8443
+  serviceAccount:
+    name: k8dash-admin
+  extraArgs:
+    - --token-ttl=86400
+
+client:
+  enabled: true
+  name: kafka-client
+  podLabels: {}
+  podAnnotations: {}
+  image:
+    repository: "haje01/kafka-client"
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+dbcon:
+  enabled: false
+

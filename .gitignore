@@ -1,0 +1,6 @@
+charts/
+*.swp
+.*.swp
+*.gz
+*.zip
+*.deb
