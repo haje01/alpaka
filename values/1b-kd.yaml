@@ -4,9 +4,9 @@ kafka:
   replicaCount: 1
   metrics:
     kafka:
-      enabled: true
+      enabled: false
     jmx:
-      enabled: true
+      enabled: false
   serviceMonitor:
     enabled: true
   zookeeper:
@@ -32,3 +32,12 @@ client:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+dbcon:
+  enabled: false

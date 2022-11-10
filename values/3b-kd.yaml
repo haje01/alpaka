@@ -4,9 +4,9 @@ kafka:
   replicaCount: 3
   metrics:
     kafka:
-      enabled: true
+      enabled: false
     jmx:
-      enabled: true
+      enabled: false
   serviceMonitor:
     enabled: true
   zookeeper:

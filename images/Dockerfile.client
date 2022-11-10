@@ -8,7 +8,8 @@ RUN apt-get update \
     && apt-get install -y dnsutils \
     && apt-get install -y netcat \
     && apt-get install -y kafkacat \
-    && apt-get install -y vim
+    && apt-get install -y vim \
+    && apt-get install -y iputils-ping
 
 # FROM ubuntu:22.04
 
