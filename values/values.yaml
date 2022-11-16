@@ -1,3 +1,4 @@
+# 밸류 참고용 템플릿
 kafka:
   defaultReplicationFactor: 1
   numPartitions: 8
@@ -39,12 +40,12 @@ grafana:
       fileName: node-exporter.json
 
 
-client:
+cli:
   enabled: false
   podLabels: {}
   podAnnotations: {}
   image:
-    repository: "haje01/kafka-client"
+    repository: "haje01/kafka-cli"
     tag: latest
     pullPolicy: IfNotPresent
   resources: {}

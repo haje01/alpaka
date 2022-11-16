@@ -9,7 +9,8 @@ RUN apt-get update \
     && apt-get install -y netcat \
     && apt-get install -y kafkacat \
     && apt-get install -y vim \
-    && apt-get install -y iputils-ping
+    && apt-get install -y iputils-ping \
+    && apt-get install -y jq
 
 # FROM ubuntu:22.04
 

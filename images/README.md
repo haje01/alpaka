@@ -7,15 +7,15 @@
 
 다음과 같이 빌드
 
-$ docker build -t haje01/kafka-client[:버전] -f Dockerfile.client .
+$ docker build -t haje01/kafka-cli[:버전] -f Dockerfile.cli .
 
 ## Dockerfile.dbcon
 
-- Kafka DB 커넥트 용 이미지
+- JDBC 소스 커넥트 용 이미지
 - 아래와 같은 패키지가 설치되어 있음
-  - JDBC Source Connector
-  - MySQL
-
+  - JDBC Source 커넥터 (커스텀)
+  - Debezium 커넥터 (MySQL & MSSQL)
+  - MySQL 커넥터
 
 다음과 같이 빌드
 

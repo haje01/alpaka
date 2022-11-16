@@ -12,13 +12,13 @@ kafka:
   zookeeper:
     replicaCount: 1
 
-client:
+cli:
   enabled: true
-  name: kafka-client
+  name: kafka-cli
   podLabels: {}
   podAnnotations: {}
   image:
-    repository: "haje01/kafka-client"
+    repository: "haje01/kafka-cli"
     tag: latest
     pullPolicy: IfNotPresent
   resources: {}

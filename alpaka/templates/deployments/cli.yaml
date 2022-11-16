@@ -1,8 +1,8 @@
-{{- if .Values.client.enabled -}}
+{{- if .Values.cli.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "common.names.fullname" . }}-client
+  name: {{ include "common.names.fullname" . }}-cli
   namespace: {{ include "common.names.namespace" . }}
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
@@ -12,35 +12,35 @@ spec:
       {{- include "common.labels.matchLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.client.podAnnotations }}
+      {{- with .Values.cli.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 -}}
       {{- end }}
       labels:
         {{- include "common.labels.standard" . | nindent 8 -}}
-        {{- if .Values.client.podLabels -}}
-        {{ toYaml .Values.client.podLabels | nindent 8 }}
+        {{- if .Values.cli.podLabels -}}
+        {{ toYaml .Values.cli.podLabels | nindent 8 }}
         {{- end }}
-        app.kubernetes.io/component: kafka-client
+        app.kubernetes.io/component: kafka-cli
     spec:
       containers:
-        - name: alpaka-client
-          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+        - name: alpaka-cli
+          image: "{{ .Values.cli.image.repository }}:{{ .Values.cli.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cli.image.pullPolicy }}
           resources:
-            {{- toYaml .Values.client.resources | nindent 12 }}
+            {{- toYaml .Values.cli.resources | nindent 12 }}
           command: ['sleep']
           args: ['infinity']
 
-      {{- with .Values.client.nodeSelector -}}
+      {{- with .Values.cli.nodeSelector -}}
       nodeSelector:
         {{- toYaml . | nindent 8 -}}
       {{- end -}}
-      {{- with .Values.client.affinity -}}
+      {{- with .Values.cli.affinity -}}
       affinity:
         {{- toYaml . | nindent 8 -}}
       {{- end -}}
-      {{- with .Values.client.tolerations -}}
+      {{- with .Values.cli.tolerations -}}
       tolerations:
         {{- toYaml . | nindent 8 -}}
       {{- end -}}

@@ -1,0 +1,54 @@
+# Kafka + client + dashboard + ui
+kafka:
+  defaultReplicationFactor: 1
+  numPartitions: 8
+  replicaCount: 3
+  image:
+    pullPolicy: IfNotPresent
+  metrics:
+    # JMX 포트를 노출시켜야 UI for Kafka 등에서 활용 가능
+    # 그러나 Java 8 의 UseCGroupMemoryLimitForHeap 옵션 에러로 홀드
+    jmx:
+      enabled: true
+  serviceMonitor:
+    enabled: true
+  zookeeper:
+    replicaCount: 3
+
+cli:
+  enabled: true
+  podLabels: {}
+  podAnnotations: {}
+  image:
+    repository: "haje01/kafka-cli"
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+k8dashboard:
+  enabled: true
+  serviceAccount:
+    name: k8dash-admin
+  extraArgs:
+    - --token-ttl=86400
+
+kafka_ui:
+  enabled: true
+  envs:
+    config:
+      KAFKA_CLUSTERS_0_NAME: "k3bdu-kafka"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "k3bdu-kafka-headless"
+      KAFKA_CLUSTERS_0_METRICS_PORT: "5555"
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+dbcon:
+  enabled: false
+

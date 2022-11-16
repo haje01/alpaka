@@ -6,11 +6,11 @@
 
   {{ .Release.Name }}-kafka
 
-{{- if .Values.client.enabled }}
+{{- if .Values.cli.enabled }}
 
-# kafka-client 에 접속
+# kafka-cli 에 접속
 
-  export KCLI_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka-client" -o jsonpath="{.items[0].metadata.name}")
+  export KCLI_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $KCLI_POD -n {{ .Release.Namespace}} -- bash
 {{- end -}}
 
@@ -27,8 +27,17 @@
 
   kubectl get secret -n {{ .Release.Namespace }} $(kubectl get serviceaccount {{ .Values.k8dashboard.serviceAccount.name }} -n {{ .Release.Namespace }} -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode
 
+{{- end }}
+
 ## 브라우저 접속 URL
 
   https://127.0.0.1:8443/
 
-{{ end }}
+{{- if (index .Values "kafka-ui" "enabled") }}
+# 카프카 UI
+
+## 포트 포워딩
+
+  kubectl port-forward svc/{{ .Release.Name }}-kafka-ui 8989:80
+
+{{- end }}

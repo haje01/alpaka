@@ -1,0 +1,39 @@
+{{- if .Values.dbcon.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.names.fullname" . }}-dbcon
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: kafka-dbcon
+spec:
+  replicas: {{ .Values.dbcon.replicaCount }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: kafka-dbcon
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: kafka-dbcon
+    spec:
+      containers:
+        - name: connect
+          image: {{ .Values.dbcon.image.repository }}:{{ .Values.dbcon.image.tag }}
+          imagePullPolicy: {{ .Values.dbcon.image.pullPolicy }}
+          # command: ['sleep']
+          # args: ['infinity']
+          command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
+          args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
+          env:
+            - name: TZ
+              value: {{ .Values.dbcon.timezone }}
+          ports:
+            - name: connector
+              containerPort: 8083
+          volumeMounts:
+            - name: conn-cfg
+              mountPath: /opt/bitnami/kafka/config
+      volumes:
+        - name: conn-cfg
+          configMap:
+            name: {{ include "common.names.fullname" . }}-dbcon
+{{- end -}}

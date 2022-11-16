@@ -1,0 +1,89 @@
+
+# kafka + dashboard + client + jdbc 커넥터
+kafka:
+  defaultReplicationFactor: 1
+  numPartitions: 8
+  replicaCount: 5
+  metrics:
+    kafka:
+      enabled: true
+    jmx:
+      enabled: true
+  serviceMonitor:
+    enabled: true
+  zookeeper:
+    replicaCount: 3
+
+k8dashboard:
+  enabled: true
+  service:
+    externalPort: 8443
+  serviceAccount:
+    name: k8dash-admin
+  extraArgs:
+    - --token-ttl=86400
+
+cli:
+  enabled: true
+  name: kafka-cli
+  podLabels: {}
+  podAnnotations: {}
+  image:
+    repository: "haje01/kafka-cli"
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+
+dbcon:
+  enabled: true
+  replicaCount: 3
+  kafkaClientPort: 9092
+  image:
+    repository: "haje01/kafka-dbcon"
+    tag: latest
+    pullPolicy: IfNotPresent
+  timezone: Asia/Seoul
+
+
+kafka-ui:
+  enabled: true
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: full-kafka
+          bootstrapServers: full-kafka-headless:9092
+          zookeeper: full-zookeeper-headless:2181
+          kafkaConnect:
+            - name: dbcon
+              address: http://full-alpaka-dbcon:8083
+          metrics:
+            port: 5556
+            type: JMX
+    auth:
+      type: disabled
+    management:
+      health:
+        ldap:
+          enabled: false
+  # envs:
+  #   config:
+  #     KAFKA_CLUSTERS_0_NAME: full-kafka
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: full-kafka-headless:9092
+  #     KAFKA_CLUSTERS_0_METRICS_PORT: "9308"
+  #     KAFKA_CLUSTERS_0_ZOOKEEPER: full-zookeeper-headless:2181
+
+prometheus:
+  enabled: false
+  serverFiles:
+    prometheus.yml:
+      scrape_configs:
+        - job_name: node
+          static_configs:
+            - targets: ['172.29.0.6:9100', '172.29.0.7:9100']
+
+grafana:
+  enabled: false
