@@ -34,6 +34,7 @@
   https://127.0.0.1:8443/
 
 {{- if (index .Values "kafka-ui" "enabled") }}
+
 # 카프카 UI
 
 ## 포트 포워딩

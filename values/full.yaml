@@ -2,8 +2,8 @@
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
   defaultReplicationFactor: 1
-  numPartitions: 8
-  replicaCount: 5
+  numPartitions: 2
+  replicaCount: 3
   metrics:
     kafka:
       enabled: true
@@ -13,6 +13,7 @@ kafka:
     enabled: true
   zookeeper:
     replicaCount: 3
+  deleteTopicEnable: true
 
 k8dashboard:
   enabled: true
@@ -22,6 +23,7 @@ k8dashboard:
     name: k8dash-admin
   extraArgs:
     - --token-ttl=86400
+    - --enable-skip-login 
 
 cli:
   enabled: true
