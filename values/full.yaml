@@ -33,12 +33,18 @@ cli:
   image:
     repository: "haje01/kafka-cli"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   resources: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
+  dnsConfig:
+    nameservers:
+      - 10.5.0.51
+      - 10.5.0.52
+    options:
+      - name: ndots
+        value: "2"
 
 dbcon:
   enabled: true
@@ -79,13 +85,30 @@ kafka-ui:
   #     KAFKA_CLUSTERS_0_ZOOKEEPER: full-zookeeper-headless:2181
 
 prometheus:
-  enabled: false
-  serverFiles:
-    prometheus.yml:
-      scrape_configs:
-        - job_name: node
-          static_configs:
-            - targets: ['172.29.0.6:9100', '172.29.0.7:9100']
+  enabled: true
+  prometheus.yml:
+    - job_name: kafka-exporter
+      scrape_interval: 10s
+      scrape_timeout:  5s
+      metrics_path: "/metrics"
+      static_configs:
+      - targets:
+        - full-kafka-metrics:9308
+    - job_name: jmx-metrics
+      scrape_interval: 10s
+      scrape_timeout:  5s
+      metrics_path: "/metrics"
+      static_configs:
+      - targets:
+        - full-kafka-jmx-metrics:5556
+  # serverFiles:
+  #   prometheus.yml:
+  #     scrape_configs:
+  #       - job_name: node
+  #         static_configs:
+  #           - targets: ['172.29.0.6:9100', '172.29.0.7:9100']
 
 grafana:
-  enabled: false
+  enabled: true
+  plugins:
+    hamedkarbasi93-kafka-datasource

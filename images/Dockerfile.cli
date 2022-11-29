@@ -10,23 +10,11 @@ RUN apt-get update \
     && apt-get install -y kafkacat \
     && apt-get install -y vim \
     && apt-get install -y iputils-ping \
-    && apt-get install -y jq
+    && apt-get install -y jq \
+    && apt-get install -y python3 \
+    && apt-get install -y python3-pip \
+    && apt-get install -y git
 
-# FROM ubuntu:22.04
 
-# ARG kafka_url="https://archive.apache.org/dist/kafka/3.0.0/kafka_2.13-3.0.0.tgz"
+RUN git clone https://github.com/haje01/kfktest.git && cd kfktest && pip3 install -r requirements.txt && pip3 install -e .
 
-# RUN apt update && apt install -y openjdk-8-jdk \
-#     && apt install -y curl \
-#     && apt install -y dnsutils \
-#     && apt install -y netcat \
-#     && apt install -y vim
-
-# RUN curl -s ${kafka_url} --output kafka.tgz \
-#     && tar xzf kafka.tgz \
-#     && rm kafka.tgz
-
-# RUN mv $(basename $(basename ${kafka_url} .tgz)) kafka
-
-# ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
-#     PATH="$PATH:/usr/lib/jvm/java-8-openjdk-amd64/bin:/kafka/bin"

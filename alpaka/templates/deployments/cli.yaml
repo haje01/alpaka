@@ -31,7 +31,12 @@ spec:
             {{- toYaml .Values.cli.resources | nindent 12 }}
           command: ['sleep']
           args: ['infinity']
-
+      {{- if .Values.cli.dnsPolicy }}
+      dnsPolicy: {{ .Values.cli.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.cli.dnsConfig }}                                                                         
+      dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.cli.dnsConfig "context" $) | nindent 8 }}
+      {{- end }}
       {{- with .Values.cli.nodeSelector -}}
       nodeSelector:
         {{- toYaml . | nindent 8 -}}
