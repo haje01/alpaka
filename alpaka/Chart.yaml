@@ -44,3 +44,6 @@ dependencies:
     version: 0.4.x
     repository: https://provectus.github.io/kafka-ui
     condition: kafka-ui.enabled
+  - name: kminion
+    version: 0.9.x
+    repository: https://raw.githubusercontent.com/cloudhut/kminion/master/charts/archives

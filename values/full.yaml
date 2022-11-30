@@ -1,9 +1,9 @@
 
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
-  defaultReplicationFactor: 1
-  numPartitions: 2
   replicaCount: 3
+  defaultReplicationFactor: 2
+  numPartitions: 8
   metrics:
     kafka:
       enabled: true
@@ -14,6 +14,8 @@ kafka:
   zookeeper:
     replicaCount: 3
   deleteTopicEnable: true
+  podLabels:
+    job: kafka
 
 k8dashboard:
   enabled: true
@@ -86,29 +88,36 @@ kafka-ui:
 
 prometheus:
   enabled: true
-  prometheus.yml:
-    - job_name: kafka-exporter
+  extraScrapeConfigs: |
+    - job_name: kminion-metrics
       scrape_interval: 10s
       scrape_timeout:  5s
       metrics_path: "/metrics"
       static_configs:
       - targets:
-        - full-kafka-metrics:9308
-    - job_name: jmx-metrics
-      scrape_interval: 10s
-      scrape_timeout:  5s
-      metrics_path: "/metrics"
-      static_configs:
-      - targets:
-        - full-kafka-jmx-metrics:5556
-  # serverFiles:
-  #   prometheus.yml:
-  #     scrape_configs:
-  #       - job_name: node
-  #         static_configs:
-  #           - targets: ['172.29.0.6:9100', '172.29.0.7:9100']
+        - full-kminion:8080
+
 
 grafana:
   enabled: true
-  plugins:
-    hamedkarbasi93-kafka-datasource
+  adminSecretName: full-grafana-admin
+  admin:
+    user: admin
+    password: admindjemals
+
+
+kminion:
+  enabled: true
+  kminion:
+    config:
+      kafka:
+        brokers: ["full-kafka-headless:9092"]
+
+    exporter:
+      host: "full-kminion"
+      port: 8080
+
+  service:
+    annotations:
+      prometheus.io/probe: kminion
+  

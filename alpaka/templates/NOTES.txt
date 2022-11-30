@@ -37,8 +37,28 @@
 
 # 카프카 UI
 
-## 포트 포워딩
+포트 포워딩
 
   kubectl port-forward svc/{{ .Release.Name }}-kafka-ui 8989:80
+{{ end -}}
 
-{{- end }}
+{{- if .Values.prometheus.enabled }}
+# 프로메테우스
+
+포트 포워딩
+
+  kubectl port-forward svc/{{ .Release.Name }}-prometheus-server 9090:80
+{{ end -}}
+
+{{- if .Values.grafana.enabled }}
+# 그라파나
+
+## 포트 포워딩
+
+  kubectl port-forward svc/{{ .Release.Name }}-grafana 3000
+
+## 로그인
+
+  유저: admin 
+  암호: admin
+{{ end -}}
