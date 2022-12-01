@@ -41,6 +41,6 @@
   kubectl port-forward svc/{{ .Release.Name }}-grafana 3000
 
   유저: admin 
-  암호: admindjemals(어드민)
+  암호: admindjemals(admin어드민)
 
 {{- end }}
