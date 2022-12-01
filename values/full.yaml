@@ -41,9 +41,9 @@ cli:
   tolerations: []
   affinity: {}
   dnsConfig:
-    nameservers:
-      - 10.5.0.51
-      - 10.5.0.52
+    # 필요시 외부 DNS 등록 
+    # nameservers:
+    #   - 213.234.76.4
     options:
       - name: ndots
         value: "2"
