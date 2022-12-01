@@ -17,5 +17,5 @@ dependencies:
 - name: kminion
   repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
   version: 0.10.0
-digest: sha256:510ed46958f80e4a6c85b3b06bb13a6e3f3c439ca0a662b3850953ae68cdea8a
-generated: "2022-12-01T13:03:21.645788+09:00"
+digest: sha256:da7c07a4fb87fabfd41b14491623759b78a8c83690e6a0237b447517a6961259
+generated: "2022-12-01T16:05:33.6345252+09:00"

@@ -47,3 +47,4 @@ dependencies:
   - name: kminion
     version: 0.10.x
     repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
+    condition: kminion.enabled
