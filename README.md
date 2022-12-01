@@ -22,4 +22,7 @@ Kubernetes 기반의 Kafka 배포
 `helm dependency build`
 ## 설치 
 
+차트 저장소 등록 
+`helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/charts`
+
 `helm install -f values/full.yaml full ./alpaka`
