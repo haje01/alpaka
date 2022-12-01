@@ -1,0 +1,38 @@
+apiVersion: v1
+entries:
+  alpaka:
+  - apiVersion: v2
+    appVersion: 3.3.1
+    created: "2022-12-01T15:55:29.2724315+09:00"
+    dependencies:
+    - name: kafka
+      repository: https://charts.bitnami.com/bitnami
+      version: 19.1.x
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 15.x.x
+    - condition: grafana.enabled
+      name: grafana
+      repository: https://charts.bitnami.com/bitnami
+      version: 8.x.x
+    - alias: k8dashboard
+      condition: k8dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard/
+      version: 5.x.x
+    - condition: kafka-ui.enabled
+      name: kafka-ui
+      repository: https://provectus.github.io/kafka-ui
+      version: 0.4.x
+    - name: kminion
+      repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
+      version: 0.10.x
+    description: Yet another Kafka deployment chart.
+    digest: 9afb0c047d818b208b396be0c02794802b625225eb156b6068cf0e78a2272f72
+    name: alpaka
+    type: application
+    urls:
+    - alpaka-0.0.1.tgz
+    version: 0.0.1
+generated: "2022-12-01T15:55:29.2550576+09:00"
