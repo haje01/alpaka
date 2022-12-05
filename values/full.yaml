@@ -104,6 +104,24 @@ grafana:
   admin:
     user: admin
     password: admindjemals
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://full-prometheus-server
+          isDefault: true
+  dashboardsProvider:
+    enabled: true
+  dashboardsConfigMaps:
+    - configMapName: full-alpaka-grafana-dashboards-1
+      fileName: kminion-cluster_rev1.json
+    - configMapName: full-alpaka-grafana-dashboards-2
+      fileName: kminion-topic_rev1.json
+    - configMapName: full-alpaka-grafana-dashboards-3
+      fileName: kminion-groups_rev1.json
 
 
 kminion:

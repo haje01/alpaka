@@ -35,6 +35,10 @@ dependencies:
     version: 8.x.x
     repository: https://charts.bitnami.com/bitnami
     condition: grafana.enabled
+  - name: kminion
+    version: 0.10.x
+    repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
+    condition: grafana.enabled
   - name: kubernetes-dashboard
     version: 5.x.x
     repository: https://kubernetes.github.io/dashboard/
@@ -44,7 +48,3 @@ dependencies:
     version: 0.4.x
     repository: https://provectus.github.io/kafka-ui
     condition: kafka-ui.enabled
-  - name: kminion
-    version: 0.10.x
-    repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
-    condition: kminion.enabled

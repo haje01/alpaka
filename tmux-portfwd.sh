@@ -24,13 +24,13 @@ tmux new-window -t $session:$window -n 'grafana'
 tmux send-keys -t $session:$window 'kubectl port-forward svc/full-grafana 3000' C-m
 
 # Open pages
-sleep 2
-open https://127.0.0.1:8443
-sleep 2
-open http://localhost:8989
-sleep 2
-open http://localhost:9090
-sleep 2
-open http://localhost:3000
+# sleep 2
+# open https://127.0.0.1:8443
+# sleep 2
+# open http://localhost:8989
+# sleep 2
+# open http://localhost:9090
+# sleep 2
+# open http://localhost:3000
 
 tmux attach-session -t $session

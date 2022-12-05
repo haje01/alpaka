@@ -20,10 +20,13 @@ Kubernetes 기반의 Kafka 배포
 ### 의존 패키지 설치 
 
 `helm dependency build`
+
+> kminion 의 경우 `policy/v1beta` 의 호환성 문제로 패치된 버전 사용 
+
 ## 설치 
 
 차트 저장소 등록 
-`helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/charts`
+`helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/chartrepo`
 
 설치 
 

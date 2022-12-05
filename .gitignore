@@ -4,3 +4,4 @@ charts/
 *.gz
 *.zip
 *.deb
+*:Zone.Identifier

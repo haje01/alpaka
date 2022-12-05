@@ -23,6 +23,8 @@
   kubectl port-forward $K8DASH_POD -n {{ .Release.Namespace }} 8443:8443
 {{- end }}
 
+  접속 URL: https://localhost:8443
+
 {{ if (index .Values "kafka-ui" "enabled") -}}
 ## 카프카 UI
 
