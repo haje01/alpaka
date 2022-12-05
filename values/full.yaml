@@ -116,11 +116,11 @@ grafana:
   dashboardsProvider:
     enabled: true
   dashboardsConfigMaps:
-    - configMapName: full-alpaka-grafana-dashboards-1
+    - configMapName: full-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: full-alpaka-grafana-dashboards-2
+    - configMapName: full-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: full-alpaka-grafana-dashboards-3
+    - configMapName: full-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
 
 

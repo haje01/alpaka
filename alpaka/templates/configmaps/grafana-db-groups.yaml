@@ -531,8 +531,5 @@ data:
     }
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2022-12-05T08:12:00Z"
-  name: full-alpaka-grafana-dashboards-3
-  namespace: default
-  resourceVersion: "259898"
-  uid: 3a67151a-5e4c-4b39-9641-b71aa05a330c
+  name: {{ .Release.Name }}-alpaka-grafana-groups
+  namespace: {{ .Release.Namespace }}
