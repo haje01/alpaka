@@ -1,21 +1,24 @@
 dependencies:
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
-  version: 19.1.4
+  version: 19.1.5
+- name: zookeeper
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.0.0
 - name: prometheus
   repository: https://prometheus-community.github.io/helm-charts
   version: 15.18.0
 - name: grafana
   repository: https://charts.bitnami.com/bitnami
   version: 8.2.20
+- name: kminion
+  repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
+  version: 0.10.0
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard/
   version: 5.11.0
 - name: kafka-ui
   repository: https://provectus.github.io/kafka-ui
   version: 0.4.6
-- name: kminion
-  repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
-  version: 0.10.0
-digest: sha256:da7c07a4fb87fabfd41b14491623759b78a8c83690e6a0237b447517a6961259
-generated: "2022-12-01T16:05:33.6345252+09:00"
+digest: sha256:84cb59c54d8484d5e613acbcdc61a807768030431ec6443d093ebaf7dd510053
+generated: "2022-12-06T14:40:08.1359798+09:00"

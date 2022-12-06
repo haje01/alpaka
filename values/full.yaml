@@ -9,13 +9,28 @@ kafka:
       enabled: true
     jmx:
       enabled: true
-  serviceMonitor:
-    enabled: true
+    serviceMonitor:
+      enabled: true
+      jobLabel: kafka
   zookeeper:
-    replicaCount: 3
+    enabled: false
+    # replicaCount: 3
+  externalZookeeper:
+    servers: ['full-zookeeper:2181']
   deleteTopicEnable: true
   podLabels:
     job: kafka
+
+
+zookeeper:
+  enabled: true
+  replicaCount: 3
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      jobLabel: zookeeper
+
 
 k8dashboard:
   enabled: true
@@ -79,12 +94,7 @@ kafka-ui:
       health:
         ldap:
           enabled: false
-  # envs:
-  #   config:
-  #     KAFKA_CLUSTERS_0_NAME: full-kafka
-  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: full-kafka-headless:9092
-  #     KAFKA_CLUSTERS_0_METRICS_PORT: "9308"
-  #     KAFKA_CLUSTERS_0_ZOOKEEPER: full-zookeeper-headless:2181
+
 
 prometheus:
   enabled: true
@@ -122,6 +132,8 @@ grafana:
       fileName: kminion-topic_rev1.json
     - configMapName: full-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
+    - configMapName: full-alpaka-grafana-zookeeper
+      fileName: zookeeper-by-prometheus_rev4.json
 
 
 kminion:

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alpaka-grafana-cluster
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/kminion-cluster_rev1.json").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alpaka-grafana-topic
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/kminion-topic_rev1.json").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alpaka-grafana-groups
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/kminion-groups_rev1.json").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alpaka-grafana-zookeeper
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/zookeeper-by-prometheus_rev4.json").AsConfig | indent 2 }}
