@@ -11,7 +11,11 @@ kafka:
       enabled: true
     serviceMonitor:
       enabled: true
-      jobLabel: kafka
+      relabelings:
+        - sourceLabels: ["container"]
+          regex: "jmx-exporter"
+          replacement: jmx
+          targetLabel: job
   zookeeper:
     enabled: false
     # replicaCount: 3
@@ -30,16 +34,29 @@ zookeeper:
     serviceMonitor:
       enabled: true
       relabelings:
-        - sourceLabels: ["app_kubernetes_io_name", "node"]
-          targetLabel: zookeeper_node
-        - replacement: jmx
+        - replacement: zookeeper
           targetLabel: job
+        # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+        - sourceLabels: ["pod"]
+          targetLabel: instance
+      metricRelabelings:
+        # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+        - sourceLabels: ["pod"]
+          targetLabel: instance
 
 
 prometheus:
   enabled: true
-  # operator:
-  #   enabled: true
+  prometheus:
+    enabled: true
+
+# prometheus:
+#   enabled: true
+#   prometheus:
+#     enabled: true
+#   rbac:
+#     create: false 
+#     pspEnabled: false
 
 
 k8dashboard:
@@ -147,7 +164,7 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://full-prometheus-server
+          url: http://full-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true

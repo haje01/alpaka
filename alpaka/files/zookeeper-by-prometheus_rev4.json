@@ -9234,7 +9234,7 @@
           "name": "instance",
           "options": [],
           "query": {
-            "query": "label_values({job=~\"$job\"}, instance)",
+            "query": "label_values({job=~\"$job\"}, pod)",
             "refId": "Prometheus-instance-Variable-Query"
           },
           "refresh": 1,
