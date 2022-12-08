@@ -34,11 +34,12 @@ zookeeper:
           targetLabel: zookeeper_node
         - replacement: jmx
           targetLabel: job
-      metricRelabelings:
-        - sourceLabels: ["app_kubernetes_io_name", "node"]
-          targetLabel: zookeeper_node
-        - replacement: jmx
-          targetLabel: job
+
+
+prometheus:
+  enabled: true
+  # operator:
+  #   enabled: true
 
 
 k8dashboard:
@@ -105,16 +106,18 @@ kafka-ui:
           enabled: false
 
 
-prometheus:
-  enabled: true
-  extraScrapeConfigs: |
-    - job_name: kminion-metrics
-      scrape_interval: 10s
-      scrape_timeout:  5s
-      metrics_path: "/metrics"
-      static_configs:
-      - targets:
-        - full-kminion:8080
+## prometheus-coummity 
+#
+# prometheus:
+#   enabled: true
+#   extraScrapeConfigs: |
+#     - job_name: kminion-metrics
+#       scrape_interval: 10s
+#       scrape_timeout:  5s
+#       metrics_path: "/metrics"
+#       static_configs:
+#       - targets:
+#         - full-kminion:8080
     # - job_name: jmx
     #   scrape_interval: 10s
     #   scrape_timeout:  5s
