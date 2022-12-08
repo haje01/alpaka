@@ -26,3 +26,8 @@ KMinion 은 KMinion Exporter 가 익스포트한 카프카 메트릭을 다음�
 > ** Grafana 에서 대쉬보드 이동시 계속 세이브 창이 뜨는 경우 **
 > Grafana 가 자동으로 대쉬보드를 최신 포맷으로 변경한 경우다. 대쉬보드의 Save Dashboard 클릭 후 Copy JSON to clipboard 후 이 디렉토리의 파일에 Paste 하여 갱신된 버전으로 저장한다.
 
+### JMX Overview
+
+JMX Exporter 가 익스포트한 JVM 메트릭 대쉬보드 
+
+[altassian-overview_rev1](https://grafana.com/grafana/dashboards/3457-altassian-overview/)
