@@ -29,7 +29,16 @@ zookeeper:
     enabled: true
     serviceMonitor:
       enabled: true
-      jobLabel: zookeeper
+      relabelings:
+        - sourceLabels: ["app_kubernetes_io_name", "node"]
+          targetLabel: zookeeper_node
+        - replacement: jmx
+          targetLabel: job
+      metricRelabelings:
+        - sourceLabels: ["app_kubernetes_io_name", "node"]
+          targetLabel: zookeeper_node
+        - replacement: jmx
+          targetLabel: job
 
 
 k8dashboard:
@@ -106,6 +115,20 @@ prometheus:
       static_configs:
       - targets:
         - full-kminion:8080
+    # - job_name: jmx
+    #   scrape_interval: 10s
+    #   scrape_timeout:  5s
+    #   metrics_path: "/metrics"
+    #   static_configs:
+    #   - targets:
+    #     - full-kafka-headless:5556
+    # - job_name: zookeeper
+    #   scrape_interval: 10s
+    #   scrape_timeout:  5s
+    #   metrics_path: "/metrics"
+    #   static_configs:
+    #   - targets:
+    #     - full-zookeeper-metrics:9141
 
 
 grafana:

@@ -9189,8 +9189,8 @@
         {
           "current": {
             "selected": false,
-            "text": "kubernetes-service-endpoints",
-            "value": "kubernetes-service-endpoints"
+            "text": "zookeeper",
+            "value": "zookeeper"
           },
           "datasource": {
             "type": "prometheus",
