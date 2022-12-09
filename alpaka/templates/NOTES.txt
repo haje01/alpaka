@@ -1,3 +1,8 @@
+
+주의: 컨트롤 노드에 주요 서비스가 배정되지 않게 (Install 전)
+
+  kubectl taint nodes k3d-dev-server-0 type=ctrl:NoSchedule
+
 # 설치된 파드 리스트
 
   kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}

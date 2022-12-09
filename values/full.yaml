@@ -31,6 +31,8 @@ kafka:
   zookeeper:
     enabled: true
     replicaCount: 3
+    tolerations:
+      - key: "ctrl"
     metrics:
       enabled: true
       serviceMonitor:
@@ -51,7 +53,7 @@ kafka:
             action: labeldrop
           - sourceLabels: ["pod"]
             targetLabel: instance
-            
+
   deleteTopicEnable: true
   podLabels:
     job: kafka
@@ -106,6 +108,11 @@ k8dashboard:
   extraArgs:
     - --token-ttl=86400
     - --enable-skip-login 
+  tolerations:
+  - key: type
+    operator: "Equal"
+    value: "ctrl"
+    effect: "NoSchedule"
 
 cli:
   enabled: true
@@ -159,6 +166,11 @@ kafka-ui:
       health:
         ldap:
           enabled: false
+  tolerations:
+  - key: type
+    operator: "Equal"
+    value: "ctrl"
+    effect: "NoSchedule"
 
 
 ## prometheus-coummity 
