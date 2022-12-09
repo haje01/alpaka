@@ -9204,7 +9204,7 @@
           "name": "job",
           "options": [],
           "query": {
-            "query": "label_values(job{service=~\".*zookeeper-metrics\"})",
+            "query": "label_values(job{service=~\".*zookeeper-metrics\", job!=\"full-kube-state-metrics\"})",
             "refId": "Prometheus-job-Variable-Query"
           },
           "refresh": 1,
@@ -9226,7 +9226,7 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "definition": "label_values({service=~\".*zookeeper-metrics\"}, instance)",
+          "definition": "label_values({service=~\".*zookeeper-metrics\", __name__!=\"kube_service_annotations\"}, instance)",
           "hide": 0,
           "includeAll": true,
           "label": "Instance",
@@ -9234,7 +9234,7 @@
           "name": "instance",
           "options": [],
           "query": {
-            "query": "label_values({service=~\".*zookeeper-metrics\"}, instance)",
+            "query": "label_values({service=~\".*zookeeper-metrics\", __name__!=\"kube_service_annotations\"}, instance)",
             "refId": "Prometheus-instance-Variable-Query"
           },
           "refresh": 1,

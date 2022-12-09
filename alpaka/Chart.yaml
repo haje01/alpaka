@@ -27,9 +27,9 @@ dependencies:
   - name: kafka
     version: 19.1.x
     repository: https://charts.bitnami.com/bitnami
-  - name: zookeeper
-    version: 11.0.x
-    repository: https://charts.bitnami.com/bitnami
+  # - name: zookeeper
+  #   version: 11.0.x
+  #   repository: https://charts.bitnami.com/bitnami
   - name: kube-prometheus
     version: 8.2.x
     repository: https://charts.bitnami.com/bitnami

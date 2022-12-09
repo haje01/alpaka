@@ -2,9 +2,6 @@ dependencies:
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
   version: 19.1.5
-- name: zookeeper
-  repository: https://charts.bitnami.com/bitnami
-  version: 11.0.0
 - name: kube-prometheus
   repository: https://charts.bitnami.com/bitnami
   version: 8.2.2
@@ -20,5 +17,5 @@ dependencies:
 - name: kafka-ui
   repository: https://provectus.github.io/kafka-ui
   version: 0.4.6
-digest: sha256:26fe883dccc885d2e475546afe1847040f7587dead5626cfbef32bf07ed8d1ed
-generated: "2022-12-08T12:43:44.3894309+09:00"
+digest: sha256:46c3c50e57818ecf9b28963976ebf01c498fa098fec37bd33307f1c2e8adbaed
+generated: "2022-12-09T11:59:34.5406386+09:00"
