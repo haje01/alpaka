@@ -1,4 +1,4 @@
-# Alpaka
+# alpaka
 
 Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키지를 포함한다:
 
@@ -13,7 +13,7 @@ Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키
 
 ## 사전 준비
 
-개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용으로는 클라우드 또는 IDC 에 배표할 수 있다.
+개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용으로는 클라우드 또는 IDC 에 배포할 수 있다.
 
 ### 로컬 쿠버네티스 환경
 
@@ -39,7 +39,7 @@ Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키
 
 클러스터 이름 `prod`, EC2 `m5.xlarge` 타입 4대, 디스크 100GB 최대 4대 예:
 
-```
+```bash
 time eksctl create cluster \
 --name prod \
 --nodegroup-name xlarge \
@@ -56,25 +56,25 @@ time eksctl create cluster \
 ( 참고 : [Creating an IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html) )
 
 1. 기존 OIDC 존재 확인
-```
+```bash
 oidc_id=$(aws eks describe-cluster --name prod --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
 ```
 
 2. 클러스터 ID 의 IAM OIDC 프로바이더가 계정에 있는지 확인 
 
-```
+```bash
 aws iam list-open-id-connect-providers | grep $oidc_id
 ```
 
 3. 결과가 없으면 IAM OIDC 아이덴터티 생성
-```
+```bash
 eksctl utils associate-iam-oidc-provider --cluster prod --approve
 ```
 
 4. 서비스 계정을 위한 EBS CSI 드라이버용 IAM Role 생성
 ( 참고 : [Creating the Amazon EBS CSI driver IAM role for service accounts](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html) )
 
-```
+```bash
 eksctl create iamserviceaccount \
   --name ebs-csi-controller-sa \
   --namespace kube-system \
@@ -87,8 +87,8 @@ eksctl create iamserviceaccount \
 
 5. EKS 애드온으로 EBS CSI 드라이버 설치하기
 ( 참고 : [Managing the Amazon EBS CSI driver as an Amazon EKS add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html) )
-```
-eksctl create addon --name aws-ebs-csi-driver --cluster prod --service-account-role-arn arn:aws:iam::415742736303:role/AmazonEKS_EBS_CSI_DriverRole --force
+```bash
+eksctl create addon --name aws-ebs-csi-driver --cluster prod --service-account-role-arn arn:aws:iam::<AWS 계정 번호>:role/AmazonEKS_EBS_CSI_DriverRole --force
 ```
 
 #### Ingress 준비 
@@ -99,25 +99,25 @@ AWS 로드밸런서 컨트롤러 설치
 ( 참고 : [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) )
 
 1. IAM Policy 파일 받기
-```
+```bash
 curl -o iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.4/docs/install/iam_policy.json
 ```
 
 2. IAM Policy 생성 ( 정책 이름 : `AWSLoadBalancerControllerIAMPolicy` )
-```
+```bash
 aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document file://iam_policy.json
 ```
 
 3. IAM Role 만들기( 역할 이름 : `AmazonEKSLoadBalancerControllerRole` )
-```
+```bash
 eksctl create iamserviceaccount \
   --cluster=prod \
   --namespace=kube-system \
   --name=aws-load-balancer-controller \
   --role-name "AmazonEKSLoadBalancerControllerRole" \
-  --attach-policy-arn=arn:aws:iam::415742736303:policy/AWSLoadBalancerControllerIAMPolicy \
+  --attach-policy-arn=arn:aws:iam::<AWS 계정 번호>:policy/AWSLoadBalancerControllerIAMPolicy \
   --approve
 ```
 
@@ -130,7 +130,7 @@ eksctl create iamserviceaccount \
 ```helm repo update```
 
 설치
-```
+```bash
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
   --set clusterName=prod \
@@ -144,7 +144,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치 확인
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
-### 의존 패키지 설치 
+### 의존 패키지 빌드 
 
 `alpaka/` 디렉토리에서 `helm dependency build` 수행
 
@@ -152,12 +152,20 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 ## 설치 
 
-차트 저장소 등록 
-`helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/chartrepo`
+### 저장소 등록
+alpaka 는 별도 차트 저장소 없이 GitHub 저장소의 파일을 이용한다. 다음과 같이 등록하자.
 
+```bash
+helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/chartrepo
+```
+
+### 설치에는 
 설치 
 
-`helm install -f values/full.yaml full alpaka/alpaka`
+```bash
+helm install -f values/full.yaml full alpaka/alpaka
+```
 
 ## 유지 보수
 
+alpaka 관련 패키지가 업데이트 되면 
