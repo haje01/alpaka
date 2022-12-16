@@ -1,9 +1,21 @@
+vendor: aws 
 
+ingress:
+  enabled: true 
+  
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
-  replicaCount: 3
-  defaultReplicationFactor: 2
+  replicaCount: 1
+  defaultReplicationFactor: 1
   numPartitions: 8
+  resources:
+    requests:
+      cpu: "3000m"
+      memory: "10Gi"
+    limits:
+      cpu: "3600m"
+      memory: "14Gi"
+
   metrics:
     kafka:
       enabled: true
@@ -30,7 +42,7 @@ kafka:
 
   zookeeper:
     enabled: true
-    replicaCount: 3
+    replicaCount: 1
     tolerations:
       - key: "ctrl"
     metrics:
@@ -137,7 +149,7 @@ cli:
 
 dbcon:
   enabled: true
-  replicaCount: 3
+  replicaCount: 1
   kafkaClientPort: 9092
   image:
     repository: "haje01/kafka-dbcon"
