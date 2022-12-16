@@ -168,6 +168,12 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다.
 
 ```bash
+helm install -f configs/prod.yaml pro alpaka/alpaka 
+```
+
+버전을 명시하여 설치할 수도 있다.
+
+```bash
 helm install -f configs/prod.yaml pro alpaka/alpaka --version 0.0.1
 ```
 
