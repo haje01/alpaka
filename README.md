@@ -144,7 +144,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치 확인
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
-## 설치 
+## 설치와 삭제
 
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
@@ -173,9 +173,9 @@ helm install -f configs/prod.yaml pro alpaka/alpaka --version 0.0.1
 
 ### 로컬 코드에서 설치하기
 
-git 을 통해 내려받은 코드를 이용해 설치할 수 있는데, 먼저 의존 패키지 빌드가 필요하다.
+git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준이다). 
 
-`alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
+먼저 의존 패키지 빌드가 필요한데, `alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
 
 ```bash
 helm dependency build
@@ -183,10 +183,23 @@ helm dependency build
 
 > kminion 의 경우 `policy/v1beta` 의 호환성 문제로 패치된 버전 사용하고 있다.
 
-이제 다음과 같이 로컬 코드에서 설치할 수 있다.
+다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
 ```bash
-helm install -f configs/prod.yaml prod alpaka/alpaka
+helm install -f configs/prod.yaml prod alpaka/
+```
+
+### 삭제 
+
+아래와 같이 삭제할 수 있다.
+```bash
+helm uninstal prod
+```
+
+중요한 점은 설치시 생성된 PVC 는 삭제되지 않는 것이다. 이는 중요한 데이터 파일을 실수로 삭제하지 않기 위함으로, 필요없는 것이 확실하다면 아래처럼 삭제해 주자.
+
+```bash
+kubectl delete pvc --all
 ```
 
 ## 유지 보수
