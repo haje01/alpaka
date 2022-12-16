@@ -86,21 +86,21 @@ prometheus:
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - full-kminion:8080
+            - dev-kminion:8080
         # - job_name: jmx
         #   scrape_interval: 10s
         #   scrape_timeout:  5s
         #   metrics_path: "/metrics"
         #   static_configs:
         #   - targets:
-        #     - full-kafka-headless:5556
+        #     - dev-kafka-headless:5556
         - job_name: zookeeper
           scrape_interval: 10s
           scrape_timeout:  5s
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - full-zookeeper-metrics:9141
+            - dev-zookeeper-metrics:9141
 
 # prometheus:
 #   enabled: true
@@ -163,12 +163,12 @@ kafka-ui:
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: full-kafka
-          bootstrapServers: full-kafka-headless:9092
-          zookeeper: full-zookeeper-headless:2181
+        - name: dev-kafka
+          bootstrapServers: dev-kafka-headless:9092
+          zookeeper: dev-zookeeper-headless:2181
           kafkaConnect:
             - name: dbcon
-              address: http://full-alpaka-dbcon:8083
+              address: http://dev-alpaka-dbcon:8083
           metrics:
             port: 5556
             type: JMX
@@ -196,26 +196,26 @@ kafka-ui:
 #       metrics_path: "/metrics"
 #       static_configs:
 #       - targets:
-#         - full-kminion:8080
+#         - dev-kminion:8080
     # - job_name: jmx
     #   scrape_interval: 10s
     #   scrape_timeout:  5s
     #   metrics_path: "/metrics"
     #   static_configs:
     #   - targets:
-    #     - full-kafka-headless:5556
+    #     - dev-kafka-headless:5556
     # - job_name: zookeeper
     #   scrape_interval: 10s
     #   scrape_timeout:  5s
     #   metrics_path: "/metrics"
     #   static_configs:
     #   - targets:
-    #     - full-zookeeper-metrics:9141
+    #     - dev-zookeeper-metrics:9141
 
 
 grafana:
   enabled: true
-  adminSecretName: full-grafana-admin
+  adminSecretName: dev-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -226,20 +226,20 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://full-prometheus-prometheus:9090
+          url: http://dev-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
   dashboardsConfigMaps:
-    - configMapName: full-alpaka-grafana-cluster
+    - configMapName: dev-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: full-alpaka-grafana-topic
+    - configMapName: dev-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: full-alpaka-grafana-groups
+    - configMapName: dev-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: full-alpaka-grafana-zookeeper
+    - configMapName: dev-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: full-alpaka-grafana-jvm
+    - configMapName: dev-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -248,10 +248,10 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["full-kafka-headless:9092"]
+        brokers: ["dev-kafka-headless:9092"]
 
     exporter:
-      host: "full-kminion"
+      host: "dev-kminion"
       port: 8080
 
   service:

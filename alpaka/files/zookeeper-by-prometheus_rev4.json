@@ -9204,7 +9204,7 @@
           "name": "job",
           "options": [],
           "query": {
-            "query": "label_values(job{service=~\".*zookeeper-metrics\", job!=\"full-kube-state-metrics\"})",
+            "query": "label_values(job{service=~\".*zookeeper-metrics\", job!=\"prod-kube-state-metrics\"})",
             "refId": "Prometheus-job-Variable-Query"
           },
           "refresh": 1,

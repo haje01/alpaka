@@ -144,28 +144,59 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치 확인
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
-### 의존 패키지 빌드 
-
-`alpaka/` 디렉토리에서 `helm dependency build` 수행
-
-> kminion 의 경우 `policy/v1beta` 의 호환성 문제로 패치된 버전 사용 
-
 ## 설치 
 
-### 저장소 등록
-alpaka 는 별도 차트 저장소 없이 GitHub 저장소의 파일을 이용한다. 다음과 같이 등록하자.
+설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
+
+두 방법 모두 배포 환경에 맞는 설정이 필요한데, `alpaka/values.yaml` 을 참고하여 커스텀 설정을 만들 수 있다. `configs/` 디렉토리 아래 `dev.yaml` 및 `prod.yaml` 파일을 참고하자.
+
+### 저장소에서 바로 설치하기
+
+먼저 Helm 에 alpaka 저장소 등록이 필요하다. alpaka 는 별도 차트 저장소 없이 GitHub 저장소의 패키지 파일을 이용한다. 다음과 같이 등록하자.
 
 ```bash
 helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/chartrepo
 ```
-
-### 설치에는 
-설치 
+다음과 같이 등록 결과를 확인할 수 있다.
 
 ```bash
-helm install -f values/full.yaml full alpaka/alpaka
+$ helm search repo alpaka
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
+alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment chart.
+```
+
+이제 다음과 같이 저장소에서 설치할 수 있다.
+
+```bash
+helm install -f configs/prod.yaml pro alpaka/alpaka --version 0.0.1
+```
+
+### 로컬 코드에서 설치하기
+
+git 을 통해 내려받은 코드를 이용해 설치할 수 있는데, 먼저 의존 패키지 빌드가 필요하다.
+
+`alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
+
+```bash
+helm dependency build
+```
+
+> kminion 의 경우 `policy/v1beta` 의 호환성 문제로 패치된 버전 사용하고 있다.
+
+이제 다음과 같이 로컬 코드에서 설치할 수 있다.
+
+```bash
+helm install -f configs/prod.yaml prod alpaka/alpaka
 ```
 
 ## 유지 보수
 
-alpaka 관련 패키지가 업데이트 되면 
+### alpaka 패키지 파일 갱신
+
+alpaka 의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 아래와 같이 패키지 파일을 갱신한다.
+
+```bash
+helm repo index alpaka/
+```
+
+그러면 `alpaka-0.0.1.tgz` 와 같은 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 이동 후 커밋하면 된다.
