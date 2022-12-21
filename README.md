@@ -1,6 +1,6 @@
 # alpaka
 
-Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키지를 포함한다:
+알파카는 Kubernetes 에 Kafka + 관련 패키지를 배포하기 위한 Helm 차트이다. 다음과 같은 패키지를 포함한다:
 
 - Kafka
 - Zookeeper
@@ -18,7 +18,7 @@ Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키
 ### 로컬 쿠버네티스 환경
 
 > 주의할 것:
-> - 메모리나 너무 작으면 파드가 죽음 
+> - 메모리가 너무 작으면 파드가 죽음 
 > - 디스크 용량이 너무 작으면 PVC 할당이 안됨
 
 #### Minikube 이용시
@@ -29,7 +29,7 @@ Kubernetes 기반의 Kafka + 관련 패키지 배포본. 다음과 같은 패키
 #### K3D 이용시 
 
 워커노드 4대, 노드별 메모리 2GB 예:
-`k3d cluster create dev --agents=4 --agents-memory=2gb`
+`k3d cluster create dev --agents=7 --agents-memory=2gb`
 
 ### 클라우드 쿠버네티스 환경 (AWS EKS)
 
@@ -93,24 +93,21 @@ eksctl create addon --name aws-ebs-csi-driver --cluster prod --service-account-r
 
 #### Ingress 준비 
 
-알파카에서 제공하는 다양한 패키지의 웹페이지를 접근하기 위해서 Ingress 를 사용한다. EKS 상에서 Ingress 를 사용하기 위해 아래 작업이 필요하다.
+알파카에서 제공하는 다양한 패키지의 웹페이지를 접근하기 위해서 Ingress 를 사용한다. EKS 상에서 Ingress 를 사용하기 위해 클러스터 생성후 아래 작업이 필요하다.
 
 AWS 로드밸런서 컨트롤러 설치
 ( 참고 : [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) )
 
-1. IAM Policy 파일 받기
-```bash
-curl -o iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.4/docs/install/iam_policy.json
-```
+1. IAM Policy 생성 ( 정책 이름 : `AWSLoadBalancerControllerIAMPolicy` )
 
-2. IAM Policy 생성 ( 정책 이름 : `AWSLoadBalancerControllerIAMPolicy` )
+`etc/eks/` 디렉토리로 이동 후 다음과 같이 실행한다.
 ```bash
 aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document file://iam_policy.json
 ```
 
-3. IAM Role 만들기( 역할 이름 : `AmazonEKSLoadBalancerControllerRole` )
+2. IAM Role 만들기( 역할 이름 : `AmazonEKSLoadBalancerControllerRole` )
 ```bash
 eksctl create iamserviceaccount \
   --cluster=prod \
@@ -124,12 +121,16 @@ eksctl create iamserviceaccount \
 4. Helm 으로 EKS 용 Load Balancer Controller 설치
 
 차트 저장소 추가
-```helm repo add eks https://aws.github.io/eks-charts```
+```bash
+helm repo add eks https://aws.github.io/eks-charts
+```
 
 로컬 저장소 갱신
-```helm repo update```
+```bash
+helm repo update
+```
 
-설치
+차트 설치
 ```bash
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
@@ -144,13 +145,15 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치 확인
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
-## 설치와 삭제
+## 설치, 활용, 삭제
+
+### 설치 
 
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
 두 방법 모두 배포 환경에 맞는 설정이 필요한데, `alpaka/values.yaml` 을 참고하여 커스텀 설정을 만들 수 있다. `configs/` 디렉토리 아래 `dev.yaml` 및 `prod.yaml` 파일을 참고하자.
 
-### 저장소에서 바로 설치하기
+#### 저장소에서 바로 설치하기
 
 먼저 Helm 에 alpaka 저장소 등록이 필요하다. alpaka 는 별도 차트 저장소 없이 GitHub 저장소의 패키지 파일을 이용한다. 다음과 같이 등록하자.
 
@@ -168,18 +171,18 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다.
 
 ```bash
-helm install -f configs/prod.yaml pro alpaka/alpaka 
+helm install -f configs/prod.yaml prod alpaka/alpaka 
 ```
 
-버전을 명시하여 설치할 수도 있다.
+`alpaka/alpaka/` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
 helm install -f configs/prod.yaml pro alpaka/alpaka --version 0.0.1
 ```
 
-### 로컬 코드에서 설치하기
+#### 로컬 코드에서 설치하기
 
-git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준이다). 
+git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준). 
 
 먼저 의존 패키지 빌드가 필요한데, `alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
 
@@ -195,6 +198,75 @@ helm dependency build
 helm install -f configs/prod.yaml prod alpaka/
 ```
 
+`alpaka/` 는 차트가 있는 디렉토리 명이다.
+
+### 활용
+
+#### 설치 노트
+
+설치가 성공하면 아래와 같은 노트가 출력된다. 운용에 참고하도록 하자.
+
+```markdown
+NAME: prod
+LAST DEPLOYED: Fri Dec 16 12:44:27 2022
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+주의: 컨트롤 노드에 주요 서비스가 배정되지 않게 (Install 전)
+
+  kubectl taint nodes k3d-dev-server-0 type=ctrl:NoSchedule
+
+# 설치된 파드 리스트
+
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=prod
+
+# 카프카 브로커 호스트명
+
+  prod-kafka
+
+# kafka-cli 에 접속
+
+  export KCLI_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=prod,app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
+  kubectl exec -it $KCLI_POD -n default -- bash
+
+# 쿠버네티스 대쉬보드
+
+  포트포워딩:
+  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=prod,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
+  kubectl port-forward $K8DASH_POD -n default 8443:8443
+
+  접속 URL: https://localhost:8443
+
+# 카프카 UI
+
+  포트포워딩:
+  kubectl port-forward svc/prod-kafka-ui 8989:80
+
+# 프로메테우스
+
+프로메테우스 접속:
+
+    포트포워딩:
+    kubectl port-forward --namespace default svc/prod-prometheus-prometheus 9090:9090
+
+얼러트매니저 접속:
+
+    포트포워딩:
+    kubectl port-forward --namespace default svc/prod-alpaka-alertmanager 9093:9093
+
+## 그라파나
+
+  kubectl port-forward svc/prod-grafana 3000
+
+  유저: admin
+  암호: admindjemals(admin어드민)
+```
+
+#### 웹 접속하기 
+
+
+
 ### 삭제 
 
 아래와 같이 삭제할 수 있다.
@@ -208,11 +280,11 @@ helm uninstal prod
 kubectl delete pvc --all
 ```
 
-## 유지 보수
+## 기타
 
 ### alpaka 패키지 파일 갱신
 
-alpaka 의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 아래와 같이 패키지 파일을 갱신한다.
+알파카의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 아래와 같이 패키지 파일을 갱신한다.
 
 ```bash
 helm repo index alpaka/

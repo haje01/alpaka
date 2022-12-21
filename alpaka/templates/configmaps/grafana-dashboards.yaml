@@ -28,7 +28,7 @@ metadata:
   name: {{ .Release.Name }}-alpaka-grafana-zookeeper
   namespace: {{ .Release.Namespace }}
 data:
-{{ (.Files.Glob "files/zookeeper-by-prometheus_rev4.json").AsConfig | indent 2 }}
+{{ (.Files.Glob "files/zookeeper-by-prometheus_rev4.json").AsConfig | replace "{REL_NAME}" "{{.Release.Name}}" | indent 2 }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -36,4 +36,4 @@ metadata:
   name: {{ .Release.Name }}-alpaka-grafana-jvm
   namespace: {{ .Release.Namespace }}
 data:
-{{ (.Files.Glob "files/altassian-overview_rev1.json").AsConfig | indent 2 }}
+{{ (.Files.Glob "files/altassian-overview_rev1.json").AsConfig | replace "{REL_NAME}" "{{.Release.Name}}" | indent 2 }}

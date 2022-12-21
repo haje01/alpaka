@@ -1,16 +1,21 @@
 vendor: aws 
 
+k8s_env: "k3d"
+
 ingress:
-  enabled: true 
+  enabled: false 
+
+loadBalancer:
+  enabled: true
   
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
-  replicaCount: 1
-  defaultReplicationFactor: 1
+  replicaCount: 3
+  defaultReplicationFactor: 2
   numPartitions: 8
   resources:
     requests:
-      cpu: "3000m"
+      cpu: "2700m"
       memory: "10Gi"
     limits:
       cpu: "3600m"

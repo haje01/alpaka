@@ -2192,8 +2192,8 @@
           "allValue": "",
           "current": {
             "selected": true,
-            "text": "prod-kafka-0",
-            "value": "prod-kafka-0"
+            "text": "{REL_NAME}-kafka-0",
+            "value": "{REL_NAME}-kafka-0"
           },
           "datasource": {
             "type": "prometheus",

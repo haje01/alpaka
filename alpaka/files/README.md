@@ -4,6 +4,10 @@
 
 ## Grafana 관련 
 
+> 만약 그라파나 대쉬보드 .json 파일 내용에 Helm Install 시 알 수 있는 릴리즈 명이 포함되어야 하는 경우 `{REL_NAME}` 을 사용할 수 있다. 다음 파일을 참고하자
+> - `files/altassian-overview_rev1.json`
+> - `files/zookeeper-by-prometheus_rev4.json`
+
 ### Zookeeper
 
 Zookeeper 메트릭을 노출하는 대쉬보드

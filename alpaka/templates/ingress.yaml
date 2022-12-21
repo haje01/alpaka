@@ -22,7 +22,7 @@ spec:
           pathType: Prefix
           backend: 
             service:
-              name: {{ .Release.Namespace }}-grafana
+              name: {{ .Release.Name }}-grafana
               port: 
                 number: 3000 
       {{- end -}}
