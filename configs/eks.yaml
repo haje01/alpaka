@@ -1,25 +1,17 @@
-vendor: aws 
+provider: eks
 
-k8s_env: "k3d"
-
-ingress:
-  enabled: false 
-
-loadBalancer:
-  enabled: true
-  
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
   replicaCount: 3
   defaultReplicationFactor: 2
   numPartitions: 8
-  resources:
-    requests:
-      cpu: "2700m"
-      memory: "10Gi"
-    limits:
-      cpu: "3600m"
-      memory: "14Gi"
+  # resources:
+  #   requests:
+  #     cpu: "2700m"
+  #     memory: "10Gi"
+  #   limits:
+  #     cpu: "3600m"
+  #     memory: "14Gi"
 
   metrics:
     kafka:
@@ -80,6 +72,16 @@ prometheus:
   enabled: true
   prometheus:
     enabled: true
+    ingress:
+      enabled: true
+      hostname: "*"
+      path: /*
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/group.name: public
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
     additionalScrapeConfigs:
       enabled: true
       type: internal
@@ -91,33 +93,29 @@ prometheus:
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - prod-kminion:8080
-        # - job_name: jmx
-        #   scrape_interval: 10s
-        #   scrape_timeout:  5s
-        #   metrics_path: "/metrics"
-        #   static_configs:
-        #   - targets:
-        #     - prod-kafka-headless:5556
+            - eks-kminion:8080
         - job_name: zookeeper
           scrape_interval: 10s
           scrape_timeout:  5s
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - prod-zookeeper-metrics:9141
-
-# prometheus:
-#   enabled: true
-#   prometheus:
-#     enabled: true
-#   rbac:
-#     create: false 
-#     pspEnabled: false
+            - eks-zookeeper-metrics:9141
 
 
 k8dashboard:
   enabled: true
+  ingress:
+    enabled: true 
+    paths:
+      - /*
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8443}]'
+
   service:
     externalPort: 8443
   serviceAccount:
@@ -165,15 +163,24 @@ dbcon:
 
 kafka-ui:
   enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
+
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: prod-kafka
-          bootstrapServers: prod-kafka-headless:9092
-          zookeeper: prod-zookeeper-headless:2181
+        - name: eks-kafka
+          bootstrapServers: eks-kafka-headless:9092
+          zookeeper: eks-zookeeper-headless:2181
           kafkaConnect:
             - name: dbcon
-              address: http://prod-alpaka-dbcon:8083
+              address: http://eks-alpaka-dbcon:8083
           metrics:
             port: 5556
             type: JMX
@@ -190,37 +197,20 @@ kafka-ui:
     effect: "NoSchedule"
 
 
-## prometheus-coummity 
-#
-# prometheus:
-#   enabled: true
-#   extraScrapeConfigs: |
-#     - job_name: kminion-metrics
-#       scrape_interval: 10s
-#       scrape_timeout:  5s
-#       metrics_path: "/metrics"
-#       static_configs:
-#       - targets:
-#         - prod-kminion:8080
-    # - job_name: jmx
-    #   scrape_interval: 10s
-    #   scrape_timeout:  5s
-    #   metrics_path: "/metrics"
-    #   static_configs:
-    #   - targets:
-    #     - prod-kafka-headless:5556
-    # - job_name: zookeeper
-    #   scrape_interval: 10s
-    #   scrape_timeout:  5s
-    #   metrics_path: "/metrics"
-    #   static_configs:
-    #   - targets:
-    #     - prod-zookeeper-metrics:9141
-
-
 grafana:
   enabled: true
-  adminSecretName: prod-grafana-admin
+  ingress:
+    enabled: true
+    hostname: "*"
+    path: /*
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 3000}]'
+
+  adminSecretName: eks-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -231,20 +221,20 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://prod-prometheus-prometheus:9090
+          url: http://eks-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
   dashboardsConfigMaps:
-    - configMapName: prod-alpaka-grafana-cluster
+    - configMapName: eks-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: prod-alpaka-grafana-topic
+    - configMapName: eks-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: prod-alpaka-grafana-groups
+    - configMapName: eks-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: prod-alpaka-grafana-zookeeper
+    - configMapName: eks-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: prod-alpaka-grafana-jvm
+    - configMapName: eks-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -253,10 +243,10 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["prod-kafka-headless:9092"]
+        brokers: ["eks-kafka-headless:9092"]
 
     exporter:
-      host: "prod-kminion"
+      host: "eks-kminion"
       port: 8080
 
   service:

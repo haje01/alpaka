@@ -8,12 +8,12 @@
 - UI for Kafka
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
-- K8S Dashboard
+- Kubernetes Dashboard
 
 
 ## 사전 준비
 
-개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용도로는 클라우드 또는 IDC 에 배포할 수 있다.
+개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용도로는 클라우드 또는 IDC 에 배포할 수 있다. 알파카는 로컬 환경으로 [minikube](https://minikube.sigs.k8s.io/docs/) 와 [k3d](https://k3d.io/v5.4.6/) 를, 프로덕션 환경으로 [AWS EKS](https://aws.amazon.com/ko/eks/) 를 지원한다.
 
 ### 로컬 쿠버네티스 환경
 
@@ -24,12 +24,17 @@
 #### Minikube 이용시
 
 코어 4개, 메모리 8GB, 디스크 40GB 예:
-`minikube start --cpus=4 --memory=8g --disk-size=40g`
+```
+minikube start --cpus=4 --memory=10g --disk-size=40g
+```
 
 #### K3D 이용시 
 
-워커노드 4대, 노드별 메모리 2GB 예:
-`k3d cluster create dev --agents=7 --agents-memory=2gb`
+워커노드 5 대, 노드별 메모리 2GB 예:
+
+```
+k3d cluster create --agents=5 --agents-memory=2gb
+```
 
 ### 클라우드 쿠버네티스 환경 (AWS EKS)
 
@@ -151,7 +156,9 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
-두 방법 모두 배포 환경에 맞는 설정이 필요한데, `alpaka/values.yaml` 을 참고하여 커스텀 설정을 만들 수 있다. `configs/` 디렉토리 아래 `dev.yaml` 및 `prod.yaml` 파일을 참고하자.
+두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리 아래 `k3d.yaml` 및 `eks.yaml` 파일을 이용할 수 있다. 각각은 k3d 및 eks 쿠버네티스 환경을 위한 것이다.
+
+> 위의 두 파일과 `alpaka/values.yaml` 을 참고하여 커스텀 설정을 만들 수도 있다. 
 
 #### 저장소에서 바로 설치하기
 
@@ -171,7 +178,11 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다.
 
 ```bash
-helm install -f configs/prod.yaml prod alpaka/alpaka 
+# k3d 의 경우 
+helm install -f configs/k3d.yaml k3d alpaka/alpaka 
+
+# eks 의 경우 
+helm install -f configs/eks.yaml eks alpaka/alpaka 
 ```
 
 `alpaka/alpaka/` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
@@ -190,12 +201,19 @@ git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설
 helm dependency build
 ```
 
-> kminion 의 경우 `policy/v1beta` 의 호환성 문제로 패치된 버전 사용하고 있다.
+> 다음 차트들은 버그가 있어 패치된 것을 이용한다.
+> `kminion` - `policy/v1beta` 의 호환성 문제
+> `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러](https://github.com/bitnami/charts/issues/14070)
+> `provectus/kafka-ui` - 차트 저장소가 사라짐
 
 다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
 ```bash
-helm install -f configs/prod.yaml prod alpaka/
+# k3d 의 경우
+helm install -f configs/k3d.yaml k3d alpaka/
+
+# eks 의 경우
+helm install -f configs/eks.yaml eks alpaka/
 ```
 
 `alpaka/` 는 차트가 있는 디렉토리 명이다.
@@ -204,7 +222,7 @@ helm install -f configs/prod.yaml prod alpaka/
 
 #### 설치 노트
 
-설치가 성공하면 아래와 같은 노트가 출력된다. 운용에 참고하도록 하자.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `eks` 에 설치한 경우의 설치 노트이다.
 
 ```markdown
 NAME: prod
@@ -213,9 +231,6 @@ NAMESPACE: default
 STATUS: deployed
 REVISION: 1
 NOTES:
-주의: 컨트롤 노드에 주요 서비스가 배정되지 않게 (Install 전)
-
-  kubectl taint nodes k3d-dev-server-0 type=ctrl:NoSchedule
 
 # 설치된 파드 리스트
 
@@ -265,7 +280,27 @@ NOTES:
 
 #### 웹 접속하기 
 
+로컬의 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다.
 
+AWS EKS 에 설치한 경우는 Ingress 가 만들어져 있다. 다음처럼 확인할 수 있다.
+
+```
+$ kubectl get ingress
+
+NAME              CLASS    HOSTS   ADDRESS                                                            PORTS   AGE
+eks-grafana       <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
+eks-k8dashboard   <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
+eks-kafka-ui      <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
+```
+
+EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com` 주소로 접속하면 되겠다. 다만 서비스 별로 접속 포트가 다른데, 아래를 참고하자. 
+
+- Kubernetes Dashboard : `8443`
+- UI for Kafka : `8080`
+- Grafana : `3000`
+- Prometheus : `9090`
+
+예를 들의 위 예에서는 `k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com:3000` 주소로 그라파나에 접속할 수 있다.
 
 ### 삭제 
 

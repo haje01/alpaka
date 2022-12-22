@@ -1,20 +1,10 @@
-vendor: aws 
+provider: k3d
 
-ingress:
-  enabled: true 
-  
 # kafka + dashboard + client + jdbc 커넥터
 kafka:
-  replicaCount: 1
-  defaultReplicationFactor: 1
+  replicaCount: 3
+  defaultReplicationFactor: 2
   numPartitions: 8
-  resources:
-    requests:
-      cpu: "3000m"
-      memory: "10Gi"
-    limits:
-      cpu: "3600m"
-      memory: "14Gi"
 
   metrics:
     kafka:
@@ -86,29 +76,14 @@ prometheus:
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - dev-kminion:8080
-        # - job_name: jmx
-        #   scrape_interval: 10s
-        #   scrape_timeout:  5s
-        #   metrics_path: "/metrics"
-        #   static_configs:
-        #   - targets:
-        #     - dev-kafka-headless:5556
+            - k3d-kminion:8080
         - job_name: zookeeper
           scrape_interval: 10s
           scrape_timeout:  5s
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - dev-zookeeper-metrics:9141
-
-# prometheus:
-#   enabled: true
-#   prometheus:
-#     enabled: true
-#   rbac:
-#     create: false 
-#     pspEnabled: false
+            - k3d-zookeeper-metrics:9141
 
 
 k8dashboard:
@@ -163,12 +138,12 @@ kafka-ui:
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: dev-kafka
-          bootstrapServers: dev-kafka-headless:9092
-          zookeeper: dev-zookeeper-headless:2181
+        - name: k3d-kafka
+          bootstrapServers: k3d-kafka-headless:9092
+          zookeeper: k3d-zookeeper-headless:2181
           kafkaConnect:
             - name: dbcon
-              address: http://dev-alpaka-dbcon:8083
+              address: http://k3d-alpaka-dbcon:8083
           metrics:
             port: 5556
             type: JMX
@@ -185,37 +160,9 @@ kafka-ui:
     effect: "NoSchedule"
 
 
-## prometheus-coummity 
-#
-# prometheus:
-#   enabled: true
-#   extraScrapeConfigs: |
-#     - job_name: kminion-metrics
-#       scrape_interval: 10s
-#       scrape_timeout:  5s
-#       metrics_path: "/metrics"
-#       static_configs:
-#       - targets:
-#         - dev-kminion:8080
-    # - job_name: jmx
-    #   scrape_interval: 10s
-    #   scrape_timeout:  5s
-    #   metrics_path: "/metrics"
-    #   static_configs:
-    #   - targets:
-    #     - dev-kafka-headless:5556
-    # - job_name: zookeeper
-    #   scrape_interval: 10s
-    #   scrape_timeout:  5s
-    #   metrics_path: "/metrics"
-    #   static_configs:
-    #   - targets:
-    #     - dev-zookeeper-metrics:9141
-
-
 grafana:
   enabled: true
-  adminSecretName: dev-grafana-admin
+  adminSecretName: k3d-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -226,20 +173,20 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://dev-prometheus-prometheus:9090
+          url: http://k3d-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
   dashboardsConfigMaps:
-    - configMapName: dev-alpaka-grafana-cluster
+    - configMapName: k3d-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: dev-alpaka-grafana-topic
+    - configMapName: k3d-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: dev-alpaka-grafana-groups
+    - configMapName: k3d-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: dev-alpaka-grafana-zookeeper
+    - configMapName: k3d-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: dev-alpaka-grafana-jvm
+    - configMapName: k3d-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -248,10 +195,10 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["dev-kafka-headless:9092"]
+        brokers: ["k3d-kafka-headless:9092"]
 
     exporter:
-      host: "dev-kminion"
+      host: "k3d-kminion"
       port: 8080
 
   service:
