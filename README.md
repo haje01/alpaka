@@ -145,7 +145,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 ```
 
 > 주의: 배포된 차트의 보안 업데이트
-> kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
+> ```kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"```
 
 설치 확인
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
