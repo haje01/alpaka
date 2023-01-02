@@ -204,9 +204,10 @@ helm dependency build
 ```
 
 > 다음 차트들은 버그가 있어 패치된 것을 이용한다.
-> `kminion` - `policy/v1beta` 의 호환성 문제
-> `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러](https://github.com/bitnami/charts/issues/14070)
-> `provectus/kafka-ui` - 차트 저장소가 사라짐
+>
+> - `kminion` - `policy/v1beta` 의 호환성 문제
+> - `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러](https://github.com/bitnami/charts/issues/14070)
+> - `provectus/kafka-ui` - 차트 저장소가 사라짐
 
 다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
