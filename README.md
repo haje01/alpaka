@@ -185,10 +185,10 @@ helm install -f configs/k3d.yaml k3d alpaka/alpaka
 helm install -f configs/eks.yaml eks alpaka/alpaka 
 ```
 
-`alpaka/alpaka/` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
+`alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/prod.yaml pro alpaka/alpaka --version 0.0.1
+helm install -f configs/k3d.yaml k3d alpaka/alpaka --version 0.0.1
 ```
 
 #### 로컬 코드에서 설치하기
@@ -313,7 +313,7 @@ EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e9
 
 아래와 같이 삭제할 수 있다.
 ```bash
-helm uninstal prod
+helm uninstal k3d
 ```
 
 중요한 점은 설치시 생성된 PVC 는 삭제되지 않는 것이다. 이는 중요한 데이터 파일을 실수로 삭제하지 않기 위함으로, 필요없는 것이 확실하다면 아래처럼 삭제해 주자.
