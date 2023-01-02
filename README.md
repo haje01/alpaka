@@ -222,7 +222,7 @@ helm install -f configs/eks.yaml eks alpaka/
 
 #### 설치 노트
 
-설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `eks` 에 설치한 경우의 설치 노트이다.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `k3d` 에 설치한 경우의 설치 노트이다.
 
 ```markdown
 NAME: prod
@@ -277,6 +277,9 @@ NOTES:
   유저: admin
   암호: admindjemals(admin어드민)
 ```
+
+> 포트 포워딩을 매번 해주기가 번거로운데, `tmux` 를 활용하여 포트포워딩을 대신해주는 스크립트를 이용하면 편리하다. 
+> `tmux-k3d-portfwd.sh` 
 
 #### 웹 접속하기 
 
