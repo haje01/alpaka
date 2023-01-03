@@ -13,6 +13,6 @@ spec:
     - name: topic-list
       image: haje01/kafka-cli
       command: ['kafka-topics.sh']
-      args: ['--list', '--bootstrap-server={{ .Release.Name }}-kafka:9092']
+      args: ['--listo', '--bootstrap-server={{ .Release.Name }}-kafka:9092']
   restartPolicy: Never
 

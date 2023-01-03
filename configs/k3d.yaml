@@ -1,10 +1,20 @@
+# 쿠버네티스 환경 제공자 (mkb, k3d, eks 중 하나)
+# 여기서는 설치 이름이 쿠버네티스 환경 제공자와 같다고 가정
 provider: k3d
 
-# kafka + dashboard + client + jdbc 커넥터
+# 카프카 설정
 kafka:
   replicaCount: 3
   defaultReplicationFactor: 2
   numPartitions: 8
+  ## 노드 리소스 조건
+  # resources:
+  #   requests:
+  #     cpu: "2700m"
+  #     memory: "10Gi"
+  #   limits:
+  #     cpu: "3600m"
+  #     memory: "14Gi"
 
   metrics:
     kafka:
@@ -61,6 +71,7 @@ kafka:
     job: kafka
 
 
+# 프로메테우스 설정
 prometheus:
   enabled: true
   prometheus:
@@ -86,6 +97,7 @@ prometheus:
             - k3d-zookeeper-metrics:9141
 
 
+# 쿠버네티스 대쉬보드 설정
 k8dashboard:
   enabled: true
   service:
@@ -101,6 +113,8 @@ k8dashboard:
     value: "ctrl"
     effect: "NoSchedule"
 
+
+# 카프카 CLI 설정
 cli:
   enabled: true
   name: kafka-cli
@@ -122,6 +136,8 @@ cli:
       - name: ndots
         value: "2"
 
+
+# 카프카 DB 관련 커넥터 설정
 dbcon:
   enabled: true
   replicaCount: 1
@@ -133,6 +149,7 @@ dbcon:
   timezone: Asia/Seoul
 
 
+# UI for 카프카 설정
 kafka-ui:
   enabled: true
   yamlApplicationConfig:
@@ -160,6 +177,7 @@ kafka-ui:
     effect: "NoSchedule"
 
 
+# 그라파나 설정
 grafana:
   enabled: true
   adminSecretName: k3d-grafana-admin
@@ -190,6 +208,7 @@ grafana:
       fileName: altassian-overview_rev1.json
 
 
+# 그라파나용 KMinion 대쉬보드 설정
 kminion:
   enabled: true
   kminion:

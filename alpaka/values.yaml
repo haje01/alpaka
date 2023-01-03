@@ -1,93 +1,268 @@
-# 밸류 참고용 템플릿
+# 쿠버네티스 환경 제공자 (mkb, k3d, eks 중 하나)
+# 여기서는 설치 이름이 쿠버네티스 환경 제공자와 같다고 가정
+# (REL 을 적절한 환경 제공자로 대치해 사용)
+provider: REL
+
+# 카프카 설정
 kafka:
-  defaultReplicationFactor: 1
-  numPartitions: 8
   replicaCount: 3
+  defaultReplicationFactor: 2
+  numPartitions: 8
+  ## 노드 리소스 조건
+  # resources:
+  #   requests:
+  #     cpu: "2700m"
+  #     memory: "10Gi"
+  #   limits:
+  #     cpu: "3600m"
+  #     memory: "14Gi"
+
   metrics:
     kafka:
       enabled: true
     jmx:
       enabled: true
-  serviceMonitor:
-    enabled: true
-  zookeeper:
-    replicaCount: 1
+    serviceMonitor:
+      enabled: true
+      relabelings:
+        - sourceLabels: ["container", "pod"]
+          regex: "jmx-exporter;"
+          replacement: jmx
+          targetLabel: job
+        # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+        - regex: "instance"
+          action: labeldrop
+        - sourceLabels: ["pod"]
+          targetLabel: instance
+      metricRelabelings:
+        # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+        - regex: "instance"
+          action: labeldrop
+        - sourceLabels: ["pod"]
+          targetLabel: instance
 
+  zookeeper:
+    enabled: true
+    replicaCount: 1
+    tolerations:
+      - key: "ctrl"
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        interval: 10s
+        scrapeTimeout:  5s
+        relabelings: 
+          - replacement: zookeeper
+            targetLabel: job
+          # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+          - regex: "instance"
+            action: labeldrop
+          - sourceLabels: ["pod"]
+            targetLabel: instance
+        metricRelabelings:
+          # 인스턴스 값을 IP 가 아닌 Pod 명으로 
+          - regex: "instance"
+            action: labeldrop
+          - sourceLabels: ["pod"]
+            targetLabel: instance
+
+  deleteTopicEnable: true
+  podLabels:
+    job: kafka
+
+
+# 프로메테우스 설정
+prometheus:
+  enabled: true
+  prometheus:
+    enabled: true
+    ingress:
+      enabled: true
+      hostname: "*"
+      path: /*
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/group.name: public
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
+    additionalScrapeConfigs:
+      enabled: true
+      type: internal
+      internal:
+        jobList:
+        - job_name: kminion-metrics
+          scrape_interval: 10s
+          scrape_timeout:  5s
+          metrics_path: "/metrics"
+          static_configs:
+          - targets:
+            - REL-kminion:8080
+        - job_name: zookeeper
+          scrape_interval: 10s
+          scrape_timeout:  5s
+          metrics_path: "/metrics"
+          static_configs:
+          - targets:
+            - REL-zookeeper-metrics:9141
+
+
+# 쿠버네티스 대쉬보드 설정
 k8dashboard:
   enabled: true
+  ingress:
+    enabled: true 
+    paths:
+      - /*
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8443}]'
+
+  service:
+    externalPort: 8443
   serviceAccount:
     name: k8dash-admin
   extraArgs:
     - --token-ttl=86400
-
-prometheus:
-  enabled: true
-  serverFiles:
-    prometheus.yml:
-      scrape_configs:
-        - job_name: node
-          static_configs:
-            - targets: ['172.29.0.6:9100', '172.29.0.7:9100']
+    - --enable-skip-login 
+  tolerations:
+  - key: type
+    operator: "Equal"
+    value: "ctrl"
+    effect: "NoSchedule"
 
 
-grafana:
-  enabled: true
-  dashboardProvider:
-    enabled: true
-  dashboardConfigMaps:
-    - configMapName: node-exporter
-      folderName: dashboards
-      fileName: node-exporter.json
-
-
+# 카프카 CLI 설정
 cli:
-  enabled: false
+  enabled: true
+  name: kafka-cli
   podLabels: {}
   podAnnotations: {}
   image:
     repository: "haje01/kafka-cli"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  dnsConfig:
+    # 필요시 외부 DNS 등록 
+    # nameservers:
+    #   - 213.234.76.4
+    options:
+      - name: ndots
+        value: "2"
 
+
+# 카프카 DB 관련 커넥터 설정
 dbcon:
-  enabled: false
-  replicaCount: 3
-  group: dbcon_cluster
+  enabled: true
+  replicaCount: 1
+  kafkaClientPort: 9092
   image:
     repository: "haje01/kafka-dbcon"
     tag: latest
-    pullPolicy: Always
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+    pullPolicy: IfNotPresent
+  timezone: Asia/Seoul
 
-# prometheus:
-#   pushgateway:
-#     enabled: true
-#   alertmanager:
-#     enabled: false
+
+# UI for 카프카 설정
+kafka-ui:
+  enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
+
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: REL-kafka
+          bootstrapServers: REL-kafka-headless:9092
+          zookeeper: REL-zookeeper-headless:2181
+          kafkaConnect:
+            - name: dbcon
+              address: http://REL-alpaka-dbcon:8083
+          metrics:
+            port: 5556
+            type: JMX
+    auth:
+      type: disabled
+    management:
+      health:
+        ldap:
+          enabled: false
+  tolerations:
+  - key: type
+    operator: "Equal"
+    value: "ctrl"
+    effect: "NoSchedule"
+
+
+# 그라파나 설정
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    hostname: "*"
+    path: /*
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/group.name: public
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 3000}]'
+
+  adminSecretName: REL-grafana-admin
+  admin:
+    user: admin
+    password: admindjemals
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://REL-prometheus-prometheus:9090
+          isDefault: true
+  dashboardsProvider:
+    enabled: true
+  dashboardsConfigMaps:
+    - configMapName: REL-alpaka-grafana-cluster
+      fileName: kminion-cluster_rev1.json
+    - configMapName: REL-alpaka-grafana-topic
+      fileName: kminion-topic_rev1.json
+    - configMapName: REL-alpaka-grafana-groups
+      fileName: kminion-groups_rev1.json
+    - configMapName: REL-alpaka-grafana-zookeeper
+      fileName: zookeeper-by-prometheus_rev4.json
+    - configMapName: REL-alpaka-grafana-jvm
+      fileName: altassian-overview_rev1.json
+
+
+# 그라파나용 KMinion 대쉬보드 설정
+kminion:
+  enabled: true
+  kminion:
+    config:
+      kafka:
+        brokers: ["REL-kafka-headless:9092"]
+
+    exporter:
+      host: "REL-kminion"
+      port: 8080
+
+  service:
+    annotations:
+      prometheus.io/probe: kminion
+  
