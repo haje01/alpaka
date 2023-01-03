@@ -21,14 +21,14 @@
 > - 메모리가 너무 작으면 파드가 죽음 
 > - 디스크 용량이 너무 작으면 PVC 할당이 안됨
 
-#### Minikube 이용시
+#### minikube 이용시
 
 코어 4개, 메모리 8GB, 디스크 40GB 예:
 ```
 minikube start --cpus=4 --memory=10g --disk-size=40g
 ```
 
-#### K3D 이용시 
+#### k3d 이용시 
 
 워커노드 5 대, 노드별 메모리 2GB 예:
 
@@ -158,9 +158,12 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
-두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리 아래 `k3d.yaml` 및 `eks.yaml` 파일을 이용할 수 있다. 각각은 k3d 및 eks 쿠버네티스 환경을 위한 것이다.
+두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정파일이 있다:
+- `mkb.yaml` - minkube 용
+- `k3d.yaml` - k3d 용
+- `eks.yaml` - eks 용
 
-> 위의 두 파일과 `alpaka/values.yaml` 을 참고하여 커스텀 설정을 만들 수도 있다. 
+> 위의 파일들과 `alpaka/values.yaml` 을 참고하여 커스텀 설정 파일을 만들어 이용할 수 있다.
 
 #### 저장소에서 바로 설치하기
 
@@ -180,6 +183,9 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다.
 
 ```bash
+# minikube 의 경우 
+helm install -f configs/mkb.yaml mkb alpaka/alpaka 
+
 # k3d 의 경우 
 helm install -f configs/k3d.yaml k3d alpaka/alpaka 
 
@@ -212,6 +218,9 @@ helm dependency build
 다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
 ```bash
+# minikube 의 경우
+helm install -f configs/mkb.yaml mkb alpaka/
+
 # k3d 의 경우
 helm install -f configs/k3d.yaml k3d alpaka/
 
@@ -225,33 +234,37 @@ helm install -f configs/eks.yaml eks alpaka/
 
 #### 설치 노트
 
-설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `k3d` 에 설치한 경우의 설치 노트이다.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 minikube (`mkb`) 에 설치한 경우의 설치 노트이다.
+
+> `helm status mkb` 명령으로 다시 볼 수 있다.
 
 ```markdown
-NAME: prod
-LAST DEPLOYED: Fri Dec 16 12:44:27 2022
+Release "mkb" has been upgraded. Happy Helming!
+NAME: mkb
+LAST DEPLOYED: Tue Jan  3 10:17:08 2023
 NAMESPACE: default
 STATUS: deployed
-REVISION: 1
+REVISION: 3
 NOTES:
+# 쿠버네티스 프로바이더 : mkb
 
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=prod
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=mkb
 
 # 카프카 브로커 호스트명
 
-  prod-kafka
+  mkb-kafka
 
 # kafka-cli 에 접속
 
-  export KCLI_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=prod,app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
+  export KCLI_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $KCLI_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드
 
   포트포워딩:
-  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=prod,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
+  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
   kubectl port-forward $K8DASH_POD -n default 8443:8443
 
   접속 URL: https://localhost:8443
@@ -259,23 +272,22 @@ NOTES:
 # 카프카 UI
 
   포트포워딩:
-  kubectl port-forward svc/prod-kafka-ui 8989:80
+  kubectl port-forward svc/mkb-kafka-ui 8989:80
 
 # 프로메테우스
 
 프로메테우스 접속:
 
-    포트포워딩:
-    kubectl port-forward --namespace default svc/prod-prometheus-prometheus 9090:9090
 
 얼러트매니저 접속:
 
     포트포워딩:
-    kubectl port-forward --namespace default svc/prod-alpaka-alertmanager 9093:9093
+    kubectl port-forward --namespace default svc/mkb-alpaka-alertmanager 9093:9093
 
 ## 그라파나
 
-  kubectl port-forward svc/prod-grafana 3000
+  포트포워딩:
+  kubectl port-forward svc/mkb-grafana 3000
 
   유저: admin
   암호: admindjemals(admin어드민)
@@ -283,11 +295,12 @@ NOTES:
 
 #### 웹 접속하기 
 
-로컬의 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다.
+로컬의 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다. 설치 노트를 참고하여 필요한 서비스를 위한 포트포워딩을 해줄 수 있다.
 
-> 포트 포워딩을 매번 해주기가 번거로운데, `tmux` 를 활용하여 포트포워딩을 대신해주는 스크립트를 이용하면 편리하다. 
+그렇지만 이렇게 매번 포트 포워딩을 해주기가 번거로운데, 제공되는 [tmux](https://github.com/tmux/tmux/wiki) 스크립트를 이용하면 편리하다. 
 >
-> `tmux-k3d-portfwd.sh` 
+> `tmux-mkb-portfwd.sh`  (minikube 용)
+> `tmux-k3d-portfwd.sh`  (k3d 용)
 
 AWS EKS 에 설치한 경우는 Ingress 가 만들어져 있다. 다음처럼 확인할 수 있다.
 
@@ -316,7 +329,15 @@ EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e9
 
 아래와 같이 삭제할 수 있다.
 ```bash
+# minikube 의 경우
+helm uninstal mkb
+
+# k3d 의 경우
 helm uninstal k3d
+
+# eks 의 경우
+helm uninstal eks
+
 ```
 
 중요한 점은 설치시 생성된 PVC 는 삭제되지 않는 것이다. 이는 중요한 데이터 파일을 실수로 삭제하지 않기 위함으로, 필요없는 것이 확실하다면 아래처럼 삭제해 주자.
