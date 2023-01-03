@@ -195,6 +195,8 @@ helm install -f configs/k3d.yaml k3d alpaka/alpaka
 helm install -f configs/eks.yaml eks alpaka/alpaka 
 ```
 
+> 여기서는 편의상 설정 파일명과 설치 이름을 같게 하였다. 실제로는 필요에 따라 설치 이름을 다르게 준다.
+
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
