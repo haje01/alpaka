@@ -167,7 +167,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 #### 저장소에서 바로 설치하기
 
-먼저 Helm 에 alpaka 저장소 등록이 필요하다. alpaka 는 별도 차트 저장소 없이 GitHub 저장소의 패키지 파일을 이용한다. 다음과 같이 등록하자.
+먼저 Helm 에 alpaka 저장소 등록이 필요하다. 알파카는 별도 차트 저장소 없이 GitHub 저장소의 패키지 파일을 이용한다. 다음과 같이 등록하자.
 
 ```bash
 helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/chartrepo
@@ -201,7 +201,7 @@ helm install -f configs/k3d.yaml k3d alpaka/alpaka --version 0.0.1
 
 #### 로컬 코드에서 설치하기
 
-git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준). 
+Git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준). 
 
 먼저 의존 패키지 빌드가 필요한데, `alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
 
@@ -348,12 +348,16 @@ kubectl delete pvc --all
 
 ## 기타
 
-### alpaka 패키지 파일 갱신
+### alpaka 레포지토리 갱신
 
 알파카의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 알파카 디렉토리에서 아래와 같이 인덱스 및 패키지 파일을 갱신한다.
 
 ```bash
 helm repo index alpaka/
+```
+`alpaka/alpaka` 디렉토리에 `index.yaml` 이 생성되는데, 이것을 `chartrepo` 디렉토리로 이동한 후, 다음처럼 패키지를 생성한다.
+
+```bash
 helm package alpaka/
 ```
 

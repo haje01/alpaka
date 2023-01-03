@@ -1,38 +1,166 @@
 apiVersion: v1
 entries:
-  alpaka:
-  - apiVersion: v2
-    appVersion: 3.3.1
-    created: "2022-12-01T15:55:29.2724315+09:00"
+  grafana:
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 9.3.2
+    created: "2023-01-03T11:04:10.0955457+09:00"
     dependencies:
-    - name: kafka
+    - name: common
       repository: https://charts.bitnami.com/bitnami
-      version: 19.1.x
-    - condition: prometheus.enabled
-      name: prometheus
-      repository: https://prometheus-community.github.io/helm-charts
-      version: 15.x.x
-    - condition: grafana.enabled
-      name: grafana
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Grafana is an open source metric analytics and visualization suite
+      for visualizing time series data that supports various types of data sources.
+    digest: 21a89b7cd4cf433b620b3a6bb46e29337656d382e2fa959920c582157199b69a
+    home: https://github.com/bitnami/charts/tree/main/bitnami/grafana
+    icon: https://bitnami.com/assets/stacks/grafana/img/grafana-stack-220x234.png
+    keywords:
+    - analytics
+    - monitoring
+    - metrics
+    - logs
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: grafana
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/grafana
+    - https://grafana.com/
+    urls:
+    - charts/grafana-8.2.21.tgz
+    version: 8.2.21
+  kafka:
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
+    appVersion: 3.3.1
+    created: "2023-01-03T11:04:10.1026742+09:00"
+    dependencies:
+    - condition: zookeeper.enabled
+      name: zookeeper
       repository: https://charts.bitnami.com/bitnami
-      version: 8.x.x
-    - alias: k8dashboard
-      condition: k8dashboard.enabled
-      name: kubernetes-dashboard
-      repository: https://kubernetes.github.io/dashboard/
-      version: 5.x.x
-    - condition: kafka-ui.enabled
-      name: kafka-ui
-      repository: https://provectus.github.io/kafka-ui
-      version: 0.4.x
-    - name: kminion
-      repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
-      version: 0.10.x
-    description: Yet another Kafka deployment chart.
-    digest: 9afb0c047d818b208b396be0c02794802b625225eb156b6068cf0e78a2272f72
-    name: alpaka
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Apache Kafka is a distributed streaming platform designed to build
+      real-time pipelines and can be used as a message broker or as a replacement
+      for a log aggregation solution for big data applications.
+    digest: f858064060a3dc2b48fffd421abf124c5e7c87984bdf088c28c1c3cfe2bce695
+    home: https://github.com/bitnami/charts/tree/main/bitnami/kafka
+    icon: https://bitnami.com/assets/stacks/kafka/img/kafka-stack-220x234.png
+    keywords:
+    - kafka
+    - zookeeper
+    - streaming
+    - producer
+    - consumer
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: kafka
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/kafka
+    - https://kafka.apache.org/
+    urls:
+    - charts/kafka-19.1.5.tgz
+    version: 19.1.5
+  kafka-ui:
+  - apiVersion: v2
+    appVersion: v0.4.0
+    created: "2023-01-03T11:04:10.1031455+09:00"
+    description: A Helm chart for kafka-UI
+    digest: f21bce5c48abd6eee1d80b670ce59ef78ed84b14a285a25977449251ba8666df
+    icon: https://github.com/provectus/kafka-ui/raw/master/documentation/images/kafka-ui-logo.png
+    name: kafka-ui
     type: application
     urls:
-    - alpaka-0.0.1.tgz
-    version: 0.0.1
-generated: "2022-12-01T15:55:29.2550576+09:00"
+    - charts/kafka-ui-0.4.6.tgz
+    version: 0.4.6
+  kminion:
+  - apiVersion: v2
+    appVersion: v2.2.0
+    created: "2023-01-03T11:04:10.1036803+09:00"
+    description: A Helm chart to deploy KMinion - a Prometheus Exporter for Apache
+      Kafka
+    digest: e5b646ead27cb13d5639780d7c3f031e1df8eeb6cab7c93b87377878b930e5ec
+    name: kminion
+    type: application
+    urls:
+    - charts/kminion-0.10.0.tgz
+    version: 0.10.0
+  kube-prometheus:
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 0.61.1
+    created: "2023-01-03T11:04:10.1177495+09:00"
+    dependencies:
+    - condition: exporters.enabled,exporters.node-exporter.enabled
+      name: node-exporter
+      repository: https://charts.bitnami.com/bitnami
+      version: 3.x.x
+    - condition: exporters.enabled,exporters.kube-state-metrics.enabled
+      name: kube-state-metrics
+      repository: https://charts.bitnami.com/bitnami
+      version: 3.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Prometheus Operator provides easy monitoring definitions for Kubernetes
+      services and deployment and management of Prometheus instances.
+    digest: d26275320623c81fdc3f030ebdc485a590902f133c1ed1d7a962658a4e32ae9a
+    home: https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus
+    icon: https://bitnami.com/assets/stacks/prometheus-operator/img/prometheus-operator-stack-220x234.png
+    keywords:
+    - prometheus
+    - alertmanager
+    - operator
+    - monitoring
+    kubeVersion: '>= 1.16.0-0'
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: kube-prometheus
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/prometheus-operator
+    - https://github.com/bitnami/containers/tree/main/bitnami/prometheus
+    - https://github.com/bitnami/containers/tree/main/bitnami/alertmanager
+    - https://github.com/prometheus-operator/kube-prometheus
+    urls:
+    - charts/kube-prometheus-8.3.0.tgz
+    version: 8.3.0
+  kubernetes-dashboard:
+  - apiVersion: v2
+    appVersion: 2.7.0
+    created: "2023-01-03T11:04:10.1190112+09:00"
+    dependencies:
+    - condition: metrics-server.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server/
+      version: 3.5.0
+    description: General-purpose web UI for Kubernetes clusters
+    digest: f89489c71fcc489313990c1972457c781ef144351a48b844c7bd28fb79fab6f5
+    home: https://github.com/kubernetes/dashboard
+    icon: https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo.svg
+    keywords:
+    - kubernetes
+    - dashboard
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - email: cdesaintmartin@wiremind.fr
+      name: desaintmartin
+    name: kubernetes-dashboard
+    sources:
+    - https://github.com/kubernetes/dashboard
+    urls:
+    - charts/kubernetes-dashboard-5.11.0.tgz
+    version: 5.11.0
+generated: "2023-01-03T11:04:10.0924687+09:00"
