@@ -163,6 +163,8 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 - `k3d.yaml` - k3d 용
 - `eks.yaml` - eks 용
 
+여기에서는 쿠버네티스 환경에 맞는 설정을 위해 환경별 설정 파일을 만들었지만, 꼭 이렇게 파일을 따로 만들 필요는 없다. 실제로는 개발/테스트/라이브 등의 용도에 따라 설정 파일을 만드는 것이 더 적합할 것이다.
+
 > 위의 파일들과 `alpaka/values.yaml` 을 참고하여 커스텀 설정 파일을 만들어 이용할 수 있다.
 
 #### 저장소에서 바로 설치하기
