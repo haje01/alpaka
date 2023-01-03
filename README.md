@@ -350,10 +350,11 @@ kubectl delete pvc --all
 
 ### alpaka 패키지 파일 갱신
 
-알파카의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 아래와 같이 패키지 파일을 갱신한다.
+알파카의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 알파카 디렉토리에서 아래와 같이 인덱스 및 패키지 파일을 갱신한다.
 
 ```bash
 helm repo index alpaka/
+helm package alpaka/
 ```
 
 그러면 `alpaka-0.0.1.tgz` 와 같은 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 이동 후 커밋하면 된다.
