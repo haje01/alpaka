@@ -243,7 +243,9 @@ helm install -f configs/eks.yaml eks alpaka/
 helm install -f configs/test.yaml test ./alpaka/
 ```
 
-이후 `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인하고, 포트포워딩 스크립트 ``tmux-portfwd.sh` 를 실행해준다. 그 후 다음과 같이 테스트를 실행한다. 
+이후 `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인하고, 포트포워딩 스크립트 `tmux-portfwd.sh` 를 실행해준다. 
+
+테스트 코드의 실행을 위해서는 Python3.5 와 pytest 가 설치된 환경에서 다음과 같이 명령한다. 
 
 ```
 pytest tests/
