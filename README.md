@@ -237,27 +237,10 @@ helm install -f configs/eks.yaml eks alpaka/
 
 #### 테스트
 
-알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트 코드가 제공된다. `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인 후, 다음과 같이 테스트를 실행할 수 있다. 
+알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트가 제공된다. `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인 후, 다음과 같이 테스트를 실행할 수 있다. 
 
 ```
-helm test <배포 이름> --logs
-```
-
-테스트 결과가 아래쪽의 `POD LOGS:` 섹션에 출력될 것이다.
-
-```
-...
-
-POD LOGS: mkb-alpaka-test
-============================= test session starts ==============================
-platform linux -- Python 3.9.2, pytest-7.2.0, pluggy-1.0.0
-rootdir: /alpaka/tests
-plugins: Faker-15.3.3, shell-0.3.2
-collected 1 item
-
-alpaka/tests/test_kafka.py .                                             [100%]
-
-============================== 1 passed in 0.07s ===============================
+pytest tests/common
 ```
 
 ### 활용
