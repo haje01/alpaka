@@ -237,11 +237,19 @@ helm install -f configs/eks.yaml eks alpaka/
 
 #### 테스트
 
-알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트가 제공된다. `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인 후, 다음과 같이 테스트를 실행할 수 있다. 
+알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트가 제공된다. 테스트를 위해서는 `configs/test.yaml` 설정 파일을 이용해 다음처럼 설치한다 (사용하는 쿠버네티스 환경은 상관 없다). 
 
 ```
-pytest tests/common
+helm install -f configs/test.yaml test ./alpaka/
 ```
+
+이후 `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인하고, 포트포워딩 스크립트 ``tmux-portfwd.sh` 를 실행해준다. 그 후 다음과 같이 테스트를 실행한다. 
+
+```
+pytest tests/
+```
+
+테스트가 끝나면 테스트용 설치는 지운다.
 
 ### 활용
 
@@ -310,10 +318,7 @@ NOTES:
 
 로컬의 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다. 설치 노트를 참고하여 필요한 서비스를 위한 포트포워딩을 해줄 수 있다.
 
-그렇지만 이렇게 매번 포트 포워딩을 해주기가 번거로운데, 제공되는 [tmux](https://github.com/tmux/tmux/wiki) 스크립트를 실행하면 한 번에 모든 포트포워딩을 해주기에 편리하다. 
->
-> `tmux-mkb-portfwd.sh`  (minikube 용)
-> `tmux-k3d-portfwd.sh`  (k3d 용)
+그렇지만 이렇게 매번 포트 포워딩을 해주기가 번거로운데, 제공되는 `tmux-portfwd.sh` 스크립트를 실행하면 한 번에 모든 포트포워딩을 해주기에 편리하다. 
 
 AWS EKS 에 설치한 경우는 Ingress 가 만들어져 있다. 다음처럼 확인할 수 있다.
 
