@@ -4,12 +4,13 @@
 
 - Kafka
 - Zookeeper
-- JDBC 커넥터 + CLI
+- Kafka 용 JDBC 커넥터
 - UI for Kafka
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
 - Kubernetes Dashboard
 
+추가적으로 테스트 및 운영을 위해 '알파카 CLI' 컨테이너가 설치된다.
 
 ## 사전 준비
 
@@ -233,6 +234,14 @@ helm install -f configs/eks.yaml eks alpaka/
 ```
 
 `alpaka/` 는 차트가 있는 디렉토리 명이다.
+
+#### 테스트
+
+잘 설치 되었는지 확인하기 위해 기본적인 테스트 코드가 제공된다. 다음과 같이 실행할 수 있다. 
+
+```
+helm test <설치 이름>
+```
 
 ### 활용
 

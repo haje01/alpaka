@@ -1,9 +1,9 @@
 # alpaka 에서 사용하는 도커 파일들
 
-## Dockerfile.client
+## Dockerfile.cli
 
-- Kafka 클러스터 테스트 용 이미지
-- 우분투 기반으로 vim, curl, nslookup, nc 패키지가 설치되어 있음
+- Kafka 클러스터 테스트 및 운영용 이미지
+- 우분투 기반으로 vim, curl, nslookup, nc, python 등의 패키지가 설치되어 있음
 
 다음과 같이 빌드
 

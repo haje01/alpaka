@@ -23,6 +23,17 @@ spec:
         {{- end }}
         app.kubernetes.io/component: kafka-cli
     spec:
+      initContainers:
+        - name: git-cloner
+          image: alpine/git
+          args:
+            - clone 
+            - -- 
+            - https://github.com/haje01/alpaka.git
+            - /target
+          volumeMounts:
+          - mountPath: /target
+            name: alpaka-src
       containers:
         - name: alpaka-cli
           image: "{{ .Values.cli.image.repository }}:{{ .Values.cli.image.tag | default .Chart.AppVersion }}"
@@ -31,6 +42,12 @@ spec:
             {{- toYaml .Values.cli.resources | nindent 12 }}
           command: ['sleep']
           args: ['infinity']
+          volumeMounts:
+          - mountPath: /alpaka
+            name: alpaka-src
+      volumes:
+      - name: alpaka-src
+        emptyDir: {}
       {{- if .Values.cli.dnsPolicy }}
       dnsPolicy: {{ .Values.cli.dnsPolicy }}
       {{- end }}

@@ -123,7 +123,7 @@ cli:
   image:
     repository: "haje01/kafka-cli"
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
   tolerations: []
