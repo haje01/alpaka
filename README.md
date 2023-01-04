@@ -10,7 +10,7 @@
 - Grafana (+ 각종 대쉬보드)
 - Kubernetes Dashboard
 
-추가적으로 테스트 및 운영을 위해 '알파카 CLI' 컨테이너가 설치된다.
+추가적으로 테스트 및 운영을 위해 '알파카 Tool' 컨테이너가 설치된다.
 
 ## 사전 준비
 
@@ -196,7 +196,7 @@ helm install -f configs/k3d.yaml k3d alpaka/alpaka
 helm install -f configs/eks.yaml eks alpaka/alpaka 
 ```
 
-> 여기서는 편의상 설정 파일명과 설치 이름을 같게 하였다. 실제로는 필요에 따라 설치 이름을 다르게 준다.
+> 여기서는 편의상 설정 파일명과 배포 이름을 같게 하였다. 실제로는 필요에 따라 배포 이름을 다르게 준다.
 
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
@@ -237,11 +237,13 @@ helm install -f configs/eks.yaml eks alpaka/
 
 #### 테스트
 
-잘 설치 되었는지 확인하기 위해 기본적인 테스트 코드가 제공된다. 다음과 같이 실행할 수 있다. 
+알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트 코드가 제공된다. `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인 후, 다음과 같이 테스트를 실행할 수 있다. 
 
 ```
-helm test <설치 이름>
+helm test <배포 이름> --logs
 ```
+
+테스트 결과 로그가 맨 아래쪽에 출력될 것이다.
 
 ### 활용
 
@@ -269,10 +271,10 @@ NOTES:
 
   mkb-kafka
 
-# kafka-cli 에 접속
+# 알파카 Tool 에 접속
 
-  export KCLI_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it $KCLI_POD -n default -- bash
+  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  kubectl exec -it $ATOOL_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드
 

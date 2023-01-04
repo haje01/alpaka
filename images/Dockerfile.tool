@@ -1,7 +1,7 @@
 # Kafka 테스트용 클라이언트 이미지
 FROM bitnami/kafka:latest
 
-# Client 용 필요 패키지 설치
+# 툴용 필요 패키지 설치
 USER root
 RUN apt-get update \
     && apt-get install -y curl \

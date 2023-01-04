@@ -7,9 +7,26 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  initContainers:
+  - name: git-cloner
+    image: alpine/git
+    args:
+    - clone 
+    - -- 
+    - https://github.com/haje01/alpaka.git
+    - /target
+    volumeMounts:
+    - mountPath: /target
+      name: alpaka-src
   containers:
-    - name: test
-      image: "{{ .Values.cli.image.repository }}:{{ .Values.cli.image.tag | default .Chart.AppVersion }}"
-      command: ['pytest']
-      args: ['/alpaka/tests']
+  - name: test
+    image: "{{ .Values.tool.image.repository }}:{{ .Values.tool.image.tag | default .Chart.AppVersion }}"
+    command: ['pytest']
+    args: ['/alpaka/tests']
+    volumeMounts:
+    - mountPath: /alpaka
+      name: alpaka-src
   restartPolicy: Never
+  volumes:
+  - name: alpaka-src
+    emptyDir: {}

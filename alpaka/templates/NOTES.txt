@@ -14,12 +14,12 @@
   export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
 {{- end }}
 
-{{- if .Values.cli.enabled }}
+{{- if .Values.tool.enabled }}
 
-# kafka-cli 에 접속
+# 알파카 Tool 에 접속
 
-  export KCLI_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kafka-cli" -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it $KCLI_POD -n {{ .Release.Namespace}} -- bash
+  export ATOOL_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  kubectl exec -it $ATOOL_POD -n {{ .Release.Namespace}} -- bash
 {{- end }}
 
 {{ if .Values.k8dashboard.enabled -}}

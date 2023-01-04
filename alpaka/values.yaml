@@ -136,14 +136,14 @@ k8dashboard:
     effect: "NoSchedule"
 
 
-# 카프카 CLI 설정
-cli:
+# 알파카 Tool 설정
+tool:
   enabled: true
-  name: kafka-cli
+  name: alpaka-tool
   podLabels: {}
   podAnnotations: {}
   image:
-    repository: "haje01/kafka-cli"
+    repository: "haje01/alpaka-tool"
     tag: latest
     pullPolicy: Always
   resources: {}
