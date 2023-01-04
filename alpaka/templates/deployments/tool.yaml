@@ -21,7 +21,7 @@ spec:
         {{- if .Values.tool.podLabels -}}
         {{ toYaml .Values.tool.podLabels | nindent 8 }}
         {{- end }}
-        app.kubernetes.io/component: kafka-tool
+        app.kubernetes.io/component: alpaka-tool
     spec:
       containers:
       - name: alpaka-tool
