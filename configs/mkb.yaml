@@ -115,7 +115,7 @@ tool:
   image:
     repository: "haje01/alpaka-tool"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   resources: {}
   nodeSelector: {}
   tolerations: []

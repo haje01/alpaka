@@ -5,3 +5,4 @@ charts/
 *.zip
 *.deb
 *:Zone.Identifier
+__pycache__/
