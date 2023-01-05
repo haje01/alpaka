@@ -9,12 +9,15 @@
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
 - Kubernetes Dashboard
+- 테스트용 MySQL
 
 추가적으로 테스트 및 운영을 위해 '알파카 Tool' 컨테이너가 설치된다.
 
 ## 사전 준비
 
-개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용도로는 클라우드 또는 IDC 에 배포할 수 있다. 알파카는 로컬 환경으로 [minikube](https://minikube.sigs.k8s.io/docs/) 와 [k3d](https://k3d.io/v5.4.6/) 를, 프로덕션 환경으로 [AWS EKS](https://aws.amazon.com/ko/eks/) 를 지원한다.
+도커의 특성상 리눅스 OS 만 지원한다. 여기에 먼저 지원 툴인 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) 과 [Helm](https://helm.sh/docs/intro/install/) 을 설치하여야 한다. 각각의 링크를 참고하여 진행하자.
+
+다음은 배포를 위한 쿠버네티스 환경을 갖추어야 한다. 개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용도로는 클라우드 또는 IDC 에 배포할 수 있다. 알파카는 로컬 환경으로 [minikube](https://minikube.sigs.k8s.io/docs/) 와 [k3d](https://k3d.io/v5.4.6/) 를, 프로덕션 환경으로 [AWS EKS](https://aws.amazon.com/ko/eks/) 를 지원한다.
 
 ### 로컬 쿠버네티스 환경
 
@@ -208,10 +211,10 @@ helm install -f configs/k3d.yaml k3d alpaka/alpaka --version 0.0.1
 
 Git 을 통해 내려받은 코드를 이용해 설치할 수 있다 (이후 설명은 내려받은 코드의 디렉토리 기준). yaml 파일을 수정하면서 테스트할 때는 코드에서 설치하는 것이 편할 것이다.
 
-먼저 의존 패키지 빌드가 필요한데, `alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
+먼저 의존 패키지를 등록하는 과정이 필요하다.  차트 정보가 있는 `alpaka/alpaka/` 디렉토리로 이동 후 다음처럼 수행한다.
 
 ```bash
-helm dependency build
+helm dependency update
 ```
 
 > 다음 차트들은 버그가 있어 패치된 것을 이용한다.
@@ -235,6 +238,8 @@ helm install -f configs/eks.yaml eks alpaka/
 
 `alpaka/` 는 차트가 있는 디렉토리 명이다.
 
+> 로컬 코드에서 설치하는 경우 
+
 #### 테스트
 
 알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트가 제공된다. 테스트를 위해서는 `configs/test.yaml` 설정 파일을 이용해 다음처럼 설치한다 (사용하는 쿠버네티스 환경은 상관 없다). 
@@ -245,10 +250,10 @@ helm install -f configs/test.yaml test ./alpaka/
 
 이후 `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인하고, 포트포워딩 스크립트 `tmux-portfwd.sh` 를 실행해준다. 
 
-테스트 코드의 실행을 위해서는 Python3.5 와 pytest 가 설치된 환경에서 다음과 같이 명령한다. 
+테스트 코드의 실행을 위해서는 Python3.5 와 pytest 가 설치된 환경에서 tests/ 디렉토리로 이동 후 다음과 같이 명령한다. 
 
 ```
-pytest tests/
+pytest
 ```
 
 테스트가 끝나면 테스트용 설치는 지운다.

@@ -266,3 +266,7 @@ kminion:
     annotations:
       prometheus.io/probe: kminion
   
+
+# 테스트용 MySQL 설정 
+mysql:
+  enabled: false

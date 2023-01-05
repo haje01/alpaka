@@ -25,7 +25,7 @@ appVersion: "3.3.1"
 
 dependencies:
   - name: kafka
-    version: 19.1.x
+    version: 20.0.x
     repository: https://charts.bitnami.com/bitnami
   - name: kube-prometheus
     version: 8.3.x
@@ -44,11 +44,15 @@ dependencies:
     repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
     condition: grafana.enabled
   - name: kubernetes-dashboard
-    version: 5.x.x
+    version: 6.x.x
     repository: https://kubernetes.github.io/dashboard/
     alias: k8dashboard
     condition: k8dashboard.enabled
   - name: kafka-ui
     version: 0.4.x
-    repository:  https://raw.githubusercontent.com/haje01/kafka-ui/master/charts/kafka-ui
+    repository: https://raw.githubusercontent.com/haje01/kafka-ui/master/charts/kafka-ui
     condition: kafka-ui.enabled
+  - name: mysql
+    version: 9.4.5
+    repository: https://charts.bitnami.com/bitnami
+    condition: mysql_enabled

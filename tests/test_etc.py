@@ -23,7 +23,4 @@ def test_prometheus():
 def test_k8sdashboard():
     """쿠버네티스 대쉬보드 접속 테스트."""
     url = 'https://localhost:8443'
-    try:
-        urlopen(url)
-    except urllib.error.URLError as e:
-        assert 'CERTIFICATE_VERIFY_FAILED' in str(e)
+    urlopen(url)

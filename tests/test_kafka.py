@@ -1,4 +1,4 @@
-from ..util import kcli
+from util import kcli
 
 
 def test_topic_list():
