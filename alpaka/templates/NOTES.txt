@@ -163,7 +163,7 @@ Thanos Sidecar can be accessed via port "{{ .Values.prometheus.prometheus.thanos
   {{- end }}
 
   유저: admin 
-  암호: admindjemals(admin어드민)
+  암호: admindjemals (admin어드민)
 {{- end }}
 
 {{ if .Values.mysql_enabled }}

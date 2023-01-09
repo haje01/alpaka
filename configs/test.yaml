@@ -114,7 +114,7 @@ tool:
   image:
     repository: "haje01/alpaka-tool"
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
   tolerations: []
@@ -136,7 +136,7 @@ dbcon:
   image:
     repository: "haje01/kafka-dbcon"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   timezone: Asia/Seoul
 
 

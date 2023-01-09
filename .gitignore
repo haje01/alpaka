@@ -1,8 +1,8 @@
 charts/
 *.swp
 .*.swp
-*.gz
-*.zip
-*.deb
+# *.gz
+# *.zip
+# *.deb
 *:Zone.Identifier
 __pycache__/

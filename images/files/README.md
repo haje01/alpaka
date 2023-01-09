@@ -5,4 +5,4 @@
 - [Confluent JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 - [Debezium connectors for MySQL](https://debezium.io/documentation/reference/stable/connectors/mysql.html)
 - [Debezium connectors for SQL Server](https://debezium.io/documentation/reference/stable/connectors/sqlserver.html)
-- [MySQL JDBC Driver (for Ubuntu)](https://dev.mysql.com/downloads/connector/j/)
+- [MySQL JDBC Driver (for Debian)](https://dev.mysql.com/downloads/connector/j/)
