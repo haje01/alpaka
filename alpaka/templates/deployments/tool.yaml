@@ -25,8 +25,8 @@ spec:
     spec:
       containers:
       - name: alpaka-tool
-        image: "{{ .Values.tool.image.repository }}:{{ .Values.tool.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.tool.image.pullPolicy }}
+        image: "{{ .Values.tool.container.image }}:{{ .Values.tool.container.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.tool.container.pullPolicy }}
         resources:
           {{- toYaml .Values.tool.resources | nindent 12 }}
         command: ['sleep']

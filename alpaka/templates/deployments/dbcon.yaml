@@ -16,24 +16,22 @@ spec:
         app.kubernetes.io/component: kafka-dbcon
     spec:
       containers:
-        - name: connect
-          image: {{ .Values.dbcon.image.repository }}:{{ .Values.dbcon.image.tag }}
-          imagePullPolicy: {{ .Values.dbcon.image.pullPolicy }}
-          # command: ['sleep']
-          # args: ['infinity']
-          command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
-          args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
-          env:
-            - name: TZ
-              value: {{ .Values.dbcon.timezone }}
-          ports:
-            - name: connector
-              containerPort: 8083
-          volumeMounts:
-            - name: conn-cfg
-              mountPath: /opt/bitnami/kafka/config
+      - name: connect
+        image: {{ .Values.dbcon.container.image }}:{{ .Values.dbcon.container.tag }}
+        imagePullPolicy: {{ .Values.dbcon.container.pullPolicy }}
+        command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
+        args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
+        env:
+          - name: TZ
+            value: {{ .Values.dbcon.timezone }}
+        ports:
+          - name: connector
+            containerPort: 8083
+        volumeMounts:
+          - name: conn-cfg
+            mountPath: /opt/bitnami/kafka/config
       volumes:
         - name: conn-cfg
           configMap:
-            name: {{ include "common.names.fullname" . }}-dbcon
+            name: {{ include "common.names.fullname" . }}-dbcon-cfg
 {{- end -}}

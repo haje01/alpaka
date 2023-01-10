@@ -1,0 +1,14 @@
+{{- if .Values.dbcon.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-init-db
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+data:
+  init.sql: |
+    CREATE DATABASE test;
+    CREATE USER 'tester'@'%' IDENTIFIED BY 'testerpass';
+    GRANT ALL PRIVILEGES ON test.* TO 'tester'@'%';
+    # Debezium 을 위한 권한
+    GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
+{{- end -}}

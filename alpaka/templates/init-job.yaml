@@ -1,0 +1,35 @@
+{{- if .Values.init.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: init
+        image: {{ .Values.init.container.image }}:{{ .Values.init.container.tag }}
+        {{- if .Values.init.container.pullPolicy }}
+        imagePullPolicy: {{ .Values.init.container.pullPolicy | default "IfNotPresent" }}
+        {{- end }}
+        command: ["/bin/sh", "-c", "{{ join " && " .Values.init.commands }}"]
+        volumeMounts:
+        {{- range $k, $v := .Values.init.files }}
+        - name: init-cmd
+          mountPath: /usr/local/bin/{{ $k }}
+          subPath: {{ $k }}
+        {{- end }}
+        - name: init-db
+          mountPath: /tmp/init.sql
+          subPath: init.sql
+      volumes:
+        - name: init-cmd
+          configMap:
+            name: {{ include "common.names.fullname" . }}-init-cmd
+            defaultMode: 0777
+        - name: init-db
+          configMap:
+            name: {{ include "common.names.fullname" . }}-init-db
+      restartPolicy: Never
+  backoffLimit: 1
+{{- end }}

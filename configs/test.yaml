@@ -111,18 +111,15 @@ tool:
   name: alpaka-tool
   podLabels: {}
   podAnnotations: {}
-  image:
-    repository: "haje01/alpaka-tool"
-    tag: latest
+  container:
+    image: "haje01/alpaka-tool"
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
   dnsConfig:
-    # 필요시 외부 DNS 등록 
-    # nameservers:
-    #   - 213.234.76.4
     options:
       - name: ndots
         value: "2"
@@ -133,11 +130,27 @@ dbcon:
   enabled: true
   replicaCount: 1
   kafkaClientPort: 9092
-  image:
-    repository: "haje01/kafka-dbcon"
-    tag: latest
-    pullPolicy: Always
+  container:
+    image: "haje01/kafka-dbcon"
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
   timezone: Asia/Seoul
+  config:
+    db:
+      type: mysql
+      addr: test-mysql-headless
+      port: 3306
+      name: test
+      timezone: Asia/Seoul
+      user: root
+      password: mypass
+    mode: bulk
+    topic: 
+      prifix: mysql-
+    poll:
+      interval_ms: "3600000"
+    tasks:
+      max: 1
 
 
 # UI for 카프카 설정
@@ -215,10 +228,49 @@ kminion:
     annotations:
       prometheus.io/probe: kminion
 
+#
+# 테스트 용
+#
 
+# MySQL
 mysql_enabled: true
-# 테스트용 MySQL 설정 
 mysql:
   auth:
     password: mypass
     rootPassword: mypass
+
+# 초기화 job
+init:
+  enabled: true
+  container:
+    image: "haje01/alpaka-tool"
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
+  files:
+    wait-mysql.sh: |
+      while ! mysqladmin ping -h test-mysql-headless --silent; do
+          sleep 1
+      done      
+    dbcon-reg-mysql.sh: |
+      curl -X POST http://test-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+        "name": "jdbc_source_mysql",
+        "config": {
+            "mode": "bulk",
+            "connection.url": "jdbc:mysql://test-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+            "connection.user": "root",
+            "connection.password": "mypass",
+            "poll.interval.ms": 3600000,
+            "topic.prefix": "mysql-",
+            "tasks.max": 1,
+            "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector"
+          }
+        }'
+  commands:
+    - wait-mysql.sh
+    - mysql -h test-mysql-headless -u root -pmypass < /tmp/init.sql
+    - sleep 10
+    - dbcon-reg-mysql.sh
+
+
+# 테스트 job
+

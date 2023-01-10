@@ -27,7 +27,10 @@ RUN cd /usr/share/java \
     && dpkg -i mysql-conn.deb \
     && rm mysql-conn.deb \
     && unzip jdbc_src_conn.zip \
-    && rm jdbc_src_conn.zip
+    && rm jdbc_src_conn.zip \
+    # 이렇게 안해주면 발견하지 못함 (?!)
+    && mv mysql-connector-j-8.0.31.jar confluentinc-kafka-connect-jdbc-10.6.1/lib
+
 
 # 추가적으로 두 번째 설정 파일 지정 가능
 # 예: /opt/bitnami/kafka/config/mongo.properties

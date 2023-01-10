@@ -1,4 +1,4 @@
-# Kafka 테스트용 클라이언트 이미지
+# Kafka 테스트 & 유틸리티 용 클라이언트 이미지
 FROM bitnami/kafka:latest
 
 # 툴용 필요 패키지 설치
@@ -13,7 +13,8 @@ RUN apt-get update \
     && apt-get install -y jq \
     && apt-get install -y python3 \
     && apt-get install -y python3-pip \
-    && apt-get install -y git
+    && apt-get install -y git \
+    && apt-get install -y mariadb-client
 
 # kubectl
 RUN curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
