@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: init-job
+  name: test-init
 spec:
   template:
     spec:
@@ -15,21 +15,15 @@ spec:
         command: ["/bin/sh", "-c", "{{ join " && " .Values.init.commands }}"]
         volumeMounts:
         {{- range $k, $v := .Values.init.files }}
-        - name: init-cmd
+        - name: test-init-cmd
           mountPath: /usr/local/bin/{{ $k }}
           subPath: {{ $k }}
         {{- end }}
-        - name: init-db
-          mountPath: /tmp/init.sql
-          subPath: init.sql
       volumes:
-        - name: init-cmd
+        - name: test-init-cmd
           configMap:
-            name: {{ include "common.names.fullname" . }}-init-cmd
+            name: {{ include "common.names.fullname" . }}-test-init-cmd
             defaultMode: 0777
-        - name: init-db
-          configMap:
-            name: {{ include "common.names.fullname" . }}-init-db
       restartPolicy: Never
   backoffLimit: 1
 {{- end }}

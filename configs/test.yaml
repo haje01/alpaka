@@ -247,12 +247,27 @@ init:
     tag: 0.0.1
     pullPolicy: IfNotPresent
   files:
-    wait-mysql.sh: |
+    init-mysql.sh: |
+      # 준비될 때까지 대기 
       while ! mysqladmin ping -h test-mysql-headless --silent; do
-          sleep 1
+          sleep 2
       done      
+      # 테스트용 DB 및 유저 만들기 
+      mysql -h test-mysql-headless -u root -pmypass -e "
+        CREATE DATABASE IF NOT EXISTS test;
+        CREATE USER 'tester'@'%' IDENTIFIED BY 'testerpass';
+        GRANT ALL PRIVILEGES ON test.* TO 'tester'@'%';
+        # Debezium 을 위한 권한
+        GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
+      "
+
     dbcon-reg-mysql.sh: |
-      curl -X POST http://test-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+      # 준비될 때까지 대기 
+      until $(curl --output /dev/null --silent --head --fail http://test-alpaka-dbcon:8083); do
+          sleep 2
+      done    
+      # 커넥터 등록
+      curl -s -X POST http://test-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "jdbc_source_mysql",
         "config": {
             "mode": "bulk",
@@ -266,9 +281,7 @@ init:
           }
         }'
   commands:
-    - wait-mysql.sh
-    - mysql -h test-mysql-headless -u root -pmypass < /tmp/init.sql
-    - sleep 10
+    - init-mysql.sh
     - dbcon-reg-mysql.sh
 
 

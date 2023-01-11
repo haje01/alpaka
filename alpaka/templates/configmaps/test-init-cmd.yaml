@@ -1,0 +1,12 @@
+{{- if .Values.init.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-test-init-cmd
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.init.files }}
+    {{ $k }}: |
+      {{ $v | indent 6 | trim }}
+  {{- end }}
+{{- end }}
