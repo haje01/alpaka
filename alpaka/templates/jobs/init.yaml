@@ -1,0 +1,32 @@
+{{ $full_name := include "common.names.fullname" . }}
+{{- with .Values.init }}
+{{- if .enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ $full_name }}-init
+        image: {{ .container.image }}:{{ .container.tag }}
+        {{- if .container.pullPolicy }}
+        imagePullPolicy: {{ .container.pullPolicy | default "IfNotPresent" }}
+        {{- end }}
+        command: ["/bin/sh", "-c", "{{ join " && " .commands }}"]
+        volumeMounts:
+        {{- range $k, $v := .files }}
+        - name: {{ $full_name }}-init-cmd
+          mountPath: /usr/local/bin/{{ $k }}
+          subPath: {{ $k }}
+        {{- end }}
+      volumes:
+        - name: {{ $full_name }}-init-cmd
+          configMap:
+            name: {{ $full_name }}-init-cmd
+            defaultMode: 0777
+      restartPolicy: Never
+  backoffLimit: 1
+{{- end }}
+{{- end }}

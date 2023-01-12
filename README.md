@@ -373,6 +373,30 @@ kubectl delete pvc --all
 
 ## 기타
 
+### 동작 테스트하기 
+
+설치된 클러스터의 동작을 테스트하기 위해 `configs/test.yaml` 설정 파일이 별도로 준비되어 있다. 이것을 통해 자동화된 테스트를 시작할 수 있는데, 먼저 최신 알파카 코드를 받아오기 위해 환경 변수가 필요하다.
+
+```
+# GitHub 에서 받아올 때
+export ALPAKA_REPO=https://github.com/haje01/alpaka.git
+
+# GitLab 에서 액세스 토큰을 사용해 받아올 때
+export ALPAKA_REPO=https://oauth2:[GitLab 액세스 토큰]@[GitLab 저장소 주소]
+```
+
+이후 아래처럼 테스트를 설치하고 시작한다.
+
+```
+helm install -f config/test test --set alpaka_repo=$ALPAKA_REPO ./alpaka
+```
+
+테스트 결과는 다음과 같이 확인한다.
+
+```
+kubectl logs job/test-start
+```
+
 ### alpaka 레포지토리 갱신
 
 알파카의 내용 및 관련 패키지 수정이 필요한 경우 `alpaka/Chart.yaml` 파일의 `version` 또는 `appVersion` 을 필요에 따라 수정하고, 알파카 코드 디렉토리에서 아래와 같이 패키지를 생성한다. 

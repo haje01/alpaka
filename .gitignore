@@ -1,6 +1,7 @@
 charts/
 *.swp
 .*.swp
+*.pem
 # *.gz
 # *.zip
 # *.deb

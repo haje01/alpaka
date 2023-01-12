@@ -166,21 +166,15 @@ Thanos Sidecar can be accessed via port "{{ .Values.prometheus.prometheus.thanos
   암호: admindjemals (admin어드민)
 {{- end }}
 
-{{ if .Values.mysql_enabled }}
+{{ if .Values.test.enabled }}
 # 테스트용 MySQL 
 
 root 사용자 암호
 
   MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace {{ include "common.names.namespace" . }} {{ template "mysql.secretName" .Subcharts.mysql }} -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 
-데이터베이스 접속:
+# 테스트 로그 확인
 
-  1. 클라이언트로 사용할 파드 실행
-
-      kubectl run {{ include "common.names.fullname" . }}-client --rm --tty -i --restart='Never' --image  {{ template "mysql.image" .Subcharts.mysql }} --namespace {{ include "common.names.namespace" . }} --env MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD --command -- bash
-
-  2. 서비스 접속
-
-      mysql -h {{ .Release.Name }}-mysql-headless -uroot -p"$MYSQL_ROOT_PASSWORD"
+  kubectl logs job/test
 
 {{- end }}

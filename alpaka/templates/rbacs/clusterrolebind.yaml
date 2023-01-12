@@ -16,5 +16,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Values.k8dashboard.serviceAccount.name }}
   namespace: {{ include "common.names.namespace" . }}
-
 {{- end }}
