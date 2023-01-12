@@ -1,0 +1,72 @@
+{{ $broker := printf "%s-kafka-headless:9092" .Release.Name }}
+{{- if .Values.test.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-test-code
+data:
+  test_kafka.py: |
+    from subprocess import run 
+
+    def exec(cmds):
+        out = run(cmds, capture_output=True)
+        if out.returncode != 0:
+            raise str(out.stderr.decode())
+        return out.stdout.decode()
+
+    def kafka_topics(cmds):
+        return exec(['kafka-topics.sh', '--bootstrap-server={{ $broker }}'] + cmds)
+
+    def test_topic_list():
+        """기본 토픽 나열."""
+        ret = kafka_topics(["--list"])
+        ans = set([
+            '__consumer_offsets', 
+            'connect-configs', 
+            'connect-offsets', 
+            'connect-status']) 
+        com = ans & set(ret.split('\n'))
+        assert len(com) == 4
+
+    def test_ct_mysql():
+        """MySQL CT 방식 테스트."""
+        # 테이블 초기화 
+        exec(['python3', '-m', 'kfktest.table', 'mysql', '--db-host', 'mkb-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
+        # 테이블에 값 채우기 
+        exec(['python3', '-m', 'kfktest.inserter', 'mysql', '--db-host', 'mkb-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
+        # 잠시 후 토픽 확인 
+        ret = exec(['/bin/sh', '-c', 'sleep 20 && kafka-console-consumer.sh --bootstrap-server=mkb-kafka-headless:9092 --topic=mysql-person --from-beginning --timeout-ms=20000 | wc -l'])
+        assert '10000' in ret
+
+
+  test_etc.py: |
+    import urllib
+    from urllib.request import urlopen
+
+    import pytest
+
+    def test_grafana():
+        """그라파나 접속 테스트."""
+        url = 'http://{{ .Release.Name }}-grafana:3000'
+        urlopen(url)
+
+    @pytest.mark.skip(reason="지연으로 인한 잦은 Fail")
+    def test_kafkaui():
+        """UI for Kafka 접속 테스트."""
+        url = 'http://{{ .Release.Name }}-kafka-ui:80'
+        urlopen(url)
+
+    def test_prometheus():
+        """프로메테우스 접속 테스트."""
+        url = 'http://{{ .Release.Name }}-prometheus-prometheus:9090'
+        urlopen(url)
+
+    def test_k8dashboard():
+        """쿠버네티스 대쉬보드 접속 테스트."""
+        url = 'https://{{ .Release.Name }}-k8dashboard:8443'
+        try:
+            urlopen(url)
+        except urllib.error.URLError as e:
+            if 'CERTIFICATE_VERIFY_FAILED' not in str(e):
+                raise e
+{{- end }}

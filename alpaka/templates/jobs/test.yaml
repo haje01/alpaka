@@ -1,0 +1,41 @@
+{{ $full_name := include "common.names.fullname" . }}
+{{- with .Values.test }}
+{{- if .enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $full_name }}-test
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ $full_name }}-test
+        image: {{ .container.image }}:{{ .container.tag }}
+        {{- if .container.pullPolicy }}
+        imagePullPolicy: {{ .container.pullPolicy | default "IfNotPresent" }}
+        {{- end }}
+        command: ["/bin/sh", "-c", "init_mysql.sh && dbcon_reg_mysql.sh && run_test.sh"]
+        volumeMounts:
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/init_mysql.sh
+          subPath: init_mysql.sh
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/dbcon_reg_mysql.sh
+          subPath: dbcon_reg_mysql.sh
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/run_test.sh
+          subPath: run_test.sh
+        - name: {{ $full_name }}-test-code
+          mountPath: /tests
+      volumes:
+        - name: {{ $full_name }}-test-cmd
+          configMap:
+            name: {{ $full_name }}-test-cmd
+            defaultMode: 0777
+        - name: {{ $full_name }}-test-code
+          configMap:
+            name: {{ $full_name }}-test-code
+      restartPolicy: Never
+  backoffLimit: 1
+{{- end }}
+{{- end }}

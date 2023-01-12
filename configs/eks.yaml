@@ -140,9 +140,9 @@ tool:
   name: alpaka-tool
   podLabels: {}
   podAnnotations: {}
-  image:
-    repository: "haje01/alpaka-tool"
-    tag: latest
+  container:
+    image: "haje01/alpaka-tool"
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -162,9 +162,9 @@ dbcon:
   enabled: true
   replicaCount: 1
   kafkaClientPort: 9092
-  image:
-    repository: "haje01/kafka-dbcon"
-    tag: latest
+  container:
+    image: "haje01/kafka-dbcon"
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   timezone: Asia/Seoul
 

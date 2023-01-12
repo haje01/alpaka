@@ -1,0 +1,14 @@
+{{ $full_name := include "common.names.fullname" . }}
+{{- with .Values.init -}}
+{{- if .enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $full_name }}-init-cmd
+data:
+  {{- range $k, $v := .files }}
+    {{ $k }}: |
+      {{ $v | indent 6 | trim }}
+  {{- end }}
+{{- end }}
+{{- end }}

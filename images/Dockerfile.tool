@@ -20,5 +20,6 @@ RUN apt-get update \
 RUN curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
     && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
+# for test
 RUN git clone https://github.com/haje01/kfktest.git && cd kfktest && pip3 install -r requirements.txt && pip3 install -e .
 

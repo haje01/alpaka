@@ -1,12 +1,49 @@
-{{- if .Values.init.enabled -}}
+{{- if .Values.test.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "common.names.fullname" . }}-test-init-cmd
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ include "common.names.fullname" . }}-test-cmd
 data:
-  {{- range $k, $v := .Values.init.files }}
-    {{ $k }}: |
-      {{ $v | indent 6 | trim }}
-  {{- end }}
+    init_mysql.sh: |
+      echo "> init_mysql.sh"
+      # MySQL 준비될 때까지 대기 
+      while ! mysqladmin ping -h {{ .Release.Name }}-mysql-headless --silent; do
+          echo "waiting for mysql."
+          sleep 5
+      done     
+      # 테스트용 DB 및 유저 만들기 
+      mysql -h {{ .Release.Name }}-mysql-headless -u root -p{{ .Values.mysql.auth.password }} -e "
+        CREATE DATABASE IF NOT EXISTS test;
+        CREATE USER IF NOT EXISTS 'tester'@'%' IDENTIFIED BY 'testerpass';
+        GRANT ALL PRIVILEGES ON test.* TO 'tester'@'%';
+        # Debezium 을 위한 권한
+        GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
+      "
+    dbcon_reg_mysql.sh: |
+      echo "> dbcon_reg_mysql.sh"
+      # 커넥트 준비될 때까지 대기 
+      until $(curl --output /dev/null --silent --head --fail http://{{ .Release.Name }}-alpaka-dbcon:8083); do
+          echo "waiting for connect."
+          sleep 5
+      done    
+      # 커넥터 등록
+      curl -s -X POST http://{{ .Release.Name }}-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+        "name": "jdbc_source_mysql",
+        "config": {
+            "mode": "bulk",
+            "connection.url": "jdbc:mysql://{{ .Release.Name }}-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+            "connection.user": "root",
+            "connection.password": "{{ .Values.mysql.auth.password }}",
+            "poll.interval.ms": 3600000,
+            "topic.prefix": "mysql-",
+            "tasks.max": 1,
+            "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
+            "tables.whitelist": "person"
+          }
+        }' | jq
+    # 테스트 실행 파일
+    run_test.sh: |
+      sleep 5
+      echo "> run_test.sh"
+      cd tests && pytest -s -p no:cacheprovider .
 {{- end }}

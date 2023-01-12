@@ -5,6 +5,7 @@ def find_tool_pod():
     """현재 설치에서 Tool 파드 이름 찾기."""
     out = run(['kubectl', 'get', 'pods'], capture_output=True)
     for line in out.stdout.decode().split('\n'):
+        print(line)
         if 'alpaka-tool' in line:
             pname = line.split()[0]
             return pname

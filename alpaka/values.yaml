@@ -265,8 +265,12 @@ kminion:
   service:
     annotations:
       prometheus.io/probe: kminion
-  
+
+# 초기화 설정
+init:
+  enabled: false  
 
 # 테스트용 MySQL 설정 
 mysql:
   enabled: false
+
