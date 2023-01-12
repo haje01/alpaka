@@ -1,21 +1,18 @@
-{{ $full_name := include "common.names.fullname" . }}
-{{ $rel_name := .Release.Name }}
-{{- with .Values.test }}
-{{- if .enabled }}
+{{- if .Values.test.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $full_name }}-test-cmd
+  name: {{ include "common.names.fullname" . }}-test-cmd
 data:
     init_mysql.sh: |
-      echo "Run init_mysql.sh"
-      # 준비될 때까지 대기 
-      while ! mysqladmin ping -h {{ $rel_name }}-mysql-headless --silent; do
-          echo "Waiting for MySQL."
+      echo "> init_mysql.sh"
+      # MySQL 준비될 때까지 대기 
+      while ! mysqladmin ping -h {{ .Release.Name }}-mysql-headless --silent; do
+          echo "waiting for mysql."
           sleep 5
       done     
       # 테스트용 DB 및 유저 만들기 
-      mysql -h {{ $rel_name }}-mysql-headless -u root -pmypass -e "
+      mysql -h {{ .Release.Name }}-mysql-headless -u root -p{{ .Values.mysql.auth.password }} -e "
         CREATE DATABASE IF NOT EXISTS test;
         CREATE USER IF NOT EXISTS 'tester'@'%' IDENTIFIED BY 'testerpass';
         GRANT ALL PRIVILEGES ON test.* TO 'tester'@'%';
@@ -23,30 +20,30 @@ data:
         GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
       "
     dbcon_reg_mysql.sh: |
-      echo "Run dbcon_reg_mysql.sh"
-      # 준비될 때까지 대기 
-      until $(curl --output /dev/null --silent --head --fail http://{{ $rel_name }}-alpaka-dbcon:8083); do
-          echo "Waiting for Connector."
+      echo "> dbcon_reg_mysql.sh"
+      # 커넥트 준비될 때까지 대기 
+      until $(curl --output /dev/null --silent --head --fail http://{{ .Release.Name }}-alpaka-dbcon:8083); do
+          echo "waiting for connect."
           sleep 5
       done    
       # 커넥터 등록
-      curl -s -X POST http://{{ $rel_name }}-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+      curl -s -X POST http://{{ .Release.Name }}-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "jdbc_source_mysql",
         "config": {
             "mode": "bulk",
-            "connection.url": "jdbc:mysql://{{ $rel_name }}-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+            "connection.url": "jdbc:mysql://{{ .Release.Name }}-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
             "connection.user": "root",
-            "connection.password": "mypass",
+            "connection.password": "{{ .Values.mysql.auth.password }}",
             "poll.interval.ms": 3600000,
             "topic.prefix": "mysql-",
             "tasks.max": 1,
-            "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector"
+            "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
+            "tables.whitelist": "person"
           }
         }' | jq
     # 테스트 실행 파일
     run_test.sh: |
       sleep 5
-      echo "Run run_test.sh"
-      cd tests && pytest -p no:cacheprovider .
-{{- end }}
+      echo "> run_test.sh"
+      cd tests && pytest -s -p no:cacheprovider .
 {{- end }}
