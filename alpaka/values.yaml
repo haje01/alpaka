@@ -1,7 +1,5 @@
-# 쿠버네티스 환경 제공자 (mkb, k3d, eks 중 하나)
-# 여기서는 설치 이름이 쿠버네티스 환경 제공자와 같다고 가정
-# (REL 을 적절한 환경 제공자로 대치해 사용)
-provider: REL
+# Ingress 사용 여부 
+use_ingress: false 
 
 # 카프카 설정
 kafka:
@@ -77,6 +75,9 @@ prometheus:
   enabled: true
   prometheus:
     enabled: true
+    #
+    # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
+    # 
     ingress:
       enabled: true
       hostname: "*"
@@ -111,6 +112,9 @@ prometheus:
 # 쿠버네티스 대쉬보드 설정
 k8dashboard:
   enabled: true
+  #
+  # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
+  # 
   ingress:
     enabled: true 
     paths:
@@ -121,7 +125,6 @@ k8dashboard:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8443}]'
-
   service:
     externalPort: 8443
   serviceAccount:
@@ -142,10 +145,10 @@ tool:
   name: alpaka-tool
   podLabels: {}
   podAnnotations: {}
-  image:
-    repository: "haje01/alpaka-tool"
+  container:
+    image: "haje01/alpaka-tool"
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
   tolerations: []
@@ -164,8 +167,8 @@ dbcon:
   enabled: true
   replicaCount: 1
   kafkaClientPort: 9092
-  image:
-    repository: "haje01/kafka-dbcon"
+  container:
+    image: "haje01/kafka-dbcon"
     tag: latest
     pullPolicy: IfNotPresent
   timezone: Asia/Seoul
@@ -174,6 +177,9 @@ dbcon:
 # UI for 카프카 설정
 kafka-ui:
   enabled: true
+  #
+  # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
+  # 
   ingress:
     enabled: true
     annotations:
@@ -182,7 +188,6 @@ kafka-ui:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
-
   yamlApplicationConfig:
     kafka:
       clusters:
@@ -211,6 +216,9 @@ kafka-ui:
 # 그라파나 설정
 grafana:
   enabled: true
+  #
+  # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
+  # 
   ingress:
     enabled: true
     hostname: "*"
@@ -221,7 +229,6 @@ grafana:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 3000}]'
-
   adminSecretName: REL-grafana-admin
   admin:
     user: admin
@@ -266,11 +273,38 @@ kminion:
     annotations:
       prometheus.io/probe: kminion
 
-# 초기화 설정
-init:
-  enabled: false  
+#
+# 초기화 
+#
+# 설치 후 초기화에 필요한 명령을 정의하고 실행한다.
+# 
+init: 
+  enabled: false 
+  files:
+    clone_code.sh: |
+      git clone https://github.com/haje01/alpaka.git
+  commands:
+    - clonec_code.sh
 
-# 테스트용 MySQL 설정 
+
+#
+#  테스트 관련
+#
+
+#
+# 테스트용 MySQL 정보
+#
+# MySQL 은 test.enabled 가 true 인 경우만 설치된다.
+#
 mysql:
-  enabled: false
+  auth:
+    password: mypass
+    rootPassword: mypass
 
+# 테스트
+test:
+  enabled: true
+  container:
+    image: "haje01/alpaka-tool"
+    tag: 0.0.1
+    pullPolicy: IfNotPresent

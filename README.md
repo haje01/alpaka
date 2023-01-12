@@ -102,7 +102,9 @@ eksctl create addon --name aws-ebs-csi-driver --cluster prod --service-account-r
 
 #### Ingress 준비 
 
-알파카에서 제공하는 다양한 패키지의 웹페이지를 접근하기 위해서 Ingress 를 사용한다. EKS 상에서 Ingress 를 사용하기 위해 클러스터 생성후 아래 작업이 필요하다.
+알파카에서 설치되는 다양한 서비스 웹페이지를 외부에서 접근하기 위해서 Ingress 를 사용하기 위해서는 설정 파일에서 `use_ingress: true` 로 해주어야 한다. 
+
+EKS 를 이용하는 경우 Ingress 를 사용하기 위해 클러스터 생성후 아래 작업이 필요하다.
 
 AWS 로드밸런서 컨트롤러 설치
 ( 참고 : [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) )
@@ -163,7 +165,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
 두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정파일이 있다:
-- `mkb.yaml` - minkube 용
+- `single.yaml` - 단일 노드 용 (minikube)
 - `k3d.yaml` - k3d 용
 - `eks.yaml` - eks 용
 
@@ -189,8 +191,8 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다 (설정 파일은 미리 준비되어야 한다).
 
 ```bash
-# minikube 의 경우 
-helm install -f configs/mkb.yaml mkb alpaka/alpaka 
+# 단일 노드의 경우 
+helm install -f configs/single.yaml single alpaka/alpaka 
 
 # k3d 의 경우 
 helm install -f configs/k3d.yaml k3d alpaka/alpaka 
@@ -227,7 +229,7 @@ helm dependency update
 
 ```bash
 # minikube 의 경우
-helm install -f configs/mkb.yaml mkb alpaka/
+helm install -f configs/single.yaml single alpaka/
 
 # k3d 의 경우
 helm install -f configs/k3d.yaml k3d alpaka/
@@ -262,37 +264,37 @@ pytest
 
 #### 설치 노트
 
-설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 minikube (`mkb`) 에 설치한 경우의 설치 노트이다.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `single.yaml` 설정 파일을 이용해 단일 노드에 설치한 경우의 노트이다.
 
-> `helm status mkb` 명령으로 다시 볼 수 있다.
+> `helm status single` 명령으로 다시 볼 수 있다.
 
 ```markdown
-Release "mkb" has been upgraded. Happy Helming!
-NAME: mkb
+Release "single" has been upgraded. Happy Helming!
+NAME: single
 LAST DEPLOYED: Tue Jan  3 10:17:08 2023
 NAMESPACE: default
 STATUS: deployed
 REVISION: 3
 NOTES:
-# 쿠버네티스 프로바이더 : mkb
+# 쿠버네티스 프로바이더 : single
 
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=mkb
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=single
 
 # 카프카 브로커 호스트명
 
-  mkb-kafka
+  single-kafka
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=single,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $ATOOL_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드
 
   포트포워딩:
-  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
+  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=single,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
   kubectl port-forward $K8DASH_POD -n default 8443:8443
 
   접속 URL: https://localhost:8443
@@ -300,7 +302,7 @@ NOTES:
 # 카프카 UI
 
   포트포워딩:
-  kubectl port-forward svc/mkb-kafka-ui 8989:80
+  kubectl port-forward svc/single-kafka-ui 8989:80
 
 # 프로메테우스
 
@@ -310,12 +312,12 @@ NOTES:
 얼러트매니저 접속:
 
     포트포워딩:
-    kubectl port-forward --namespace default svc/mkb-alpaka-alertmanager 9093:9093
+    kubectl port-forward --namespace default svc/single-alpaka-alertmanager 9093:9093
 
 ## 그라파나
 
   포트포워딩:
-  kubectl port-forward svc/mkb-grafana 3000
+  kubectl port-forward svc/single-grafana 3000
 
   유저: admin
   암호: admindjemals(admin어드민)
@@ -355,7 +357,7 @@ EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e9
 아래와 같이 삭제할 수 있다.
 ```bash
 # minikube 의 경우
-helm uninstal mkb
+helm uninstal single
 
 # k3d 의 경우
 helm uninstal k3d
@@ -375,26 +377,72 @@ kubectl delete pvc --all
 
 ### 동작 테스트하기 
 
-설치된 클러스터의 동작을 테스트하기 위해 `configs/test.yaml` 설정 파일이 별도로 준비되어 있다. 이것을 통해 자동화된 테스트를 시작할 수 있는데, 먼저 최신 알파카 코드를 받아오기 위해 환경 변수가 필요하다.
+설치 후 동작이 잘되는지 확인하려면, 설치전 설정 파일에서 아래처럼 `test.enabled` 를 `true` 로 하고 설치를 진행한다.
+
+```yaml
+#
+#  테스트 관련
+#
+
+# 테스트용 MySQL 정보
+mysql:
+  auth:
+    password: mypass
+    rootPassword: mypass
+
+# 테스트
+test:
+  enabled: true
+  container:
+    image: "haje01/alpaka-tool"
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
+```
+
+이렇게 하면 테스트를 위한 `mysql` 파드와 `[배포 이름]-alpaka-test` 잡을 확인할 수 있다. 아래는 테스트 결과의 예이다.
 
 ```
-# GitHub 에서 받아올 때
-export ALPAKA_REPO=https://github.com/haje01/alpaka.git
+$ kubectl logs job/single-alpaka-start
 
-# GitLab 에서 액세스 토큰을 사용해 받아올 때
-export ALPAKA_REPO=https://oauth2:[GitLab 액세스 토큰]@[GitLab 저장소 주소]
+> init_mysql.sh
+waiting for mysql.
+waiting for mysql.
+> dbcon_reg_mysql.sh
+waiting for connect.
+{
+  "name": "jdbc_source_mysql",
+  "config": {
+    "mode": "bulk",
+    "connection.url": "jdbc:mysql://single-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+    "connection.user": "root",
+    "connection.password": "mypass",
+    "poll.interval.ms": "3600000",
+    "topic.prefix": "mysql-",
+    "tasks.max": "1",
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tables.whitelist": "person",
+    "name": "jdbc_source_mysql"
+  },
+  "tasks": [],
+  "type": "source"
+}
+> run_test.sh
+============================= test session starts ==============================
+platform linux -- Python 3.9.2, pytest-7.2.0, pluggy-1.0.0
+rootdir: /tests
+plugins: Faker-16.1.0, shell-0.3.2
+collected 6 items
+
+test_etc.py .s..
+test_kafka.py ..
+
+=================== 5 passed, 1 skipped in 121.39s (0:02:01) ===================
 ```
 
-이후 아래처럼 테스트를 설치하고 시작한다.
+테스트가 필요없어지면 설정 파일에서 `test.enabled` 를 `false` 로 바꾸고 다음처럼 업그레이드하면 테스트용 리소스가 제거되는 것을 확인할 수 있다.
 
 ```
-helm install -f config/test test --set alpaka_repo=$ALPAKA_REPO ./alpaka
-```
-
-테스트 결과는 다음과 같이 확인한다.
-
-```
-kubectl logs job/test-start
+helm upgrade -f config/single.yaml single ./alpaka
 ```
 
 ### alpaka 레포지토리 갱신
