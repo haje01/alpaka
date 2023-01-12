@@ -1,4 +1,4 @@
-use_ingress: false 
+use_ingress: true 
 
 # 카프카 설정
 kafka:
