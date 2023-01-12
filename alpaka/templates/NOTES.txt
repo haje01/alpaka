@@ -1,5 +1,3 @@
-# 쿠버네티스 프로바이더 : {{ required ".Values.provider 없음 - mkb, k3d, eks 중 선택" .Values.provider }}
-
 # 설치된 파드 리스트
 
   kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
@@ -8,7 +6,7 @@
 
   {{ .Release.Name }}-kafka
 
-{{- if eq .Values.provider "eks" }}
+{{- if eq .Values.use_ingress }}
 
   Ingress (AWS ALB) 주소:
   export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
@@ -24,7 +22,7 @@
 
 {{ if .Values.k8dashboard.enabled -}}
 # 쿠버네티스 대쉬보드
-{{- if ne .Values.provider "eks" }}
+{{- if ne .Values.use_ingress }}
 
   포트포워딩:
   export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=kubernetes-dashboard" -n {{ .Release.Namespace }} -o jsonpath="{.items[0].metadata.name}")
@@ -41,7 +39,7 @@
 
 {{ if (index .Values "kafka-ui" "enabled") -}}
 # 카프카 UI
-{{- if ne .Values.provider "eks" }}
+{{- if ne .Values.use_ingress }}
 
   포트포워딩:
   kubectl port-forward svc/{{ .Release.Name }}-kafka-ui 8989:80
@@ -77,7 +75,7 @@
     echo "Prometheus URL: http://$SERVICE_IP{{- if ne $port "80" }}:{{ .Values.prometheus.prometheus.service.ports.http }}{{ end }}/"
 
 {{- else if contains "ClusterIP"  .Values.prometheus.prometheus.service.type }}
-  {{ if ne .Values.provider "eks" }}
+  {{ if ne .Values.use_ingress }}
     포트포워딩:
     kubectl port-forward --namespace {{ include "common.names.namespace" . }} svc/{{ .Release.Name }}-prometheus-prometheus 9090:{{ .Values.prometheus.prometheus.service.ports.http }}
   {{- else }}
@@ -130,7 +128,7 @@ Thanos Sidecar can be accessed via port "{{ .Values.prometheus.prometheus.thanos
     echo "Alertmanager URL: http://$SERVICE_IP{{- if ne $port "80" }}:{{ .Values.prometheus.alertmanager.service.ports.http }}{{ end }}/"
 
 {{- else if contains "ClusterIP"  .Values.prometheus.alertmanager.service.type }}
-  {{- if ne .Values.provider "eks" }}
+  {{- if ne .Values.use_ingress }}
 
     포트포워딩:
     kubectl port-forward --namespace {{ include "common.names.namespace" . }} svc/{{ template "kube-prometheus.alertmanager.fullname" . }} 9093:{{ .Values.prometheus.alertmanager.service.ports.http }}
@@ -152,7 +150,7 @@ Thanos Sidecar can be accessed via port "{{ .Values.prometheus.prometheus.thanos
 
 {{ if .Values.grafana.enabled -}}
 # 그라파나
-  {{- if ne .Values.provider "eks" }}
+  {{- if ne .Values.use_ingress }}
 
   포트포워딩:
   kubectl port-forward svc/{{ .Release.Name }}-grafana 3000

@@ -1,6 +1,4 @@
-# 쿠버네티스 환경 제공자 (mkb, k3d, eks 중 하나)
-# 여기서는 설치 이름이 쿠버네티스 환경 제공자와 같다고 가정
-provider: k3d
+use_ingress: false 
 
 # 카프카 설정
 kafka:
