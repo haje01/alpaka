@@ -1,10 +1,16 @@
+#
+# 밸류 파일 내 값은 기본 값으로 동작 
+# 
+
+# 주의: RELNAME 을 helm install 시 설치 이름으로 대체해야함.
+
 # Ingress 사용 여부 
-use_ingress: false 
+use_ingress: true 
 
 # 카프카 설정
 kafka:
-  replicaCount: 3
-  defaultReplicationFactor: 2
+  replicaCount: 1
+  defaultReplicationFactor: 1
   numPartitions: 8
   ## 노드 리소스 조건
   # resources:
@@ -42,8 +48,6 @@ kafka:
   zookeeper:
     enabled: true
     replicaCount: 1
-    tolerations:
-      - key: "ctrl"
     metrics:
       enabled: true
       serviceMonitor:
@@ -80,14 +84,23 @@ prometheus:
     # 
     ingress:
       enabled: true
-      hostname: "*"
-      path: /*
+      hostname: "alpaka.info"
+      path: /prometheus
+      pathType: Prefix
+      # ingressClassName: nginx
       annotations:
-        kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/group.name: public
-        alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/target-type: ip
-        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
+        # minikube 설치용
+        # nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+        # K3S (K3D) 설치용
+        # kubernetes.io/ingress.class: "traefik"
+
+        # AWS EKS 설치용
+        # kubernetes.io/ingress.class: alb
+        # alb.ingress.kubernetes.io/group.name: public
+        # alb.ingress.kubernetes.io/scheme: internet-facing
+        # alb.ingress.kubernetes.io/target-type: ip
+        # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
     additionalScrapeConfigs:
       enabled: true
       type: internal
@@ -99,14 +112,14 @@ prometheus:
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - REL-kminion:8080
+            - RELNAME-kminion:8080
         - job_name: zookeeper
           scrape_interval: 10s
           scrape_timeout:  5s
           metrics_path: "/metrics"
           static_configs:
           - targets:
-            - REL-zookeeper-metrics:9141
+            - RELNAME-zookeeper-metrics:9141
 
 
 # 쿠버네티스 대쉬보드 설정
@@ -115,16 +128,23 @@ k8dashboard:
   #
   # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
   # 
-  ingress:
-    enabled: true 
-    paths:
-      - /*
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8443}]'
+  # ingress:
+  #   enabled: true 
+  #   paths:
+  #     - /*
+  #   annotations:
+      # minikube 설치용
+      # nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+      # K3S (K3D) 설치용
+      # kubernetes.io/ingress.class: "traefik"
+
+      # AWS EKS 설치용
+      # kubernetes.io/ingress.class: alb
+      # alb.ingress.kubernetes.io/group.name: public
+      # alb.ingress.kubernetes.io/scheme: internet-facing
+      # alb.ingress.kubernetes.io/target-type: ip
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
   service:
     externalPort: 8443
   serviceAccount:
@@ -180,23 +200,32 @@ kafka-ui:
   #
   # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
   # 
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
+  # ingress:
+  #   enabled: true 
+  #   paths:
+  #     - /*
+  #   annotations:
+      # minikube 설치용
+      # nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+      # K3S (K3D) 설치용
+      # kubernetes.io/ingress.class: "traefik"
+
+      # AWS EKS 설치용
+      # kubernetes.io/ingress.class: alb
+      # alb.ingress.kubernetes.io/group.name: public
+      # alb.ingress.kubernetes.io/scheme: internet-facing
+      # alb.ingress.kubernetes.io/target-type: ip
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: REL-kafka
-          bootstrapServers: REL-kafka-headless:9092
-          zookeeper: REL-zookeeper-headless:2181
+        - name: RELNAME-kafka
+          bootstrapServers: RELNAME-kafka-headless:9092
+          zookeeper: RELNAME-zookeeper-headless:2181
           kafkaConnect:
             - name: dbcon
-              address: http://REL-alpaka-dbcon:8083
+              address: http://RELNAME-alpaka-dbcon:8083
           metrics:
             port: 5556
             type: JMX
@@ -219,17 +248,24 @@ grafana:
   #
   # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
   # 
-  ingress:
-    enabled: true
-    hostname: "*"
-    path: /*
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 3000}]'
-  adminSecretName: REL-grafana-admin
+  # ingress:
+  #   enabled: true 
+  #   paths:
+  #     - /*
+  #   annotations:
+      # minikube 설치용
+      # nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+      # K3S (K3D) 설치용
+      # kubernetes.io/ingress.class: "traefik"
+
+      # AWS EKS 설치용
+      # kubernetes.io/ingress.class: alb
+      # alb.ingress.kubernetes.io/group.name: public
+      # alb.ingress.kubernetes.io/scheme: internet-facing
+      # alb.ingress.kubernetes.io/target-type: ip
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
+  adminSecretName: RELNAME-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -240,20 +276,20 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://REL-prometheus-prometheus:9090
+          url: http://RELNAME-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
   dashboardsConfigMaps:
-    - configMapName: REL-alpaka-grafana-cluster
+    - configMapName: RELNAME-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: REL-alpaka-grafana-topic
+    - configMapName: RELNAME-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: REL-alpaka-grafana-groups
+    - configMapName: RELNAME-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: REL-alpaka-grafana-zookeeper
+    - configMapName: RELNAME-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: REL-alpaka-grafana-jvm
+    - configMapName: RELNAME-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -263,10 +299,10 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["REL-kafka-headless:9092"]
+        brokers: ["RELNAME-kafka-headless:9092"]
 
     exporter:
-      host: "REL-kminion"
+      host: "RELNAME-kminion"
       port: 8080
 
   service:
@@ -280,11 +316,6 @@ kminion:
 # 
 init: 
   enabled: false 
-  files:
-    clone_code.sh: |
-      git clone https://github.com/haje01/alpaka.git
-  commands:
-    - clonec_code.sh
 
 
 #

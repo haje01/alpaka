@@ -11,7 +11,7 @@ data:
     def exec(cmds):
         out = run(cmds, capture_output=True)
         if out.returncode != 0:
-            raise str(out.stderr.decode())
+            raise Exception(str(out.stderr.decode()))
         return out.stdout.decode()
 
     def kafka_topics(cmds):

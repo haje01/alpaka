@@ -165,8 +165,8 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
 두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정파일이 있다:
-- `single.yaml` - 단일 노드 용 (minikube)
-- `k3d.yaml` - k3d 용
+- `wslmkb.yaml` - WSL 에서 minikube 환경
+- `wslk3d.yaml` - WSL 에서 k3d 환경
 - `eks.yaml` - eks 용
 
 여기에서는 쿠버네티스 환경에 맞는 설정을 위해 환경별 설정 파일을 만들었지만, 꼭 이렇게 파일을 따로 만들 필요는 없다. 실제로는 개발/테스트/라이브 등의 용도에 따라 설정 파일을 만드는 것이 더 적합할 것이다.
@@ -191,11 +191,11 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다 (설정 파일은 미리 준비되어야 한다).
 
 ```bash
-# 단일 노드의 경우 
-helm install -f configs/single.yaml single alpaka/alpaka 
+# WSL 에서 minikube 의 경우 
+helm install -f configs/wslmkb.yaml wslmkb alpaka/alpaka 
 
-# k3d 의 경우 
-helm install -f configs/k3d.yaml k3d alpaka/alpaka 
+# WSL 에서 k3d 의 경우 
+helm install -f configs/wslk3d.yaml wslk3d alpaka/alpaka 
 
 # eks 의 경우 
 helm install -f configs/eks.yaml eks alpaka/alpaka 
@@ -206,7 +206,7 @@ helm install -f configs/eks.yaml eks alpaka/alpaka
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/k3d.yaml k3d alpaka/alpaka --version 0.0.1
+helm install -f configs/wslk3d.yaml wslk3d alpaka/alpaka --version 0.0.1
 ```
 
 #### 로컬 코드에서 설치하기
@@ -228,11 +228,11 @@ helm dependency update
 다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
 ```bash
-# minikube 의 경우
-helm install -f configs/single.yaml single alpaka/
+# WSL 에서 minikube 의 경우
+helm install -f configs/wslmkb.yaml wslmkb alpaka/
 
-# k3d 의 경우
-helm install -f configs/k3d.yaml k3d alpaka/
+# WSL 에서 k3d 의 경우
+helm install -f configs/wslk3d.yaml wslk3d alpaka/
 
 # eks 의 경우
 helm install -f configs/eks.yaml eks alpaka/
@@ -264,68 +264,77 @@ pytest
 
 #### 설치 노트
 
-설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `single.yaml` 설정 파일을 이용해 단일 노드에 설치한 경우의 노트이다.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `wslmkb.yaml` 설정 파일을 이용해 단일 노드에 설치한 경우의 노트이다.
 
-> `helm status single` 명령으로 다시 볼 수 있다.
+> `helm status wslmkb` 명령으로 다시 볼 수 있다.
 
 ```markdown
-Release "single" has been upgraded. Happy Helming!
-NAME: single
-LAST DEPLOYED: Tue Jan  3 10:17:08 2023
+NAME: wslmkb
+LAST DEPLOYED: Fri Jan 13 16:32:35 2023
 NAMESPACE: default
 STATUS: deployed
-REVISION: 3
+REVISION: 1
+TEST SUITE: None
 NOTES:
-# 쿠버네티스 프로바이더 : single
-
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=single
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=wslmkb
 
 # 카프카 브로커 호스트명
 
-  single-kafka
+  wslmkb-kafka
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=single,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=wslmkb,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $ATOOL_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드
 
-  포트포워딩:
-  export K8DASH_POD=$(kubectl get pods -l "app.kubernetes.io/instance=single,app.kubernetes.io/component=kubernetes-dashboard" -n default -o jsonpath="{.items[0].metadata.name}")
-  kubectl port-forward $K8DASH_POD -n default 8443:8443
-
-  접속 URL: https://localhost:8443
+  접속 URL:
+  echo "$ING_URL:8443"
 
 # 카프카 UI
 
-  포트포워딩:
-  kubectl port-forward svc/single-kafka-ui 8989:80
+  접속 URL:
+  echo "$ING_URL:8989"
 
 # 프로메테우스
 
 프로메테우스 접속:
 
+  You should be able to access your new Prometheus installation through
+
+  http://alpaka.info
 
 얼러트매니저 접속:
+    접속 URL:
+    echo "$ING_URL:9093"
 
-    포트포워딩:
-    kubectl port-forward --namespace default svc/single-alpaka-alertmanager 9093:9093
+# 그라파나
 
-## 그라파나
-
-  포트포워딩:
-  kubectl port-forward svc/single-grafana 3000
+    접속 URL:
+    echo "$ING_URL:3000"
 
   유저: admin
-  암호: admindjemals(admin어드민)
+  암호: admindjemals (admin어드민)
+
+
+# 테스트용 MySQL
+
+root 사용자 암호
+
+  MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default wslmkb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
+
+# 테스트 로그 확인
+
+  kubectl logs job/test
+
 ```
 
 #### 웹 접속하기 
 
-로컬의 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다. 설치 노트를 참고하여 필요한 서비스를 위한 포트포워딩을 해줄 수 있다.
+WSL 에서 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다. 설치 노트를 참고하여 필요한 서비스를 위한 포트포워딩을 해줄 수 있다.
 
 그렇지만 이렇게 매번 포트 포워딩을 해주기가 번거로운데, 제공되는 `tmux-portfwd.sh` 스크립트를 실행하면 한 번에 모든 포트포워딩을 해주기에 편리하다. 
 
@@ -357,7 +366,7 @@ EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e9
 아래와 같이 삭제할 수 있다.
 ```bash
 # minikube 의 경우
-helm uninstal single
+helm uninstal wslmkb
 
 # k3d 의 경우
 helm uninstal k3d
@@ -402,7 +411,7 @@ test:
 이렇게 하면 테스트를 위한 `mysql` 파드와 `[배포 이름]-alpaka-test` 잡을 확인할 수 있다. 아래는 테스트 결과의 예이다.
 
 ```
-$ kubectl logs job/single-alpaka-start
+$ kubectl logs job/wslmkb-alpaka-start
 
 > init_mysql.sh
 waiting for mysql.
@@ -413,7 +422,7 @@ waiting for connect.
   "name": "jdbc_source_mysql",
   "config": {
     "mode": "bulk",
-    "connection.url": "jdbc:mysql://single-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+    "connection.url": "jdbc:mysql://wslmkb-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
     "connection.user": "root",
     "connection.password": "mypass",
     "poll.interval.ms": "3600000",
@@ -442,7 +451,7 @@ test_kafka.py ..
 테스트가 필요없어지면 설정 파일에서 `test.enabled` 를 `false` 로 바꾸고 다음처럼 업그레이드하면 테스트용 리소스가 제거되는 것을 확인할 수 있다.
 
 ```
-helm upgrade -f config/single.yaml single ./alpaka
+helm upgrade -f config/wslmkb.yaml wslmkb ./alpaka
 ```
 
 ### alpaka 레포지토리 갱신

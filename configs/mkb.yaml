@@ -1,0 +1,49 @@
+#
+# 리눅스에서 minikube 사용시 (Ingress 사용)
+#
+use_ingress: true
+
+# 프로메테우스 설정
+prometheus:
+  prometheus:
+    ingress:
+      enabled: true
+      hostname: "alpaka.info"
+      path: /prometheus
+      pathType: Prefix
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+    additionalScrapeConfigs:
+      internal:
+        jobList:
+        - job_name: kminion-metrics
+          static_configs:
+          - targets:
+            - mkb-kminion:8080
+        - job_name: zookeeper
+          static_configs:
+          - targets:
+            - mkb-zookeeper-metrics:9141
+
+grafana:
+  dashboardsConfigMaps:
+    - configMapName: mkb-alpaka-grafana-cluster
+      fileName: kminion-cluster_rev1.json
+    - configMapName: mkb-alpaka-grafana-topic
+      fileName: kminion-topic_rev1.json
+    - configMapName: mkb-alpaka-grafana-groups
+      fileName: kminion-groups_rev1.json
+    - configMapName: mkb-alpaka-grafana-zookeeper
+      fileName: zookeeper-by-prometheus_rev4.json
+    - configMapName: mkb-alpaka-grafana-jvm
+      fileName: altassian-overview_rev1.json
+
+
+kminion:
+  kminion:
+    config:
+      kafka:
+        brokers: ["mkb-kafka-headless:9092"]
+    exporter:
+      host: "mkb-kminion"
