@@ -6,6 +6,9 @@ use_ingress: true
 # 프로메테우스 설정
 prometheus:
   prometheus:
+    service:
+      type: NodePort 
+      
     ingress:
       enabled: true
       hostname: "alpaka.info"
