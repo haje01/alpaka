@@ -1,0 +1,49 @@
+#
+# 리눅스에서 k3s 사용시 (Ingress 사용)
+#
+use_ingress: true
+
+# 프로메테우스 설정
+prometheus:
+  prometheus:
+    ingress:
+      enabled: true
+      hostname: "alpaka.info"
+      path: /prometheus
+      pathType: Prefix
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+
+    additionalScrapeConfigs:
+      internal:
+        jobList:
+        - job_name: kminion-metrics
+          static_configs:
+          - targets:
+            - k3s-kminion:8080
+        - job_name: zookeeper
+          static_configs:
+          - targets:
+            - k3s-zookeeper-metrics:9141
+
+grafana:
+  dashboardsConfigMaps:
+    - configMapName: k3s-alpaka-grafana-cluster
+      fileName: kminion-cluster_rev1.json
+    - configMapName: k3s-alpaka-grafana-topic
+      fileName: kminion-topic_rev1.json
+    - configMapName: k3s-alpaka-grafana-groups
+      fileName: kminion-groups_rev1.json
+    - configMapName: k3s-alpaka-grafana-zookeeper
+      fileName: zookeeper-by-prometheus_rev4.json
+    - configMapName: k3s-alpaka-grafana-jvm
+      fileName: altassian-overview_rev1.json
+
+
+kminion:
+  kminion:
+    config:
+      kafka:
+        brokers: ["k3s-kafka-headless:9092"]
+    exporter:
+      host: "k3s-kminion"
