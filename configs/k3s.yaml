@@ -8,11 +8,11 @@ prometheus:
   prometheus:
     service:
       type: NodePort 
-      
+
     ingress:
       enabled: true
       hostname: "alpaka.info"
-      path: /prometheus
+      path: /
       pathType: Prefix
       annotations:
         kubernetes.io/ingress.class: "traefik"
