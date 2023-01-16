@@ -1,19 +1,10 @@
 #
-# 리눅스에서 minikube 사용시 (Ingress 사용)
+# 리눅스에서 minikube 사용시
 #
-use_ingress: true
 
 # 프로메테우스 설정
 prometheus:
   prometheus:
-    ingress:
-      enabled: true
-      hostname: "alpaka.info"
-      path: /prometheus
-      pathType: Prefix
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /$1
-
     additionalScrapeConfigs:
       internal:
         jobList:

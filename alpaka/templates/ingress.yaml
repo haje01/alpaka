@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "common.names.fullname" . }}-alpaka
+  annotations:
+    {{- if .Values.ingress.type }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.ingress.annotations "context" $) | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          {{ if .Values.prometheus }}
+          - path: /prometheus
+            pathType: Prefix
+            backend:
+              service:
+                name: 
+                port:
+                  number: 8080
+          {{- end }}
+          - path: /web2
+            pathType: Prefix
+            backend:
+              service:
+                name: web2
+                port:
+                  number: 8080

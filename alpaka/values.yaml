@@ -4,9 +4,6 @@
 
 # 주의: RELNAME 을 helm install 시 설치 이름으로 대체해야함.
 
-# Ingress 사용 여부 
-use_ingress: true 
-
 # 카프카 설정
 kafka:
   replicaCount: 1
@@ -79,28 +76,6 @@ prometheus:
   enabled: true
   prometheus:
     enabled: true
-    #
-    # ingress 설정 ('use_ingress' 가 `true` 인 경우만 필요)
-    # 
-    ingress:
-      enabled: true
-      hostname: "alpaka.info"
-      path: /prometheus
-      pathType: Prefix
-      # ingressClassName: nginx
-      annotations:
-        # minikube 설치용
-        # nginx.ingress.kubernetes.io/rewrite-target: /$1
-
-        # K3S (K3D) 설치용
-        # kubernetes.io/ingress.class: "traefik"
-
-        # AWS EKS 설치용
-        # kubernetes.io/ingress.class: alb
-        # alb.ingress.kubernetes.io/group.name: public
-        # alb.ingress.kubernetes.io/scheme: internet-facing
-        # alb.ingress.kubernetes.io/target-type: ip
-        # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
     additionalScrapeConfigs:
       enabled: true
       type: internal
@@ -308,6 +283,25 @@ kminion:
   service:
     annotations:
       prometheus.io/probe: kminion
+
+
+# 공용 ingress 설정
+ingress:
+  hostname: "alpaka.web"
+  annotations:
+    # # minikube 설치용
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+    # # K3S (K3D) 설치용
+    # kubernetes.io/ingress.class: "traefik"
+
+    # # AWS EKS 설치용
+    # kubernetes.io/ingress.class: alb
+    # alb.ingress.kubernetes.io/group.name: public
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
+
 
 #
 # 초기화 
