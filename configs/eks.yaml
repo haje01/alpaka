@@ -1,5 +1,3 @@
-use_ingress: true 
-
 # 카프카 설정
 kafka:
   replicaCount: 3
@@ -74,16 +72,6 @@ prometheus:
   enabled: true
   prometheus:
     enabled: true
-    ingress:
-      enabled: true
-      hostname: "*"
-      path: /*
-      annotations:
-        kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/group.name: public
-        alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/target-type: ip
-        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
     additionalScrapeConfigs:
       enabled: true
       type: internal
@@ -108,17 +96,6 @@ prometheus:
 # 쿠버네티스 대쉬보드 설정
 k8dashboard:
   enabled: true
-  ingress:
-    enabled: true 
-    paths:
-      - /*
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8443}]'
-
   service:
     externalPort: 8443
   serviceAccount:
@@ -170,15 +147,6 @@ dbcon:
 # UI for 카프카 설정
 kafka-ui:
   enabled: true
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
-
   yamlApplicationConfig:
     kafka:
       clusters:
@@ -207,17 +175,6 @@ kafka-ui:
 # 그라파나 설정
 grafana:
   enabled: true
-  ingress:
-    enabled: true
-    hostname: "*"
-    path: /*
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/group.name: public
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 3000}]'
-
   adminSecretName: eks-grafana-admin
   admin:
     user: admin

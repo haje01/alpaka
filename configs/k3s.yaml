@@ -1,22 +1,12 @@
 #
-# 리눅스에서 k3s 사용시 (Ingress 사용)
+# 리눅스에서 k3s 사용시
 #
-use_ingress: true
 
 # 프로메테우스 설정
 prometheus:
   prometheus:
     service:
       type: NodePort 
-
-    ingress:
-      enabled: true
-      hostname: "alpaka.info"
-      path: /
-      pathType: Prefix
-      annotations:
-        kubernetes.io/ingress.class: "traefik"
-
     additionalScrapeConfigs:
       internal:
         jobList:

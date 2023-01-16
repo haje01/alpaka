@@ -51,7 +51,8 @@ dependencies:
   - name: kafka-ui
     version: 0.4.x
     repository: https://raw.githubusercontent.com/haje01/kafka-ui/master/charts/kafka-ui
-    condition: kafka-ui.enabled
+    alias: ui4kafka
+    condition: ui4kafka.enabled
   - name: mysql
     version: 9.4.5
     repository: https://charts.bitnami.com/bitnami

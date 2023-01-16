@@ -38,3 +38,9 @@ kminion:
         brokers: ["mkb-kafka-headless:9092"]
     exporter:
       host: "mkb-kminion"
+
+
+ingress:
+  annotations:
+    # minikube 설치용
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
