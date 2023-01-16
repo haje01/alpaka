@@ -5,31 +5,29 @@
 # 프로메테우스 설정
 prometheus:
   prometheus:
-    service:
-      type: NodePort 
     additionalScrapeConfigs:
       internal:
         jobList:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - k3s-kminion:8080
+            - mkb-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - k3s-zookeeper-metrics:9141
+            - mkb-zookeeper-metrics:9141
 
 grafana:
   dashboardsConfigMaps:
-    - configMapName: k3s-alpaka-grafana-cluster
+    - configMapName: mkb-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: k3s-alpaka-grafana-topic
+    - configMapName: mkb-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: k3s-alpaka-grafana-groups
+    - configMapName: mkb-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: k3s-alpaka-grafana-zookeeper
+    - configMapName: mkb-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: k3s-alpaka-grafana-jvm
+    - configMapName: mkb-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -37,6 +35,12 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["k3s-kafka-headless:9092"]
+        brokers: ["mkb-kafka-headless:9092"]
     exporter:
-      host: "k3s-kminion"
+      host: "mkb-kminion"
+
+
+ingress:
+  annotations:
+    # k3s (k3d) 설치용
+    kubernetes.io/ingress.class: "traefik"
