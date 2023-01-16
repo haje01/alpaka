@@ -31,11 +31,11 @@ data:
     def test_ct_mysql():
         """MySQL CT 방식 테스트."""
         # 테이블 초기화 
-        exec(['python3', '-m', 'kfktest.table', 'mysql', '--db-host', 'mkb-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
+        exec(['python3', '-m', 'kfktest.table', 'mysql', '--db-host', '{{ .Release.Name }}-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
         # 테이블에 값 채우기 
-        exec(['python3', '-m', 'kfktest.inserter', 'mysql', '--db-host', 'mkb-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
+        exec(['python3', '-m', 'kfktest.inserter', 'mysql', '--db-host', '{{ .Release.Name }}-mysql-headless.default.svc.cluster.local', '--db-user', 'root', '--db-passwd', '{{ .Values.mysql.auth.password }}'])
         # 잠시 후 토픽 확인 
-        ret = exec(['/bin/sh', '-c', 'sleep 30 && kafka-console-consumer.sh --bootstrap-server=mkb-kafka-headless:9092 --topic=mysql-person --from-beginning --timeout-ms=30000 | wc -l'])
+        ret = exec(['/bin/sh', '-c', 'sleep 30 && kafka-console-consumer.sh --bootstrap-server={{ .Release.Name }}-kafka-headless:9092 --topic=mysql-person --from-beginning --timeout-ms=30000 | wc -l'])
         assert '10000' in ret
 
 

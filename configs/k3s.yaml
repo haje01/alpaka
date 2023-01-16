@@ -2,7 +2,6 @@
 # 리눅스에서 k3s 사용시
 #
 
-# 프로메테우스 설정
 prometheus:
   prometheus:
     additionalScrapeConfigs:
@@ -11,23 +10,23 @@ prometheus:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - mkb-kminion:8080
+            - k3s-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - mkb-zookeeper-metrics:9141
+            - k3s-zookeeper-metrics:9141
 
 grafana:
   dashboardsConfigMaps:
-    - configMapName: mkb-alpaka-grafana-cluster
+    - configMapName: k3s-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: mkb-alpaka-grafana-topic
+    - configMapName: k3s-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: mkb-alpaka-grafana-groups
+    - configMapName: k3s-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: mkb-alpaka-grafana-zookeeper
+    - configMapName: k3s-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: mkb-alpaka-grafana-jvm
+    - configMapName: k3s-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -35,9 +34,9 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["mkb-kafka-headless:9092"]
+        brokers: ["k3s-kafka-headless:9092"]
     exporter:
-      host: "mkb-kminion"
+      host: "k3s-kminion"
 
 
 ingress:
