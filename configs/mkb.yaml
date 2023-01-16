@@ -2,9 +2,28 @@
 # 리눅스에서 minikube 사용시
 #
 
-# 프로메테우스 설정
+ui4kafka:
+  ingress:
+    enabled: true 
+    host: ui4kafka.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+
+k8dashboard:
+  ingress:
+    enabled: true 
+    hosts: 
+    - k8dashboard.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+
 prometheus:
   prometheus:
+    ingress:
+      enabled: true 
+      hostname: prometheus.alpaka.wai
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
     additionalScrapeConfigs:
       internal:
         jobList:
@@ -18,6 +37,11 @@ prometheus:
             - mkb-zookeeper-metrics:9141
 
 grafana:
+  ingress:
+    enabled: true 
+    hostname: grafana.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
   dashboardsConfigMaps:
     - configMapName: mkb-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
@@ -38,9 +62,3 @@ kminion:
         brokers: ["mkb-kafka-headless:9092"]
     exporter:
       host: "mkb-kminion"
-
-
-ingress:
-  annotations:
-    # minikube 설치용
-    nginx.ingress.kubernetes.io/rewrite-target: /$1

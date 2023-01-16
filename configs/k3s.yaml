@@ -1,9 +1,29 @@
 #
-# 리눅스에서 k3s 사용시
+# 리눅스에서 minikube 사용시
 #
+
+ui4kafka:
+  ingress:
+    enabled: true 
+    host: ui4kafka.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+
+k8dashboard:
+  ingress:
+    enabled: true 
+    hosts: 
+    - k8dashboard.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
 
 prometheus:
   prometheus:
+    ingress:
+      enabled: true 
+      hostname: prometheus.alpaka.wai
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
     additionalScrapeConfigs:
       internal:
         jobList:
@@ -17,6 +37,11 @@ prometheus:
             - k3s-zookeeper-metrics:9141
 
 grafana:
+  ingress:
+    enabled: true 
+    hostname: grafana.alpaka.wai
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
   dashboardsConfigMaps:
     - configMapName: k3s-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
@@ -37,9 +62,3 @@ kminion:
         brokers: ["k3s-kafka-headless:9092"]
     exporter:
       host: "k3s-kminion"
-
-
-ingress:
-  annotations:
-    # k3s (k3d) 설치용
-    kubernetes.io/ingress.class: "traefik"
