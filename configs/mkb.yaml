@@ -2,6 +2,8 @@
 #  minikube 사용시
 #
 
+k8s_dist: minikube
+
 ui4kafka:
   yamlApplicationConfig:
     kafka:
@@ -31,6 +33,15 @@ prometheus:
             - mkb-zookeeper-metrics:9141
 
 grafana:
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://mkb-prometheus-prometheus:9090
+        isDefault: true
   dashboardsConfigMaps:
     - configMapName: mkb-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json

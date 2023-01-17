@@ -17,9 +17,11 @@
 
 도커의 특성상 리눅스 OS 만 지원한다. 여기에 먼저 지원 툴인 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) 과 [Helm](https://helm.sh/docs/intro/install/) 을 설치하여야 한다. 각각의 링크를 참고하여 진행하자.
 
-다음은 배포를 위한 쿠버네티스 환경을 갖추어야 한다. 개발용으로는 로컬 쿠버네티스 환경을, 프로덕션 용도로는 클라우드 또는 IDC 에 배포할 수 있다. 알파카는 로컬 환경으로 [minikube](https://minikube.sigs.k8s.io/docs/) 와 [k3d](https://k3d.io/v5.4.6/) 를, 프로덕션 환경으로 [AWS EKS](https://aws.amazon.com/ko/eks/) 를 지원한다.
+다음은 사용할 쿠버네티스 배포판을 선택해야 한다. 개발용으로는 로컬용 쿠버네티스 배포판을, 프로덕션 용도로는 클라우드 또는 IDC 용 배포판을 이용할 수 있다. 알파카는 로컬 용으로 [minikube](https://minikube.sigs.k8s.io/docs/), [k3s](https://k3s.io/) 및 [k3d](https://k3d.io/v5.4.6/) 를, 프로덕션 용으로 [AWS EKS](https://aws.amazon.com/ko/eks/) 을 위한 설정 파일을 기본으로 제공한다. 
 
-### 로컬 쿠버네티스 환경
+다른 환경에도 조금만 응용하면 무리없이 적용할 수 있을 것이다.
+
+### 로컬 쿠버네티스 배포판 관련
 
 > 주의할 것:
 > - 메모리가 너무 작으면 파드가 죽음 
@@ -40,7 +42,7 @@ minikube start --cpus=4 --memory=10g --disk-size=40g
 k3d cluster create --agents=5 --agents-memory=2gb
 ```
 
-### 클라우드 쿠버네티스 환경 (AWS EKS)
+### 클라우드 쿠버네티스 환경 (AWS EKS) 관련
 
 여기서는 AWS EKS (관리형 쿠버네티스 서비스) 기준으로 설명한다.
 
@@ -100,11 +102,9 @@ eksctl create iamserviceaccount \
 eksctl create addon --name aws-ebs-csi-driver --cluster prod --service-account-role-arn arn:aws:iam::<AWS 계정 번호>:role/AmazonEKS_EBS_CSI_DriverRole --force
 ```
 
-#### Ingress 준비 
+#### EKS 용 인그레스 (Ingress) 준비 
 
-알파카에서 설치되는 다양한 서비스 웹페이지를 외부에서 접근하기 위해서 Ingress 를 사용하기 위해서는 설정 파일에서 `use_ingress: true` 로 해주어야 한다. 
-
-EKS 를 이용하는 경우 Ingress 를 사용하기 위해 클러스터 생성후 아래 작업이 필요하다.
+알파카로 설치되는 다양한 서비스의 웹페이지를 외부에서 접근하기 위해서 인그레스가 필요하다. EKS 를 이용하는 경우 인그레스를 사용하기 전에 클러스터 생성후 아래 작업이 필요하다.
 
 AWS 로드밸런서 컨트롤러 설치
 ( 참고 : [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) )
@@ -150,7 +150,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.name=aws-load-balancer-controller 
 ```
 
-> 주의: 배포된 차트의 보안 업데이트
+> 참고: 배포된 차트의 보안 업데이트
 >
 > ```kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"```
 
@@ -158,20 +158,31 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
+이제 AWS EKS 에서 인그레스를 이용할 준비가 되었다. AWS EKS 의 경우 도메인 명으로 접속하려면 퍼블릭 도메인과 ACM 인증서가 필요하기에, 여기서는 도메인 없이 포트로 서비스를 구분하여 사용하는 것으로 설명하겠다. `configs/eks.yaml` 설정 파일을 보면 이를 위해 설정 파일에서 서비스 별로 인그레스를 서로 다른 포트로 요청하는 것을 확인할 수 있다. 
+
+> 퍼블릭 도메인을 이용하는 경우:
+> AWS ACM 으로 가서 퍼블릭 도메인을 위한 인증서를 만들어 주고 그 ARN 을 아래와 같이 `annotations` 아래에 기재하여야 한다.
+> ```
+> alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:111122223333:certificate/11fceb32-9cc2-4b45-934f-c8903e4f9e12 
+> alb.ingress.kubernetes.io/ssl-redirect: '443'
+> ```
+
+
 ## 설치, 활용, 삭제
 
 ### 설치 
 
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
-두 방법 모두 쿠버네티스 환경에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정파일이 있다:
-- `wslmkb.yaml` - WSL 에서 minikube 환경
-- `wslk3d.yaml` - WSL 에서 k3d 환경
+두 방법 모두 이용하는 쿠버네티스 배포판에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정 파일이 있으니 참고하도록 하자:
+- `mkb.yaml` - minikube 용
+- `k3s.yaml` - k3s 용
+- `k3d.yaml` - k3d 용
 - `eks.yaml` - eks 용
 
-여기에서는 쿠버네티스 환경에 맞는 설정을 위해 환경별 설정 파일을 만들었지만, 꼭 이렇게 파일을 따로 만들 필요는 없다. 실제로는 개발/테스트/라이브 등의 용도에 따라 설정 파일을 만드는 것이 더 적합할 것이다.
+여기서는 참고용으로 쿠버네티스 배포판별로 구분하여 설정 파일을 만들었지만, 꼭 이렇게 할 필요는 없다. 실제로는 한 번 선택한 쿠버네티스 배포판 자주 바뀌지 않기에 개발/테스트/라이브 등의 용도별로 설정 파일을 만드는 것이 더 적합할 것이다.
 
-> 위의 파일들과 `alpaka/values.yaml` 을 참고하여 커스텀 설정 파일을 만들어 이용할 수 있다.
+> `alpaka/values.yaml` 는 차트에서 사용하는 기본 변수값을 담고 있다. 위의 파일들과 함께 참고하여 커스텀 설정 파일을 만들 수 있다.
 
 #### 저장소에서 바로 설치하기
 
@@ -191,22 +202,22 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 이제 다음과 같이 저장소에서 설치할 수 있다 (설정 파일은 미리 준비되어야 한다).
 
 ```bash
-# WSL 에서 minikube 의 경우 
-helm install -f configs/wslmkb.yaml wslmkb alpaka/alpaka 
+# minikube 의 경우 
+helm install -f configs/mkb.yaml mkb alpaka/alpaka 
 
-# WSL 에서 k3d 의 경우 
-helm install -f configs/wslk3d.yaml wslk3d alpaka/alpaka 
+# k3s 의 경우 
+helm install -f configs/k3s.yaml k3s alpaka/alpaka 
 
 # eks 의 경우 
 helm install -f configs/eks.yaml eks alpaka/alpaka 
 ```
 
-> 여기서는 편의상 설정 파일명과 배포 이름을 같게 하였다. 실제로는 필요에 따라 배포 이름을 다르게 준다.
+> 여기서는 편의상 설정 파일명과 배포 이름을 같게 하였다. 실제로는 필요에 따라 배포 이름을 다르게 줄수 있겠다.
 
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/wslk3d.yaml wslk3d alpaka/alpaka --version 0.0.1
+helm install -f configs/k3s.yaml k3s alpaka/alpaka --version 0.0.1
 ```
 
 #### 로컬 코드에서 설치하기
@@ -222,17 +233,17 @@ helm dependency update
 > 다음 차트들은 버그가 있어 패치된 것을 이용한다.
 >
 > - `kminion` - `policy/v1beta` 의 호환성 문제
-> - `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러](https://github.com/bitnami/charts/issues/14070)
+> - `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러 발생](https://github.com/bitnami/charts/issues/14070)
 > - `provectus/kafka-ui` - 차트 저장소가 사라짐
 
 다시 상위 디렉토리로 이동 후, 다음과 같이 로컬 코드에서 설치할 수 있다.
 
 ```bash
-# WSL 에서 minikube 의 경우
-helm install -f configs/wslmkb.yaml wslmkb alpaka/
+# minikube 의 경우
+helm install -f configs/mkb.yaml mkb alpaka/
 
-# WSL 에서 k3d 의 경우
-helm install -f configs/wslk3d.yaml wslk3d alpaka/
+# k3s 의 경우
+helm install -f configs/k3s.yaml k3s alpaka/
 
 # eks 의 경우
 helm install -f configs/eks.yaml eks alpaka/
@@ -240,27 +251,31 @@ helm install -f configs/eks.yaml eks alpaka/
 
 `alpaka/` 는 차트가 있는 디렉토리 명이다.
 
-> 로컬 코드에서 설치하는 경우 
+### 설치 후 활용
 
 #### 테스트
 
-알파카가 잘 설치 되었는지 확인하기 위해 기본적인 테스트가 제공된다. 테스트를 위해서는 `configs/test.yaml` 설정 파일을 이용해 다음처럼 설치한다 (사용하는 쿠버네티스 환경은 상관 없다). 
+알파카가 잘 설치되었는지 확인하기 위해 기본적인 테스트가 제공되는데, 이를 위해 테스트를 위한 잡, 파드 및 MySQL DB 서비스가 설치되게 된다.
+
+`[배포 이름]-alpaka-test-[임의 문자열]` 형식의 파드가 테스트를 위한 것으로, 이것은 [배포 이름]-alpaka-test` 형식의 Job 을 통해 시작된 것이다. 만약 테스트가 실패하면 다음과 같이 실패 메시지를 확인하여 문제를 파악할 수 있다.
 
 ```
-helm install -f configs/test.yaml test ./alpaka/
+kubectl logs job/[배포 이름]-alpaka-test
 ```
 
-이후 `kubectl get pods` 명령으로 모든 파드가 `Running` 상태가 되었는지 확인하고, 포트포워딩 스크립트 `tmux-portfwd.sh` 를 실행해준다. 
-
-테스트 코드의 실행을 위해서는 Python3.5 와 pytest 가 설치된 환경에서 tests/ 디렉토리로 이동 후 다음과 같이 명령한다. 
-
-```
-pytest
+테스트는 설치 후 자동으로 실행된다. 만약 테스트를 원하지 않으면 아래와 같이 설정파일에 기술한다.
+```json
+test:
+  enabled: false
 ```
 
-테스트가 끝나면 테스트용 설치는 지운다.
+이미 설치 및 수행된 테스트 관련 리소스를 제거하려면, 설정파일에 위와 같이 기술 후 Helm 업그레이드를 하면 된다.
 
-### 활용
+```
+helm upgrade -f configs/mkb.yaml mkb alpaka
+```
+
+테스트 관련 리소스가 제거된 것을 확인할 수 있을 것이다.
 
 #### 설치 노트
 
@@ -269,8 +284,8 @@ pytest
 > `helm status wslmkb` 명령으로 다시 볼 수 있다.
 
 ```markdown
-NAME: wslmkb
-LAST DEPLOYED: Fri Jan 13 16:32:35 2023
+NAME: mkb
+LAST DEPLOYED: Tue Jan 17 14:01:05 2023
 NAMESPACE: default
 STATUS: deployed
 REVISION: 1
@@ -278,15 +293,18 @@ TEST SUITE: None
 NOTES:
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=wslmkb
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=mkb
 
 # 카프카 브로커 호스트명
 
-  wslmkb-kafka
+  mkb-kafka
+
+  Ingress (AWS ALB) 주소:
+  export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=wslmkb,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mkb,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $ATOOL_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드
@@ -294,27 +312,24 @@ NOTES:
   접속 URL:
   echo "$ING_URL:8443"
 
-# 카프카 UI
 
+# 카프카 UI
   접속 URL:
   echo "$ING_URL:8989"
 
 # 프로메테우스
 
 프로메테우스 접속:
-
-  You should be able to access your new Prometheus installation through
-
-  http://alpaka.info
+    접속 URL:
+    echo "$ING_URL:9090"
 
 얼러트매니저 접속:
     접속 URL:
     echo "$ING_URL:9093"
 
 # 그라파나
-
-    접속 URL:
-    echo "$ING_URL:3000"
+  접속 URL:
+  echo "$ING_URL:3000"
 
   유저: admin
   암호: admindjemals (admin어드민)
@@ -324,52 +339,61 @@ NOTES:
 
 root 사용자 암호
 
-  MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default wslmkb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
+  MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default mkb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 
 # 테스트 로그 확인
 
   kubectl logs job/test
-
 ```
 
 #### 웹 접속하기 
 
-WSL 에서 `minikube` 나 `k3d` 환경에서 설치한 경우 서비스별 웹 페이지를 접속하기 위해서는 포트 포워딩이 필요하다. 설치 노트를 참고하여 필요한 서비스를 위한 포트포워딩을 해줄 수 있다.
+알파카를 통해 설치된 서비스의 웹페이지 접속을 위해서는 인그레스가 필요한데, AWS EKS 를 제외한 다른 쿠버네티스 배포판에서는 공용 인그레스를 만들어 이용한다. 설정 파일의 `annotations` 요소에 쿠버네티스 배포판 별로 커스텀한 인그레스 설정이 들어가는 것에 주의하자. 공용 인그레스가 필요없는 경우 `ingress.enabled` 를 `false` 로 하자. 
 
-그렇지만 이렇게 매번 포트 포워딩을 해주기가 번거로운데, 제공되는 `tmux-portfwd.sh` 스크립트를 실행하면 한 번에 모든 포트포워딩을 해주기에 편리하다. 
+> 윈도우 WSL (Windows Subsystem for Linux) 환경에서 minikube 를 이용하는 경우, 아래와 같이 터널링해주어야 인그레스를 외부에서 접근할 수 있다.
+>
+> `minikube tunnel`
+> 
+> 이후 호스트 파일 `C:\Windows\System32\drivers\etc\hosts` 에서 아래와 같이 추가해주면 ([참고](https://www.liquidweb.com/kb/edit-host-file-windows-10/)) 윈도우상의 웹브라우저에서 도메인 이름으로 접속이 가능하다.
+> 127.0.0.1  grafana.alpaka.wai
+> 127.0.0.1  k8dashboard.alpaka.wai
+> 127.0.0.1  ui4kafka.alpaka.wai
+> 127.0.0.1  prometheus.alpaka.wai
+>
 
-AWS EKS 에 설치한 경우는 Ingress 가 만들어져 있다. 다음처럼 확인할 수 있다.
+AWS EKS 에 설치한 경우는 다음과 같이 접속 주소를 확인할 수 있다.
 
 ```
 $ kubectl get ingress
 
-NAME              CLASS    HOSTS   ADDRESS                                                            PORTS   AGE
-eks-grafana       <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
-eks-k8dashboard   <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
-eks-kafka-ui      <none>   *       k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com   80      108s
+NAME                        CLASS    HOSTS   ADDRESS                                                            PORTS   AGE
+eks-grafana                 <none>   *       k8s-public-1946ec9e92-277402474.ap-northeast-2.elb.amazonaws.com   80      16m
+eks-k8dashboard             <none>   *       k8s-public-1946ec9e92-277402474.ap-northeast-2.elb.amazonaws.com   80      16m
+eks-prometheus-prometheus   <none>   *       k8s-public-1946ec9e92-277402474.ap-northeast-2.elb.amazonaws.com   80      16m
+eks-ui4kafka                <none>   *       k8s-public-1946ec9e92-277402474.ap-northeast-2.elb.amazonaws.com   80      16m
 ```
 
-EKS 의 Ingress 는 ALB 를 이용하는데, 위의 경우 `k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com` 주소로 접속하면 되겠다. 다만 서비스 별로 접속 포트가 다른데, 아래를 참고하자. 
+EKS 의 인그레스는 는 ALB 를 이용하는데, 여기서는 도메인 없이 사용하기에 위의 경우 `k8s-public-1946ec9e92-2144952281.ap-northeast-2.elb.amazonaws.com` 주소로 접속하면 되겠다. 서비스 별로 접속 포트가 다른데, 아래를 참고하자. 
 
 - Kubernetes Dashboard : `8443`
 - UI for Kafka : `8080`
 - Grafana : `3000`
 - Prometheus : `9090`
 
-예를 들의 위 예에서는 `k8s-public-1946ec9e92-126312179.ap-northeast-2.elb.amazonaws.com:3000` 주소로 그라파나에 접속할 수 있다.
+예를 들의 위 예에서는 `k8s-public-1946ec9e92-277402474.ap-northeast-2.elb.amazonaws.com:3000` 주소로 그라파나에 접속할 수 있다.
 
 > `Ingress` 는 원래 `80 (HTTP)` 및 `443 (HTTPS)` 포트로 접근이 제한된다. 위 예처럼 포트를 달리하여 다양한 서비스에 접속하는 방식은 AWS ALB 에 특화된 팁으로 볼 수 있다.
-> 보다 정통적인 방법은 서브도메인을 이용하는 것이다.
+> 보다 정통적인 방법은 서브 도메인을 이용하는 것이다.
 
 ### 삭제 
 
 아래와 같이 삭제할 수 있다.
 ```bash
 # minikube 의 경우
-helm uninstal wslmkb
+helm uninstal mkb
 
-# k3d 의 경우
-helm uninstal k3d
+# k3s 의 경우
+helm uninstal k3s
 
 # eks 의 경우
 helm uninstal eks
@@ -384,75 +408,41 @@ kubectl delete pvc --all
 
 ## 기타
 
-### 동작 테스트하기 
+### 초기화 명령 
 
-설치 후 동작이 잘되는지 확인하려면, 설치전 설정 파일에서 아래처럼 `test.enabled` 를 `true` 로 하고 설치를 진행한다.
+카프카 클러스터 생성이 완료된 후 추가적으로 초기화에 필요한 명령이 있을 수 있다. 이를 위해 설정 파일의 `init` 섹션에서 초기화 명령을 등록할 수 있다. 아래는 JDBC 소스 커넥터 등록의 예이다.
 
 ```yaml
-#
-#  테스트 관련
-#
-
-# 테스트용 MySQL 정보
-mysql:
-  auth:
-    password: mypass
-    rootPassword: mypass
-
-# 테스트
-test:
+init:
   enabled: true
-  container:
-    image: "haje01/alpaka-tool"
-    tag: 0.0.1
-    pullPolicy: IfNotPresent
+  files:
+    dbcon_reg_mysql.sh: |
+      echo "> dbcon_reg_mysql.sh"
+      # 커넥트 준비될 때까지 대기 
+      until $(curl --output /dev/null --silent --head --fail http://[배포 이름]-alpaka-dbcon:8083); do
+          echo "waiting for connect."
+          sleep 5
+      done    
+      # 커넥터 등록
+      curl -s -X POST http://[배포 이름]-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+        "name": "jdbc_source_mysql",
+        "config": {
+            "mode": "bulk",
+            "connection.url": "jdbc:mysql://[배포 이름]-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+            "connection.user": "root",
+            "connection.password": "[DB 암호]",
+            "poll.interval.ms": 3600000,
+            "topic.prefix": "mysql-",
+            "tasks.max": 1,
+            "connector.class" : "io.confluent.connect.jdbc.JdbcSourceConnector",
+            "tables.whitelist": "person"
+          }
+        }' | jq
+  commands:
+    - dbcon_reg_mysql.sh  
 ```
 
-이렇게 하면 테스트를 위한 `mysql` 파드와 `[배포 이름]-alpaka-test` 잡을 확인할 수 있다. 아래는 테스트 결과의 예이다.
-
-```
-$ kubectl logs job/wslmkb-alpaka-start
-
-> init_mysql.sh
-waiting for mysql.
-waiting for mysql.
-> dbcon_reg_mysql.sh
-waiting for connect.
-{
-  "name": "jdbc_source_mysql",
-  "config": {
-    "mode": "bulk",
-    "connection.url": "jdbc:mysql://wslmkb-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
-    "connection.user": "root",
-    "connection.password": "mypass",
-    "poll.interval.ms": "3600000",
-    "topic.prefix": "mysql-",
-    "tasks.max": "1",
-    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-    "tables.whitelist": "person",
-    "name": "jdbc_source_mysql"
-  },
-  "tasks": [],
-  "type": "source"
-}
-> run_test.sh
-============================= test session starts ==============================
-platform linux -- Python 3.9.2, pytest-7.2.0, pluggy-1.0.0
-rootdir: /tests
-plugins: Faker-16.1.0, shell-0.3.2
-collected 6 items
-
-test_etc.py .s..
-test_kafka.py ..
-
-=================== 5 passed, 1 skipped in 121.39s (0:02:01) ===================
-```
-
-테스트가 필요없어지면 설정 파일에서 `test.enabled` 를 `false` 로 바꾸고 다음처럼 업그레이드하면 테스트용 리소스가 제거되는 것을 확인할 수 있다.
-
-```
-helm upgrade -f config/wslmkb.yaml wslmkb ./alpaka
-```
+`files` 섹션에 초기화에 필요한 파일의 구현을 기술하고, 그 아래 `commands` 에서 지정한 순서대로 그 파일들을 실행하여 초기화를 진행하게 된다.
 
 ### alpaka 레포지토리 갱신
 

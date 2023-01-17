@@ -2,7 +2,10 @@
 # 밸류 파일 내 값은 기본 값으로 동작 
 # 
 
-# 주의: RELEASE 을 helm install 시 설치 이름으로 대체해야함.
+# 쿠버네티스 배포판 이름 (minibkue, k3s, k3d, eks 중 하나)
+k8s_dist: UNKNOWN
+
+# 주의: RELEASE 가들어간 이름은 설치용 설정 파일에서 배포 이름으로 대체되어야함.
 
 # 카프카 설정
 kafka:
@@ -182,7 +185,7 @@ ui4kafka:
 # 그라파나 설정
 grafana:
   enabled: true
-  adminSecretName: RELEASE-grafana-admin
+  adminSecretName: mkb-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -193,7 +196,7 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://RELEASE-prometheus-prometheus:9090
+          url: http://mkb-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
@@ -236,7 +239,7 @@ ingress:
     # nginx.ingress.kubernetes.io/rewrite-target: /$1
 
     # # K3S (K3D) 설치용
-    # kubernetes.io/ingress.class: "traefik"
+    # kubernetes.io/ingress.class: traefik
 
     # # AWS EKS 설치용
     # kubernetes.io/ingress.class: alb

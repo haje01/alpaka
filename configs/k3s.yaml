@@ -1,29 +1,24 @@
 #
-# 리눅스에서 minikube 사용시
+#  k3s 사용시
 #
+k8s_dist: k3s
 
 ui4kafka:
-  ingress:
-    enabled: true 
-    host: ui4kafka.alpaka.wai
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
-
-k8dashboard:
-  ingress:
-    enabled: true 
-    hosts: 
-    - k8dashboard.alpaka.wai
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: k3s-kafka
+          bootstrapServers: k3s-kafka-headless:9092
+          zookeeper: k3s-zookeeper-headless:2181
+          kafkaConnect:
+            - name: dbcon
+              address: http://k3s-alpaka-dbcon:8083
+          metrics:
+            port: 5556
+            type: JMX
 
 prometheus:
   prometheus:
-    ingress:
-      enabled: true 
-      hostname: prometheus.alpaka.wai
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
     additionalScrapeConfigs:
       internal:
         jobList:
@@ -37,11 +32,15 @@ prometheus:
             - k3s-zookeeper-metrics:9141
 
 grafana:
-  ingress:
-    enabled: true 
-    hostname: grafana.alpaka.wai
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://k3s-prometheus-prometheus:9090
+        isDefault: true
   dashboardsConfigMaps:
     - configMapName: k3s-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
@@ -62,3 +61,8 @@ kminion:
         brokers: ["k3s-kafka-headless:9092"]
     exporter:
       host: "k3s-kminion"
+
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: traefik

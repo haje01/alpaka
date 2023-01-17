@@ -1,3 +1,6 @@
+# 쿠버네티스 배포판 
+  {{ .Values.k8s_dist }}
+
 # 설치된 파드 리스트
 
   kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
@@ -39,87 +42,26 @@
 
 프로메테우스 접속:
 
-{{- if .Values.prometheus.prometheus.ingress.enabled }}
-
-  You should be able to access your new Prometheus installation through
-
-  {{ ternary "https" "http" .Values.prometheus.prometheus.ingress.tls }}://{{ .Values.prometheus.prometheus.ingress.hostname }}
-
-{{- else if contains "LoadBalancer" .Values.prometheus.prometheus.service.type }}
-
-  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-        Watch the status with: 'kubectl get svc --namespace {{ include "common.names.namespace" . }} -w {{ template "kube-prometheus.prometheus.fullname" . }}'
-
 {{- $port:=.Values.prometheus.prometheus.service.ports.http | toString }}
 
-    export SERVICE_IP=$(kubectl get svc --namespace {{ include "common.names.namespace" . }} {{ template "kube-prometheus.prometheus.fullname" . }} --template "{{ "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}" }}")
-    echo "Prometheus URL: http://$SERVICE_IP{{- if ne $port "80" }}:{{ .Values.prometheus.prometheus.service.ports.http }}{{ end }}/"
-
-{{- else if contains "ClusterIP"  .Values.prometheus.prometheus.service.type }}
     접속 URL:
-    echo "$ING_URL:9090"
+    echo "$ING_URL:{{ $port }}"
 
-{{- else if contains "NodePort" .Values.prometheus.prometheus.service.type }}
-
-    export NODE_PORT=$(kubectl get --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "kube-prometheus.prometheus.fullname" . }})
-    export NODE_IP=$(kubectl get nodes --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.items[0].status.addresses[0].address}")
-    echo "Prometheus URL: http://$NODE_IP:$NODE_PORT/"
-
-{{- end }}
-{{- end }}
-
-{{- if and .Values.prometheus.prometheus.thanos.create }}
-
-Thanos Sidecar can be accessed via port "{{ .Values.prometheus.prometheus.thanos.service.ports.grpc }}" on the following DNS name from within your cluster:
-
-    {{ template "kube-prometheus.thanos.fullname" . }}.{{ include "common.names.namespace" . }}.svc.cluster.local
-
-{{- if .Values.prometheus.prometheus.thanos.ingress.enabled }}
-
-  You should be able to access your new Thanos Sidecar installation through
-
-  {{ ternary "https" "http" .Values.prometheus.prometheus.thanos.ingress.tls }}://{{ .Values.prometheus.prometheus.thanos.ingress.hostname }}
-
-{{- end }}
 {{- end }}
 
 {{- if .Values.prometheus.alertmanager.enabled }}
 
 얼러트매니저 접속:
 
-{{- if .Values.prometheus.alertmanager.ingress.enabled }}
-
-  You should be able to access your new Prometheus installation through
-
-  {{ ternary "https" "http" .Values.prometheus.alertmanager.ingress.tls }}://{{ .Values.prometheus.alertmanager.ingress.hostname }}
-
-{{- else if contains "LoadBalancer" .Values.prometheus.alertmanager.service.type }}
-
-  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-        Watch the status with: 'kubectl get svc --namespace {{ include "common.names.namespace" . }} -w {{ template "kube-prometheus.alertmanager.fullname" . }}'
-
-{{- $port:=.Values.prometheus.alertmanager.service.ports.http | toString }}
-
-    export SERVICE_IP=$(kubectl get svc --namespace {{ include "common.names.namespace" . }} {{ template "kube-prometheus.alertmanager.fullname" . }} --template "{{ "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}" }}")
-    echo "Alertmanager URL: http://$SERVICE_IP{{- if ne $port "80" }}:{{ .Values.prometheus.alertmanager.service.ports.http }}{{ end }}/"
-
-{{- else if contains "ClusterIP"  .Values.prometheus.alertmanager.service.type }}
     접속 URL:
     echo "$ING_URL:9093"
 
-{{- else if contains "NodePort" .Values.prometheus.alertmanager.service.type }}
-
-    export NODE_PORT=$(kubectl get --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "kube-prometheus.alertmanager.fullname" . }})
-    export NODE_IP=$(kubectl get nodes --namespace {{ include "common.names.namespace" . }} -o jsonpath="{.items[0].status.addresses[0].address}")
-    echo "Alertmanager URL: http://$NODE_IP:$NODE_PORT/"
-
 {{- end }}
-{{- end }}
-
 {{- end }}
 
 {{ if .Values.grafana.enabled -}}
 # 그라파나
+
   접속 URL:
   echo "$ING_URL:3000"
 
