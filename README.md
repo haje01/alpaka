@@ -61,6 +61,12 @@ time eksctl create cluster \
 --nodes-max 4
 ```
 
+> AWS EKS 클러스터의 경우 사용을 마쳤으면 꼭 제거해 비용을 절감하도록 하자.
+> 
+> ```
+> eksctl delete cluster --name prod
+> ```
+
 #### 스토리지 프로비저닝 준비 
 
 클러스터 생성후 PVC 를 통한 스토리지 할당을 받기 위해 아래 작업이 필요하다.
