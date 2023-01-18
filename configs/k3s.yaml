@@ -1,0 +1,68 @@
+#
+#  k3s 사용시
+#
+k8s_dist: k3s
+
+ui4kafka:
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: k3s-kafka
+          bootstrapServers: k3s-kafka-headless:9092
+          zookeeper: k3s-zookeeper-headless:2181
+          kafkaConnect:
+            - name: dbcon
+              address: http://k3s-alpaka-dbcon:8083
+          metrics:
+            port: 5556
+            type: JMX
+
+prometheus:
+  prometheus:
+    additionalScrapeConfigs:
+      internal:
+        jobList:
+        - job_name: kminion-metrics
+          static_configs:
+          - targets:
+            - k3s-kminion:8080
+        - job_name: zookeeper
+          static_configs:
+          - targets:
+            - k3s-zookeeper-metrics:9141
+
+grafana:
+  datasources:
+    secretDefinition:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://k3s-prometheus-prometheus:9090
+        isDefault: true
+  dashboardsConfigMaps:
+    - configMapName: k3s-alpaka-grafana-cluster
+      fileName: kminion-cluster_rev1.json
+    - configMapName: k3s-alpaka-grafana-topic
+      fileName: kminion-topic_rev1.json
+    - configMapName: k3s-alpaka-grafana-groups
+      fileName: kminion-groups_rev1.json
+    - configMapName: k3s-alpaka-grafana-zookeeper
+      fileName: zookeeper-by-prometheus_rev4.json
+    - configMapName: k3s-alpaka-grafana-jvm
+      fileName: altassian-overview_rev1.json
+
+
+kminion:
+  kminion:
+    config:
+      kafka:
+        brokers: ["k3s-kafka-headless:9092"]
+    exporter:
+      host: "k3s-kminion"
+
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: traefik

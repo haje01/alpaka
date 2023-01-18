@@ -36,6 +36,6 @@ spec:
           configMap:
             name: {{ $full_name }}-test-code
       restartPolicy: Never
-  backoffLimit: 1
+  backoffLimit: 0
 {{- end }}
 {{- end }}
