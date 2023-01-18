@@ -458,7 +458,7 @@ init:
 helm package alpaka/
 ```
 
-그러면 `alpaka-0.0.1.tgz` 와 같은 패키지 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 옮긴 후, `chartrepo` 디렉토리에서 인덱스 파일을 생성한다.
+그러면 `alpaka-0.0.1.tgz` 와 같은 패키지 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 옮긴 후, `chartrepo` 디렉토리에서 인덱스 파일을 생성한다 (하나 이상의 패키지 파일이 있어도 괜찮다).
 
 ```bash
 helm repo index .
