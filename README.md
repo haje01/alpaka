@@ -164,7 +164,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 ```kubectl get deployment -n kube-system aws-load-balancer-controller```
 
-이제 AWS EKS 에서 인그레스를 이용할 준비가 되었다. AWS EKS 의 경우 도메인 명으로 접속하려면 퍼블릭 도메인과 ACM 인증서가 필요하기에, 여기서는 도메인 없이 포트로 서비스를 구분하여 사용하는 것으로 설명하겠다. `configs/eks.yaml` 설정 파일을 보면 이를 위해 설정 파일에서 서비스 별로 인그레스를 서로 다른 포트로 요청하는 것을 확인할 수 있다. 
+이제 AWS EKS 에서 인그레스를 이용할 준비가 되었다. AWS EKS 의 경우 도메인 명으로 접속하려면 퍼블릭 도메인과 ACM 인증서가 필요하기에, 여기서는 도메인 없이 포트로 서비스를 구분하여 사용하는 것으로 설명하겠다. `configs/_eks.yaml` 설정 파일을 보면 이를 위해 설정 파일에서 서비스 별로 인그레스를 서로 다른 포트로 요청하는 것을 확인할 수 있다. 
 
 > 퍼블릭 도메인을 이용하는 경우:
 > AWS ACM 으로 가서 퍼블릭 도메인을 위한 인증서를 만들어 주고 그 ARN 을 아래와 같이 `annotations` 아래에 기재하여야 한다.
@@ -181,10 +181,10 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 설치는 저장소에서 바로 설치하는 방법과 로컬에 있는 alpaka 코드에서 설치하는 두 가지 방법으로 나뉜다.
 
 두 방법 모두 이용하는 쿠버네티스 배포판에 맞는 설정이 필요한데, `configs/` 디렉토리에 아래와 같은 기본 설정 파일이 있으니 참고하도록 하자:
-- `mkb.yaml` - minikube 용
+- `_mkb.yaml` - minikube 용
 - `k3s.yaml` - k3s 용
 - `k3d.yaml` - k3d 용
-- `eks.yaml` - eks 용
+- `__eks.yaml_` - eks 용
 
 여기서는 참고용으로 쿠버네티스 배포판별로 구분하여 설정 파일을 만들었지만, 꼭 이렇게 할 필요는 없다. 실제로는 한 번 선택한 쿠버네티스 배포판 자주 바뀌지 않기에 개발/테스트/라이브 등의 용도별로 설정 파일을 만드는 것이 더 적합할 것이다.
 
@@ -209,13 +209,13 @@ alpaka/alpaka   0.0.1           3.3.1           Yet another Kafka deployment cha
 
 ```bash
 # minikube 의 경우 
-helm install -f configs/mkb.yaml mkb alpaka/alpaka 
+helm install -f configs/_mkb.yaml mkb alpaka/alpaka 
 
 # k3s 의 경우 
-helm install -f configs/k3s.yaml k3s alpaka/alpaka 
+helm install -f configs/_k3s.yaml_ k3s alpaka/alpaka 
 
 # eks 의 경우 
-helm install -f configs/eks.yaml eks alpaka/alpaka 
+helm install -f configs/_eks.yaml eks alpaka/alpaka 
 ```
 
 > 여기서는 편의상 설정 파일명과 배포 이름을 같게 하였다. 실제로는 필요에 따라 배포 이름을 다르게 줄수 있겠다.
@@ -223,7 +223,7 @@ helm install -f configs/eks.yaml eks alpaka/alpaka
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/k3s.yaml k3s alpaka/alpaka --version 0.0.1
+helm install -f configs/_k3s.yaml k3s alpaka/alpaka --version 0.0.1
 ```
 
 #### 로컬 코드에서 설치하기
@@ -246,13 +246,13 @@ helm dependency update
 
 ```bash
 # minikube 의 경우
-helm install -f configs/mkb.yaml mkb alpaka/
+helm install -f configs/_mkb.yaml mkb alpaka/
 
 # k3s 의 경우
-helm install -f configs/k3s.yaml k3s alpaka/
+helm install -f configs/_k3s.yaml_ k3s alpaka/
 
 # eks 의 경우
-helm install -f configs/eks.yaml eks alpaka/
+helm install -f configs/_eks.yaml eks alpaka/
 ```
 
 `alpaka/` 는 차트가 있는 디렉토리 명이다.
@@ -278,16 +278,16 @@ test:
 이미 설치 및 수행된 테스트 관련 리소스를 제거하려면, 설정파일에 위와 같이 기술 후 Helm 업그레이드를 하면 된다.
 
 ```
-helm upgrade -f configs/mkb.yaml mkb alpaka
+helm upgrade -f configs/_mkb.yaml mkb alpaka
 ```
 
-테스트 관련 리소스가 제거된 것을 확인할 수 있을 것이다.
+테스트 관련 리소스_가 제거된 것을_ 확인할 수 있을 것이다.
 
 #### 설치 노트
 
-설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `wslmkb.yaml` 설정 파일을 이용해 단일 노드에 설치한 경우의 노트이다.
+설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 `wsl_mkb.yaml` 설정 파일을 이용해 단일 노드에 설치한 경우의 노트이다.
 
-> `helm status wslmkb` 명령으로 다시 볼 수 있다.
+> `helm status wslmkb` 명령으로 다_시 볼 수 있다_.
 
 ```markdown
 NAME: mkb
