@@ -7,3 +7,4 @@ charts/
 # *.deb
 *:Zone.Identifier
 __pycache__/
+configs/[^_]*.yaml
