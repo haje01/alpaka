@@ -1,0 +1,23 @@
+{{- if .Values.kafka_connect.enabled }}
+{{ $full_name := include "common.names.fullname" . }}
+{{ $labels := (include "common.labels.standard" . ) }}
+{{ $matchLabels := (include "common.labels.matchLabels" . ) }}
+{{- range $cnt := .Values.kafka_connect.connects }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full_name }}-connect-{{ $cnt.type }}
+  labels: 
+    {{- $labels | nindent 4 }}
+    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 8083
+    targetPort: connector
+  selector: 
+    {{- $matchLabels | nindent 4 }}
+    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+{{- end }}
+{{- end }}

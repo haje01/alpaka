@@ -1,13 +1,20 @@
-{{- if .Values.dbcon.enabled -}}
+{{- if .Values.kafka_connect.enabled -}}
+{{ $fullname := include "common.names.fullname" . }}
+{{ $relname := .Release.Name }}
+{{ $labels := (include "common.labels.standard" . ) }}
+{{ $kafka_port := .Values.kafka.service.ports.client }}
+{{- range $cnt := .Values.kafka_connect.connects }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "common.names.fullname" . }}-dbcon-cfg
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  name: {{ $fullname }}-connect-{{ $cnt.type }}-cfg
+  labels: 
+  {{- $labels | nindent 4 }}
 data:
   connect-distributed.properties: |
     # A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.
-    bootstrap.servers = {{ .Release.Name }}-kafka-headless:{{ .Values.kafka.service.ports.client }}
+    bootstrap.servers = {{ $relname }}-kafka-headless:{{ $kafka_port }}
 
     # unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
     group.id=connect-cluster
@@ -90,4 +97,5 @@ data:
 
     log4j.logger.org.apache.zookeeper=ERROR
     log4j.logger.org.reflections=ERROR
-{{- end -}}
+{{- end }}
+{{- end }}
