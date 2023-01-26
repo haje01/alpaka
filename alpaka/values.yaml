@@ -5,7 +5,9 @@
 # 쿠버네티스 배포판 이름 (minibkue, k3s, k3d, eks 중 하나)
 k8s_dist: UNKNOWN
 
+#
 # 주의: RELEASE 가들어간 이름은 설치용 설정 파일에서 배포 이름으로 대체되어야함.
+#
 
 # 카프카 설정
 kafka:
@@ -142,16 +144,18 @@ tool:
         value: "2"
 
 
-# 카프카 DB 관련 커넥터 설정
-dbcon:
-  enabled: true
-  replicaCount: 1
-  kafkaClientPort: 9092
-  container:
-    image: "haje01/kafka-dbcon"
-    tag: latest
-    pullPolicy: IfNotPresent
-  timezone: Asia/Seoul
+# 카프카 커넥트 설정
+kafka_connect:
+  enabled: false
+  connects: []
+    ## connects 아래 필요한 커넥트 정보를 기술
+    # - type: jdbcsrc
+    #   replicaCount: 1
+    #   container:
+    #     image: "haje01/kafka-dbcon"
+    #     tag: latest
+    #     pullPolicy: IfNotPresent
+    #   timezone: Asia/Seoul
 
 
 # UI for 카프카 설정
@@ -160,15 +164,19 @@ ui4kafka:
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: RELEASE-kafka
-          bootstrapServers: RELEASE-kafka-headless:9092
-          zookeeper: RELEASE-zookeeper-headless:2181
-          kafkaConnect:
-            - name: dbcon
-              address: http://RELEASE-alpaka-dbcon:8083
-          metrics:
-            port: 5556
-            type: JMX
+      - name: RELEASE-kafka
+        bootstrapServers: RELEASE-kafka-headless:9092
+        zookeeper: RELEASE-zookeeper-headless:2181
+        kafkaConnect:
+        #
+        # 주의 : 이 아래 섹션을 kafka_connect.connects 에 등록한 connect 에 대해 순회
+        # CONNECT_TYPE 은 kafka_connect.connects.type 
+        #
+        - name: CONNECT_TYPE
+          address: http://RELEASE-alpaka-CONNECT_TYPE:8083
+        metrics:
+          port: 5556
+          type: JMX
     auth:
       type: disabled
     management:
@@ -185,7 +193,7 @@ ui4kafka:
 # 그라파나 설정
 grafana:
   enabled: true
-  adminSecretName: mkb-grafana-admin
+  adminSecretName: RELEASE-grafana-admin
   admin:
     user: admin
     password: admindjemals
@@ -196,7 +204,7 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://mkb-prometheus-prometheus:9090
+          url: http://RELEASE-prometheus-prometheus:9090
           isDefault: true
   dashboardsProvider:
     enabled: true
@@ -256,6 +264,16 @@ ingress:
 # 
 init: 
   enabled: false 
+  container:
+    image: "haje01/alpaka-tool"
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  files: {}
+  commands: []
 
 
 #
@@ -279,3 +297,7 @@ test:
     image: "haje01/alpaka-tool"
     tag: 0.0.1
     pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

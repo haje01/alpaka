@@ -8,6 +8,7 @@ metadata:
 data:
   {{- range $k, $v := .files }}
     {{ $k }}: |
+      echo '> run {{ $k }}'
       {{ $v | indent 6 | trim }}
   {{- end }}
 {{- end }}

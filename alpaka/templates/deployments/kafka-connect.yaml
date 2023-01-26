@@ -1,0 +1,45 @@
+{{- if .Values.kafka_connect.enabled -}}
+{{ $fullname := include "common.names.fullname" . }}
+{{ $labels := include "common.labels.standard" . }}
+{{ $matchLabels := include "common.labels.matchLabels" . }}
+{{- range $cnt := .Values.kafka_connect.connects -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-connect-{{ $cnt.type }}
+  labels: 
+    {{- $labels | nindent 4 }}
+    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+spec:
+  replicas: {{ $cnt.replicaCount | default 1 }}
+  selector:
+    matchLabels: 
+      {{- $matchLabels | nindent 6 }}
+      app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+  template:
+    metadata:
+      labels: {{ $labels | nindent 8 }}
+        app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+    spec:
+      containers:
+      - name: {{ $cnt.type }}-connect
+        image: {{ $cnt.container.image }}:{{ $cnt.container.tag }}
+        imagePullPolicy: {{ $cnt.container.pullPolicy | default "IfNotPresent" }}
+        command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
+        args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
+        env:
+          - name: TZ
+            value: {{ $cnt.timezone | default "UTC" }}
+        ports:
+          - name: connector
+            containerPort: 8083
+        volumeMounts:
+          - name: conn-cfg
+            mountPath: /opt/bitnami/kafka/config
+      volumes:
+        - name: conn-cfg
+          configMap:
+            name: {{ $fullname }}-connect-{{ $cnt.type }}-cfg
+{{- end }}
+{{- end }}

@@ -1,0 +1,33 @@
+{{- if .Values.kafka_connect.enabled }}
+{{ $full_name := include "common.names.fullname" . }}
+{{ $rel_name := .Release.Name }}
+{{- range $cnt := .Values.kafka_connect.connects }}
+{{- $cnt_url := printf "http://%s-connect-%s:8083" $full_name $cnt.type }}
+{{- $cvals := $cnt.values | default (dict) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $full_name }}-connector-{{ $cnt.type }}
+data:
+  {{ $cnt.type }}-wait-connect.sh: |
+    # 커넥트가 준비될 때까지 대기 
+    until $(curl --output /dev/null --silent --head --fail {{ $cnt_url }}); do
+        echo "waiting for Kafka connect '{{$cnt.type}}' to activate."
+        sleep 5
+    done 
+{{- $cmds := list (printf "%s-wait-connect.sh" $cnt.type ) }}
+{{- range $grp := $cnt.connector_groups }}
+{{- range $con := $grp.connectors }}
+  {{- $cname := include "connector.filename" (dict "cnt_type" $cnt.type "grp_name" $grp.name "con_name" $con.name ) }}
+  {{ $cname }}: |
+    echo '> run {{ $cname }}'
+    {{- $gvals := $grp.values | default (dict) }}
+    {{- include "connector.register" ( dict "global" $ "cnt_url" $cnt_url "cvals" $cnt.values "gvals" $gvals "com" $grp.common "cname" $cname "cfg" $con.config ) }}
+  {{- $cmds = append $cmds $cname }}
+{{- end }}
+{{- end }}
+  {{ $full_name }}-{{ $cnt.type }}-all.sh: | 
+{{ join "\n" $cmds | indent 4 }}
+{{- end }}
+{{- end }}
