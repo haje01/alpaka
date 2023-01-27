@@ -320,7 +320,8 @@ kafka_connect:
     timezone: Asia/Seoul # 커넥트 파드의 타임존 
     # 커넥트 레벨에서 공유될 변수 값 리스트 
     values:                    
-      db_ip: mysql-db-addr        # DBMS IP 주소
+      db_host: mysql-db-addr      # DBMS 호스트 주소
+      db_port: 3306               # DBMS 접속 포트
       db_name: mydb               # DB 이름 
       db_user: myuser             # DB 유저
       db_pass: mypass             # DB 유저 암호 
@@ -332,7 +333,7 @@ kafka_connect:
       common:
         connector.class: io.confluent.connect.jdbc.JdbcSourceConnector    # 커넥터 클래스 
         tasks.max: "1"   # 커넥터 동시성 수 
-        connection.url: "jdbc:mysql://{{ .Values.db_ip }};databaseName={{ .Values.db_name }}" # 커넥터 접속 URL
+        connection.url: "jdbc:mysql://{{ .Values.db_host }}:{{ .Values.db_port }};databaseName={{ .Values.db_name }}" # 커넥터 접속 URL
         connection.password: "{{ .Values.db_pass }}"  # DB 유저 암호
         mode: incrementing  # 소스 커넥터의 동작 모드 
         incrementing.column.name: id  # incrementing 동작 기준 컬럼 
@@ -355,7 +356,7 @@ kafka_connect:
         config:
           connector.class: io.confluent.connect.jdbc.JdbcSourceConnector    # 커넥터 클래스 
           tasks.max: "1"   # 커넥터 동시성 수 
-          connection.url: "jdbc:mysql://{{ .Values.db_ip }};databaseName={{ .Values.db_name }}" # 커넥터 접속 URL
+          connection.url: "jdbc:mysql://{{ .Values.db_host }}:{{ .Values.db_port }};databaseName={{ .Values.db_name }}" # 커넥터 접속 URL
           connection.password: "{{ .Values.db_pass }}"  # DB 유저 암호
           mode: "bulk"        # 소스 커넥터의 동작 모드 
           topic.prefix: code  # 카프카 토픽 접두사 
