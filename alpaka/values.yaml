@@ -129,7 +129,7 @@ tool:
   podAnnotations: {}
   container:
     image: "haje01/alpaka-tool"
-    tag: latest
+    tag: 0.0.2
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -210,14 +210,19 @@ grafana:
     enabled: true
   dashboardsConfigMaps:
     - configMapName: RELEASE-alpaka-grafana-cluster
-      fileName: kminion-cluster_rev1.json
+      # KMinion 카프카 클러스터 대쉬보드 
+      fileName: kminion-cluster_rev1.json             
     - configMapName: RELEASE-alpaka-grafana-topic
+      # KMinion 카프카 토픽 대쉬보드 
       fileName: kminion-topic_rev1.json
     - configMapName: RELEASE-alpaka-grafana-groups
+      # KMinion 카프카 컨슈머 그룹 대쉬보드 
       fileName: kminion-groups_rev1.json
     - configMapName: RELEASE-alpaka-grafana-zookeeper
+      # 주키퍼 대쉬보드 
       fileName: zookeeper-by-prometheus_rev4.json
     - configMapName: RELEASE-alpaka-grafana-jvm
+      # 카프카 브로커의 JMX 대쉬보드 
       fileName: altassian-overview_rev1.json
 
 
@@ -233,18 +238,16 @@ kminion:
       host: "RELEASE-kminion"
       port: 8080
 
-  service:
-    annotations:
-      prometheus.io/probe: kminion
+    # annotations:
+    #   prometheus.io/probe: kminion
 
 
 # 공용 ingress 설정
 ingress:
   enabled: true
-  hostname: "alpaka.web"
   annotations:
     # # minikube 설치용
-    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # kubernetes.io/ingress.class: nginx
 
     # # K3S (K3D) 설치용
     # kubernetes.io/ingress.class: traefik
@@ -266,7 +269,7 @@ init:
   enabled: false 
   container:
     image: "haje01/alpaka-tool"
-    tag: latest
+    tag: 0.0.2
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
