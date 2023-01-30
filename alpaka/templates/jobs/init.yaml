@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $full_name }}-init
+  name: {{ $full_name }}-init-{{ .Release.Revision }}
 spec:
   template:
     spec:
