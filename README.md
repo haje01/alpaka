@@ -715,7 +715,6 @@ ingress:
   annotations:
     # # minikube 설치용
     # kubernetes.io/ingress.class: nginx
-    # nginx.ingress.kubernetes.io/rewrite-target: /
 
     # # K3S (K3D) 설치용
     # kubernetes.io/ingress.class: traefik
@@ -957,15 +956,16 @@ NOTES:
 
 앞서 예제에서 설명한대로 인그레스가 잘 설정되었다면 외부에서 알파카를 통해 설치된 각종 서비스의 웹페이지에 접속이 가능하다.
 
-> 윈도우 WSL (Windows Subsystem for Linux) 환경에서 minikube 를 이용하는 경우, 아래와 같이 터널링해주어야 인그레스를 외부에서 접근할 수 있다.
+> 윈도우 WSL (Windows Subsystem for Linux) 환경에서 minikube 를 이용하는 경우, 아래와 같이 터널링해주어야 인그레스를 외부에서 접근할 수 있다 (WSL 에서 k3s 를 사용하는 경우는 비슷한 방법을 찾기 힘들었다).
 >
 > `minikube tunnel`
 > 
 > 이후 호스트 파일 (macOS/Linux 는 `/etc/hosts`, 윈도우는 `C:\Windows\System32\drivers\etc\hosts`) 에서 아래와 같이 추가해주면 윈도우상의 웹브라우저에서 도메인 이름으로 접속이 가능하다 ([참고](https://www.liquidweb.com/kb/edit-host-file-windows-10/)
-> 127.0.0.1  grafana.alpaka.wai
-> 127.0.0.1  k8dashboard.alpaka.wai
-> 127.0.0.1  ui4kafka.alpaka.wai
-> 127.0.0.1  prometheus.alpaka.wai
+>
+> `127.0.0.1  grafana.alpaka.wai`
+> `127.0.0.1  k8dashboard.alpaka.wai`
+> `127.0.0.1  ui4kafka.alpaka.wai`
+> `127.0.0.1  prometheus.alpaka.wai`
 >
 
 AWS EKS 에 설치한 경우는 다음과 같이 접속 주소를 확인할 수 있다.
