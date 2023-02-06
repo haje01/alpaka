@@ -23,6 +23,10 @@ kafka:
   #     cpu: "3600m"
   #     memory: "14Gi"
 
+  # jvm_ 메트릭을 얻기 위해서는 java agent 로 실행해야하나 잘 되지 않음.. ㅠ
+  # https://stackoverflow.com/questions/51372578/no-kafka-metrics-in-grafana-prometheus
+  # https://github.com/bitnami/charts/pull/7012+      
+  
   metrics:
     kafka:
       enabled: true
@@ -30,6 +34,8 @@ kafka:
       enabled: true
     serviceMonitor:
       enabled: true
+      interval: 10s
+      scrapeTimeout: 5s
       relabelings:
         - sourceLabels: ["container", "pod"]
           regex: "jmx-exporter;"
@@ -224,6 +230,9 @@ grafana:
     - configMapName: RELEASE-alpaka-grafana-jvm
       # 카프카 브로커의 JMX 대쉬보드 
       fileName: altassian-overview_rev1.json
+    - configMapName: RELEASE-alpaka-grafana-kafka-exporter
+      # 카프카 브로커의 JMX 대쉬보드 
+      fileName: kafka-exporter-overview_rev5.json
 
 
 # 그라파나용 KMinion 대쉬보드 설정

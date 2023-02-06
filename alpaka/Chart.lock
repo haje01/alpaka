@@ -1,13 +1,13 @@
 dependencies:
 - name: kafka
-  repository: https://charts.bitnami.com/bitnami
+  repository: https://raw.githubusercontent.com/haje01/bitnami-charts/master/bitnami/kafka
   version: 20.0.6
 - name: kube-prometheus
   repository: https://raw.githubusercontent.com/haje01/bitnami-charts/master/bitnami/kube-prometheus
   version: 8.3.0
 - name: grafana
   repository: https://charts.bitnami.com/bitnami
-  version: 8.2.25
+  version: 8.2.26
 - name: kminion
   repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
   version: 0.10.0
@@ -20,5 +20,5 @@ dependencies:
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
   version: 9.4.5
-digest: sha256:6aa24d658b96a07c1183c2da16f5e81540cc3252849a989d7386b2583a45e545
-generated: "2023-02-01T17:15:12.436378189+09:00"
+digest: sha256:57539eed6005a85234d8ded61b0ecda5fbe5ab54ec7361aa82230c749a7f7ba6
+generated: "2023-02-06T10:06:09.202675367+09:00"

@@ -37,3 +37,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
 {{ (.Files.Glob "files/altassian-overview_rev1.json").AsConfig | replace "{REL_NAME}" .Release.Name | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alpaka-grafana-kafka-exporter
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/kafka-exporter-overview_rev5.json").AsConfig | replace "{REL_NAME}" .Release.Name | indent 2 }}

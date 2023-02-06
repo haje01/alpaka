@@ -35,3 +35,12 @@ KMinion 은 KMinion Exporter 가 익스포트한 카프카 메트릭을 다음�
 JMX Exporter 가 익스포트한 JVM 메트릭 대쉬보드 
 
 [altassian-overview_rev1](https://grafana.com/grafana/dashboards/3457-altassian-overview/)
+
+
+### Kafka Exporter 
+
+Bitnami Kafka 기본 카프카 익스포터. 심플하나 필수적인 것들이 있음 (컨슈머 그룹이 있을 때 동작).
+
+[kafka-exporter-overview_rev5.json](https://grafana.com/grafana/dashboards/7589-kafka-exporter-overview/)
+
+만약 새 버전이 나오면 이 디렉토리에 덮어 쓰고 `${DS_PROMETHEUS_WH211}` 을 모두 `Prometheus` 로 대체한다.
