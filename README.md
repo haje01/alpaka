@@ -479,7 +479,7 @@ init:
   - test-alpaka-jdbcsrc-all.sh
 ```
 
-> `test.enabled=true` 시에는 이 모든 커넥터 등록 스크립트가 생성되지 않으니 호출하지 않도록 하자.
+> `test.enabled` 가 `true` 인 경우 이 모든 커넥터 등록 스크립트가 생성되지 않으니 호출하지 않도록 하자.
 
 이 스크립트의 파일명은 `[배포 이름]-alpaka-[커넥트 타입]-all.sh` 형식이다. 위 경우 `test` 배포에서 `jdbcsrc` 커넥트 아래에 만들어진 모든 등록 쉘스크립트가 이 안에 리스팅되어 실행되게 된다.
 
@@ -922,6 +922,8 @@ helm upgrade -f configs/_mkb.yaml mkb alpaka
 ```
 
 테스트용 MySQL 을 비롯한 관련 리소스가 제거된 것을 확인할 수 있을 것이다.
+
+> 업그레이드 후에도 테스트를 위해 등록된 커넥터 `jdbc_source_mysql` 가 남아 있는데, 별 문제는 없을 것이다. 찜찜하면 ui4kafka 등을 통해 지워주도록 하자.
 
 #### 설치 노트
 
