@@ -20,7 +20,7 @@ spec:
         mountPath: /usr/local/bin/{{ $k }}
         subPath: {{ $k }}
       {{- end }}
-      {{- if .Values.kafka_connect.enabled }}
+      {{- if and .Values.kafka_connect.enabled (not .Values.test.enabled) }}
         {{- range $cnt := .Values.kafka_connect.connects }}
         {{- $cfg_name := printf "%s-connector-%s" $full_name $cnt.type }}
         {{- /* 전체 등록 스크립트 */}}
@@ -46,7 +46,7 @@ spec:
         configMap:
           name: {{ $full_name }}-init-cmd
           defaultMode: 0777
-      {{- if .Values.kafka_connect.enabled }}
+      {{- if and .Values.kafka_connect.enabled (not .Values.test.enabled) }}
         {{- range $cnt := .Values.kafka_connect.connects }}
         {{- $cfg_name := printf "%s-connector-%s" $full_name $cnt.type }}
       - name: {{ $cfg_name }}

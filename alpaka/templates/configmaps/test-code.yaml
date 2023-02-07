@@ -63,7 +63,7 @@ data:
 
     def test_k8dashboard():
         """쿠버네티스 대쉬보드 접속 테스트."""
-        url = 'https://{{ .Release.Name }}-k8dashboard:8443'
+        url = 'http://{{ .Release.Name }}-k8dashboard:8443'
         try:
             urlopen(url)
         except urllib.error.URLError as e:

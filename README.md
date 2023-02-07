@@ -242,10 +242,10 @@ k8s_dist: minikube
 이 설정 파일이 완성되면 다음과 같이 설치하게 될 것이다.
 
 ```
-helm install -f configs/test.yaml mytest alpaka/
+helm install -f configs/test.yaml myrel alpaka/
 ```
 
-이 경우 배포 이름은 `mytest` 가 된다. 
+이 경우 배포 이름은 `myrel` 이 된다. 
 
 이제 각 설정 블럭을 차례대로 설명하겠다. 알파카 차트나 알파카 변수 파일 `alpaka/values.yaml` 에 기본값이 지정되어 있고 설정 파일에 관련 내용이 없으면 기본값이 이용된다.
 
@@ -407,7 +407,7 @@ jdbcsrc-mydb_code-code.sh
 
 `jdbcsrc-mydb_log-log1.sh`
 ```
-curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "jdbcsrc-mydb_log-log1.sh",
     "config": {
         "connection.password": "mypass",
@@ -424,7 +424,7 @@ curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content
 
 `jdbcsrc-mydb_log-log2.sh`
 ```
-curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "jdbcsrc-mydb_log-log2.sh",
     "config": {
         "connection.password": "mypass",
@@ -441,7 +441,7 @@ curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content
 
 `jdbcsrc-mydb_code-code.sh`
 ```
-curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "jdbcsrc-mydb_code-code.sh",
     "config": {
         "connection.password": "mypass",
@@ -457,6 +457,7 @@ curl -s -X POST http://mytest-alpaka-connect-jdbcsrc:8083/connectors -H "Content
 
 잘 살펴보면 앞서 기술한 설정 및 변수값이 적용되어 있는 것을 알 수 있을 것이다. 이 파일이 실행되면 `curl` 을 통해 카프카 커넥트의 API 를 호출하여 각 커넥터를 등록하하게 된다.
 
+> `test.enabled` 가 `true` 인 때에는 커넥터 등록 스크립트가 생성되지 않음에 주의하자. 
 
 ### 커넥터 등록과 갱신 
 
@@ -477,6 +478,8 @@ init:
   commands:
   - test-alpaka-jdbcsrc-all.sh
 ```
+
+> `test.enabled=true` 시에는 이 모든 커넥터 등록 스크립트가 생성되지 않으니 호출하지 않도록 하자.
 
 이 스크립트의 파일명은 `[배포 이름]-alpaka-[커넥트 타입]-all.sh` 형식이다. 위 경우 `test` 배포에서 `jdbcsrc` 커넥트 아래에 만들어진 모든 등록 쉘스크립트가 이 안에 리스팅되어 실행되게 된다.
 
@@ -518,15 +521,16 @@ ui4kafka:
   yamlApplicationConfig:  
     kafka:            
       clusters:
-      - name: mytest-kafka   # 카프카 클러스터 이름 
-        bootstrapServers: mytest-kafka-headless:9092  # 카프카 브로커의 헤드리스 서비스 
-        zookeeper: mytest-zookeeper-headless:2181     # 주키퍼의 헤드리스 서비스 
+      - name: myrel-kafka   # 카프카 클러스터 이름 
+        bootstrapServers: myrel-kafka-headless:9092  # 카프카 브로커의 헤드리스 서비스 
+        zookeeper: myrel-zookeeper-headless:2181     # 주키퍼의 헤드리스 서비스 
         kafkaConnect:
         # jdbcsrc 커넥트 정보 
         - name: jdbcsrc
-          address: http://mytest-alpaka-jdbcsrc:8083
+          address: http://myrel-alpaka-jdbcsrc:8083
 ```
 
+> `test.enabled` 가 `true` 인 경우 jdbcsrc 커넥트의 주소는 `address: http://myrel-alpaka-test-jdbcsrc:8083` 를 이용해야 한다.
 
 UI for Kafka 차트는 최초에 [Provectus 의 것](https://github.com/provectus/kafka-ui)을 이용하였으나, Helm 패키지 설치에 문제가 있어 [포크한 것](https://github.com/haje01/kafka-ui) 을 이용하였다. 차트의 기본값은 다음처럼 확인할 수 있다.
 
@@ -607,11 +611,11 @@ prometheus:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - mytest-kminion:8080
+            - myrel-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - mytest-zookeeper-metrics:9141
+            - myrel-zookeeper-metrics:9141
 ```
 
 프로메테우스 차트는 [bitnami 의 kube-prometheus](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 차트의 기본값은 다음처럼 확인할 수 있다.
@@ -672,18 +676,18 @@ grafana:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://mytest-prometheus-prometheus:9090
+        url: http://myrel-prometheus-prometheus:9090
         isDefault: true
   dashboardsConfigMaps:
-    - configMapName: mytest-alpaka-grafana-cluster
+    - configMapName: myrel-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: mytest-alpaka-grafana-topic
+    - configMapName: myrel-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: mytest-alpaka-grafana-groups
+    - configMapName: myrel-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: mytest-alpaka-grafana-zookeeper
+    - configMapName: myrel-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: mytest-alpaka-grafana-jvm
+    - configMapName: myrel-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 ```
 
@@ -719,9 +723,9 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["mytest-kafka-headless:9092"]
+        brokers: ["myrel-kafka-headless:9092"]
     exporter:
-      host: "mytest-kminion"
+      host: "myrel-kminion"
 ```
 
 KMnion 차트는 [여기](https://github.com/redpanda-data/kminion/tree/master/charts) 에서 확인할 수 있다. 차트의 기본값은 다음처럼 확인할 수 있다.
@@ -864,7 +868,7 @@ alpaka/alpaka   0.0.2           3.3.1           Yet another Kafka deployment cha
 앞서 작성해 둔 예제 설정 파일을 이용하면 다음과 같이 설치할 수 있다.
 
 ```bash
-helm install -f configs/test.yaml mytest alpaka/alpaka 
+helm install -f configs/test.yaml myrel alpaka/alpaka 
 ```
 
 `alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
@@ -894,7 +898,7 @@ helm dependency update
 외부 의존 차트를 다 받았으면, 다시 상위 디렉토리로 이동 하여 다음과 같이 로컬 코드에서 설치한다.
 
 ```bash
-helm install -f configs/test.yaml mytest alpaka/
+helm install -f configs/test.yaml myrel alpaka/
 ```
 
 > `alpaka/` 는 차트가 있는 디렉토리 명이다.
@@ -923,10 +927,10 @@ helm upgrade -f configs/_mkb.yaml mkb alpaka
 
 설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 예제 설정 파일을 통해 설치한 경우의 노트이다.
 
-> `helm status mytest` 명령으로 다시 볼 수 있다.
+> `helm status myrel` 명령으로 다시 볼 수 있다.
 
 ```markdown
-NAME: mytest
+NAME: myrel
 LAST DEPLOYED: Fri Jan 27 17:33:50 2023
 NAMESPACE: default
 STATUS: deployed
@@ -938,18 +942,18 @@ NOTES:
 
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=mytest
+  kubectl get pods --namespace default -l app.kubernetes.io/instance=myrel
 
 # 카프카 브로커 호스트명
 
-  mytest-kafka
+  myrel-kafka
 
   Ingress (AWS ALB) 주소:
   export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=mytest,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=myrel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it $ATOOL_POD -n default -- bash
 
 # 쿠버네티스 대쉬보드

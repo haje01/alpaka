@@ -305,10 +305,17 @@ mysql:
 # 테스트
 test:
   enabled: true
+  # 테스트 컨테이너
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
+  # 커넥트 컨테이너 
+  connect:
+    container:
+      image: "haje01/kafka-dbcon"
+      tag: 0.0.3
+      pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
   tolerations: []

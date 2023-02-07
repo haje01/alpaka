@@ -1,9 +1,11 @@
-{{- if .Values.kafka_connect.enabled }}
+{{/*
+    유저 커넥터 설정은 test.enabled=false 일때만 동작 
+*/}}
+{{- if and .Values.kafka_connect.enabled (not .Values.test.enabled) }}
 {{ $full_name := include "common.names.fullname" . }}
 {{ $rel_name := .Release.Name }}
 {{- range $cnt := .Values.kafka_connect.connects }}
 {{- $cnt_url := printf "http://%s-connect-%s:8083" $full_name $cnt.type }}
-{{- $cvals := $cnt.values | default (dict) }}
 ---
 apiVersion: v1
 kind: ConfigMap

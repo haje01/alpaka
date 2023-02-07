@@ -1,36 +1,37 @@
-{{- if .Values.kafka_connect.enabled -}}
+{{/* 
+  테스트 커넥트 디플로이는 test.enabled=true 일때만
+*/}}
+{{- if .Values.test.enabled }}
 {{ $fullname := include "common.names.fullname" . }}
 {{ $labels := include "common.labels.standard" . }}
 {{ $matchLabels := include "common.labels.matchLabels" . }}
-{{- range $cnt := .Values.kafka_connect.connects -}}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullname }}-connect-{{ $cnt.type }}
+  name: {{ $fullname }}-connect-test-jdbcsrc
   labels: 
     {{- $labels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
 spec:
-  replicas: {{ $cnt.replicaCount | default 1 }}
+  replicas: {{ .Values.test.replicaCount | default 1 }}
   selector:
     matchLabels: 
       {{- $matchLabels | nindent 6 }}
-      app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+      app.kubernetes.io/component: kafka-connect-test-jdbcsrc
   template:
     metadata:
       labels: {{ $labels | nindent 8 }}
-        app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+        app.kubernetes.io/component: kafka-connect-test-jdbcsrc
     spec:
       containers:
-      - name: {{ $cnt.type }}-connect
-        image: {{ $cnt.container.image }}:{{ $cnt.container.tag }}
-        imagePullPolicy: {{ $cnt.container.pullPolicy | default "IfNotPresent" }}
+      - name: test-jdbcsrc-connect
+        image: {{ .Values.test.connect.container.image }}:{{ .Values.test.connect.container.tag }}
+        imagePullPolicy: {{ .Values.test.connect.container.pullPolicy | default "IfNotPresent" }}
         command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
         args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
         env:
           - name: TZ
-            value: {{ $cnt.timezone | default "UTC" }}
+            value: {{ .Values.test.timezone | default "UTC" }}
         ports:
           - name: connector
             containerPort: 8083
@@ -40,6 +41,5 @@ spec:
       volumes:
         - name: conn-cfg
           configMap:
-            name: {{ $fullname }}-connect-{{ $cnt.type }}-cfg
-{{- end }}
+            name: {{ $fullname }}-connect-test-jdbcsrc-cfg
 {{- end }}

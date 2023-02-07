@@ -1,10 +1,11 @@
 {{ $full_name := include "common.names.fullname" . }}
+{{ $rev := .Release.Revision }}
 {{- with .Values.test }}
 {{- if .enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $full_name }}-test
+  name: {{ $full_name }}-test-{{ $rev }}
 spec:
   template:
     spec:
@@ -14,14 +15,14 @@ spec:
         {{- if .container.pullPolicy }}
         imagePullPolicy: {{ .container.pullPolicy | default "IfNotPresent" }}
         {{- end }}
-        command: ["/bin/sh", "-c", "init_mysql.sh && dbcon_reg_mysql.sh && run_test.sh"]
+        command: ["/bin/sh", "-c", "init_mysql.sh && jdbcsrc_reg_mysql.sh && run_test.sh"]
         volumeMounts:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/init_mysql.sh
           subPath: init_mysql.sh
         - name: {{ $full_name }}-test-cmd
-          mountPath: /usr/local/bin/dbcon_reg_mysql.sh
-          subPath: dbcon_reg_mysql.sh
+          mountPath: /usr/local/bin/jdbcsrc_reg_mysql.sh
+          subPath: jdbcsrc_reg_mysql.sh
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/run_test.sh
           subPath: run_test.sh
