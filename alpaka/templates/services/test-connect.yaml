@@ -1,15 +1,14 @@
-{{- if .Values.kafka_connect.enabled }}
+{{- if .Values.test.enabled }}
 {{ $full_name := include "common.names.fullname" . }}
 {{ $labels := (include "common.labels.standard" . ) }}
 {{ $matchLabels := (include "common.labels.matchLabels" . ) }}
-{{- range $cnt := .Values.kafka_connect.connects }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $full_name }}-connect-{{ $cnt.type }}
+  name: {{ $full_name }}-connect-test-jdbcsrc
   labels: 
     {{- $labels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
 spec:
   type: ClusterIP
   ports:
@@ -18,6 +17,5 @@ spec:
     targetPort: connector
   selector: 
     {{- $matchLabels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
-{{- end }}
+    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
 {{- end }}

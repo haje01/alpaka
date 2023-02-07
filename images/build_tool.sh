@@ -1,6 +1,6 @@
 USERNAME=haje01
 IMAGE=alpaka-tool
-version=`cat VERSION.tool`
+version=`cat VERSION`
 
 docker build -t $USERNAME/$IMAGE:latest -f Dockerfile.tool .
 docker tag $USERNAME/$IMAGE:latest $USERNAME/$IMAGE:$version

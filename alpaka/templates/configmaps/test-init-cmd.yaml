@@ -1,8 +1,9 @@
 {{- if .Values.test.enabled }}
+{{ $full_name := include "common.names.fullname" . }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "common.names.fullname" . }}-test-cmd
+  name: {{ $full_name }}-test-cmd
 data:
     init_mysql.sh: |
       echo "> init_mysql.sh"
@@ -19,15 +20,15 @@ data:
         # Debezium 을 위한 권한
         GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
       "
-    dbcon_reg_mysql.sh: |
-      echo "> dbcon_reg_mysql.sh"
+    jdbcsrc_reg_mysql.sh: |
+      echo "> jdbcsrc_reg_mysql.sh"
       # 커넥트 준비될 때까지 대기 
-      until $(curl --output /dev/null --silent --head --fail http://{{ .Release.Name }}-alpaka-dbcon:8083); do
+      until $(curl --output /dev/null --silent --head --fail http://{{ $full_name }}-connect-test-jdbcsrc:8083); do
           echo "waiting for connect."
           sleep 5
       done    
       # 커넥터 등록
-      curl -s -X POST http://{{ .Release.Name }}-alpaka-dbcon:8083/connectors -H "Content-Type: application/json" -d '{
+      curl -s -X POST http://{{ $full_name }}-connect-test-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "jdbc_source_mysql",
         "config": {
             "mode": "bulk",
@@ -46,4 +47,6 @@ data:
       sleep 5
       echo "> run_test.sh"
       cd tests && pytest -s -p no:cacheprovider .
+      # 디버깅용
+      # sleep infinity
 {{- end }}

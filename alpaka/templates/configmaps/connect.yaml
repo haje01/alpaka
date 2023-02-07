@@ -1,8 +1,11 @@
-{{- if .Values.kafka_connect.enabled -}}
+{{/*
+    유저 커넥트 설정은 test.enabled=false 일때만 생성
+*/}}
 {{ $fullname := include "common.names.fullname" . }}
 {{ $relname := .Release.Name }}
 {{ $labels := (include "common.labels.standard" . ) }}
 {{ $kafka_port := .Values.kafka.service.ports.client }}
+{{- if and .Values.kafka_connect.enabled (not .Values.test.enabled) -}}
 {{- range $cnt := .Values.kafka_connect.connects }}
 ---
 apiVersion: v1
