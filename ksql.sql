@@ -44,5 +44,32 @@
  43   AS SELECT
  44     LogNo,
  45     ServiceCode,
+46     GameAccountNo,
+ 47     p.CashProductNo CashProductNo,
+ 48     d.CashProductName CashProductName,
+ 49     LanguageCode,
+ 50     RegDate
+ 51   FROM purchase p
+ 52   LEFT JOIN latest_cash_product_desc d ON p.CashProductNo = d.CashProductNo;
+ 53
+ 54
+ 55 -- 1시간 크기 10분 이동 윈도우로 상품별 판매 수 취합
+ 56 SET 'auto.offset.reset'='latest';
+ 57 CREATE TABLE hourly_purchased AS
+ 58     SELECT
+ 59         CashProductName,
+ 60         FORMAT_TIMESTAMP(FROM_UNIXTIME(WINDOWSTART), 'yyyy-MM-dd HH:mm:ss.SSS', 'Asia/Seoul') WSTART,
+ 61         FORMAT_TIMESTAMP(FROM_UNIXTIME(WINDOWEND), 'yyyy-MM-dd HH:mm:ss.SSS', 'Asia/Seoul') WEND,
+ 62         TIMESTAMPADD(MINUTES, 10, FROM_UNIXTIME(UNIX_TIMESTAMP())) WCUT,
+ 63         COUNT(*) count
+ 64     FROM purchase_and_product_desc
+ 65     WINDOW HOPPING (SIZE 1 HOURS, ADVANCE BY 10 MINUTES)
+ 66     GROUP BY CashProductName;
+ 67
+ 68
+ 69 -- 위 윈도우들 중 첫 번째 것만 선택
+ 70 SELECT CashProductName, WSTART, WEND, count
+ 71     FROM hourly_purchased
+ 72     WHERE FROM_UNIXTIME(WINDOWEND) < WCUT
+ 73     EMIT CHANGES;
 
-
