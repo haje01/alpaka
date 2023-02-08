@@ -15,7 +15,7 @@ spec:
         {{- if .container.pullPolicy }}
         imagePullPolicy: {{ .container.pullPolicy | default "IfNotPresent" }}
         {{- end }}
-        command: ["/bin/sh", "-c", "init_mysql.sh && jdbcsrc_reg_mysql.sh && run_test.sh"]
+        command: ["/bin/sh", "-c", "init_mysql.sh && jdbcsrc_reg_mysql.sh && wait-ksqldb.sh && run_test.sh"]
         volumeMounts:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/init_mysql.sh
@@ -23,6 +23,9 @@ spec:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/jdbcsrc_reg_mysql.sh
           subPath: jdbcsrc_reg_mysql.sh
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/wait-ksqldb.sh
+          subPath: wait-ksqldb.sh          
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/run_test.sh
           subPath: run_test.sh

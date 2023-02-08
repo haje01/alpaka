@@ -14,7 +14,12 @@ RUN apt-get update \
     && apt-get install -y python3 \
     && apt-get install -y python3-pip \
     && apt-get install -y git \
-    && apt-get install -y mariadb-client
+    && apt-get install -y mariadb-client \
+    && apt-get install -y locales
+
+RUN printf 'export LANGUAGE=ko_KR.UTF-8\nexport LANG=ko_KR.UTF-8\n' >> /root/.bashrc
+
+RUN echo 'set encoding=utf-8' >> /etc/vim/vimrc.local 
 
 # kubectl
 RUN curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \

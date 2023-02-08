@@ -39,6 +39,88 @@ data:
         assert '10000' in ret
 
 
+  test_ksql.py: |
+    import json 
+    import subprocess
+    from dateutil.parser import parse as dt_parse
+
+
+    def ksql_exec(sql, mode='ksql', _props=None, timeout=None):
+        """ksqlDB 명령 실행
+
+        sql (str): ksqlDB SQL 명령
+        mode (str): 호출 방식. ksql, query 중 하나. ksql, query 중 하나 (기본값 ksql)
+            ksql: SELECT 문 외
+            query: SELECT 문
+
+        Returns:
+            dict: 하나의 JSON 인 경우
+            list: JSON Lines 인 경우
+        """
+        print(f"ksql_exec '{sql}'")
+        assert mode in ('ksql', 'query')
+        sql = sql.strip().replace('\n', '\\n')
+        if not sql.endswith(';'):
+            sql += ';'
+        if _props is None:
+            props = ''
+        else:
+            assert type(_props) is dict
+            props = f', "streamsProperties": {json.dumps(_props)}'
+
+        timeout = f"-m {timeout}" if timeout is not None else ''
+        cmd = ["curl", "-s"]
+        if len(timeout) > 0:
+            cmd.append(timeout)
+        data = f'{{`{{"ksql": "{sql}" {props}}}`}}'
+        cmd += [
+            "-X", "POST", f"http://test-ksqldb:8088/{mode}",
+            "-H", "'content-type: application/vnd.ksql.v1+json; charset=utf-8'",
+            "-d", data]
+        print(' '.join(cmd))
+        ignore_err = True if timeout is not None else False
+        ret = subprocess.run(cmd, check=True, capture_output=True)
+        return ret.stdout.decode('utf8')
+        
+
+    def test_basic():
+        """ksqlDB 기본 테스트."""
+        props = {
+            "ksql.streams.auto.offset.reset": "earliest",
+        }        
+
+        # 토픽 확인
+        ret = ksql_exec('SHOW TOPICS', 'ksql')
+        ret = eval(ret)[0]
+        topics = ret['topics']
+        assert len(topics) == 3
+
+        # 토픽에서 스트림 생성
+        sql = '''
+        DROP STREAM IF EXISTS person;
+        CREATE STREAM person (
+            regdt TIMESTAMP,
+            pid INT, 
+            sid INT,
+            name VARCHAR, address VARCHAR,
+            ip VARCHAR, birth INT, company VARCHAR, phone VARCHAR)
+            with (kafka_topic = 'mysql-person', partitions=8,
+                value_format='json');
+        '''
+        ret = ksql_exec(sql, 'ksql', props)
+        ret = ret.replace('null', 'None')
+        status = eval(ret)[0]['commandStatus']['status']
+        assert 'SUCCESS' == status
+
+        # 스트림 내용 확인
+        sql = '''
+        SELECT * FROM person LIMIT 3
+        '''
+        ret = ksql_exec(sql, 'query', props)
+        first = eval(ret.split('\n')[1])
+        dt_parse(first[0])
+
+
   test_etc.py: |
     import urllib
     from urllib.request import urlopen

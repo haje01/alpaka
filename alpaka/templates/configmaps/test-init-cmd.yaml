@@ -35,6 +35,9 @@ data:
             "connection.url": "jdbc:mysql://{{ .Release.Name }}-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
             "connection.user": "root",
             "connection.password": "{{ .Values.mysql.auth.password }}",
+            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "value.converter.schemas.enable": false,
             "poll.interval.ms": 3600000,
             "topic.prefix": "mysql-",
             "tasks.max": 1,
@@ -42,6 +45,12 @@ data:
             "tables.whitelist": "person"
           }
         }' | jq
+    wait-ksqldb.sh: |
+      echo "> run wait_ksqldb.sh"
+      until $(curl --output /dev/null --silent --fail http://{{ .Release.Name }}-ksqldb:8088); do
+          echo "waiting for ksqlDB."
+          sleep 5
+      done  
     # 테스트 실행 파일
     run_test.sh: |
       sleep 5

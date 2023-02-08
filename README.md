@@ -5,6 +5,7 @@
 - Kafka
 - Zookeeper
 - Kafka 용 JDBC 커넥터
+- ksqlDB
 - UI for Kafka
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
@@ -262,7 +263,7 @@ kafka:
 
 기본 값은 브로커 1 대, 파티션 수 8 개로 이대로 사용하고자 하면 별도의 `kafka` 블럭을 지정하지 않아도 카프카 클러스터가 만들어진다.
 
-카프카는 [bitnami 의 kafka Helm 차트](https://bitnami.com/stack/kafka/helm) 를 이용하였다. 차트의 기본값은 다음처럼 확인할 수 있다.
+카프카는 [bitnami 의 kafka Helm 차트](https://bitnami.com/stack/kafka/helm) 를 이용하였다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values bitnami/kafka
@@ -491,6 +492,45 @@ helm upgrade -f configs/test.yaml test alpaka/
 
 일반적으로는 이렇게 하면 **설정파일 변경 -> ConfigMap 재생성 -> 관련 쿠버네티스 리소스 재생성** 식으로 진행되는데, 수정하지 않은 커넥트까지 불필요한 재시작을 겪게된다. 이에 알파카는 업그레이드시 사용된 커넥터 설정을 기 등록된 커넥터 설정과 비교하여 변경된 커넥터만 삭제 후 다시 등록하도록 구현되어 있다. 
 
+### ksqlDB 설정 
+
+[ksqlDB](https://ksqldb.io/) 는 SQL 형식 명령을 통해 카프카의 정보를 스트리밍 방식으로 처리하거나 질의할 수 있게 해준다. 일반적으로 다음과 같은 구성이다.
+
+```yaml
+ksqldb:
+  enabled: false
+  ksqldb:
+    nameOverride: RELEASE-ksqldb
+    kafka:
+      # ksqlDB 차트에서 제공하는 카프카 사용 여부. 
+      enabled: false 
+      bootstrapServer: PLAINTEXT://RELEASE-kafka-headless:9092
+    schema-registry: 
+      # ksqlDB 차트에서 제공하는 스키마 레지스트리 사용 여부. 
+      enabled: false 
+    kafka-connect:
+      # ksqlDB 차트에서 제공하는 커넥터 사용 여부. 
+      enabled: false 
+```
+
+기본적으로 꺼져있는데, 지금가지 예제를 기준으로 사용하도록 설정한다면 다음과 같이 될 것이다.
+
+```yaml
+ksqldb:
+  enabled: true 
+  ksqldb:
+    nameOverride: myrel-ksqldb
+    kafka:
+      enabled: false 
+      bootstrapServer: PLAINTEXT://myrel-kafka-headless:9092  
+```
+
+ksqlDB 차트는 [여기](https://ricardo-aires.github.io/helm-charts/charts/ksqldb/) 에서 확인할 수 있다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
+
+```
+helm show values rhcharts/ksqldb
+```
+
 ### UI for Kafka 설정
 
 [UI for Kafka](https://github.com/provectus/kafka-ui) 는 카프카 클러스터의 관리 및 모니터링에 사용된다. 이를 위해 연결할 카프카 브로커, 주키퍼 그리고 필요한 경우 커넥트 정보를 기술해주어야 한다. 일반적으로 다음과 같은 구성이다.
@@ -532,7 +572,7 @@ ui4kafka:
 
 > `test.enabled` 가 `true` 인 경우 jdbcsrc 커넥트의 주소는 `address: http://myrel-alpaka-test-jdbcsrc:8083` 를 이용해야 한다.
 
-UI for Kafka 차트는 최초에 [Provectus 의 것](https://github.com/provectus/kafka-ui)을 이용하였으나, Helm 패키지 설치에 문제가 있어 [포크한 것](https://github.com/haje01/kafka-ui) 을 이용하였다. 차트의 기본값은 다음처럼 확인할 수 있다.
+UI for Kafka 차트는 최초에 [Provectus 의 것](https://github.com/provectus/kafka-ui)을 이용하였으나, Helm 패키지 설치에 문제가 있어 [포크한 것](https://github.com/haje01/kafka-ui) 을 이용하였다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values kafka-ui/kafka-ui
@@ -565,7 +605,7 @@ k8dashboard:
   enabled: true 
 ```
 
-쿠버네티스 대쉬보드의 차트는 [여기](https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard) 에서 찾을 수 있다. 차트의 기본값은 다음처럼 확인할 수 있다.
+쿠버네티스 대쉬보드의 차트는 [여기](https://artifacthub.io/packages/helm/k8s-dashboard/kubernetes-dashboard) 에서 찾을 수 있다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values kubernetes-dashboard/kubernetes-dashboard 
@@ -618,7 +658,7 @@ prometheus:
             - myrel-zookeeper-metrics:9141
 ```
 
-프로메테우스 차트는 [bitnami 의 kube-prometheus](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 차트의 기본값은 다음처럼 확인할 수 있다.
+프로메테우스 차트는 [bitnami 의 kube-prometheus](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values bitnami/kube-prometheus
@@ -691,7 +731,7 @@ grafana:
       fileName: altassian-overview_rev1.json
 ```
 
-그라파나 차트는 [bitnami 의 grafana](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 차트의 기본값은 다음처럼 확인할 수 있다.
+그라파나 차트는 [bitnami 의 grafana](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values bitnami/grafana
@@ -728,7 +768,7 @@ kminion:
       host: "myrel-kminion"
 ```
 
-KMnion 차트는 [여기](https://github.com/redpanda-data/kminion/tree/master/charts) 에서 확인할 수 있다. 차트의 기본값은 다음처럼 확인할 수 있다.
+KMnion 차트는 [여기](https://github.com/redpanda-data/kminion/tree/master/charts) 에서 확인할 수 있다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
 ```
 helm show values kminion/kminion
@@ -913,6 +953,7 @@ helm install -f configs/test.yaml myrel alpaka/
 
 - 관련 패키지 (그라파나, 프로메테우스, UI for Kafka, 쿠버네티스 대쉬보드) 웹 접속 테스트
 - MySQL DB 에 있는 정보를 JDBC 소스 커넥터를 통해 카프카로 가져오기 테스트
+- 기본적인 ksqlDB 동작 테스트 
 
 앞으로 좀 더 다양한 테스트가 추가될 수 있을 것이다.
 
