@@ -234,7 +234,7 @@ test:           # 클러스터 설치 후 테스트 설정
 
 `k8s_dist`, `kminion`, `ingress`, `kafka_connect`, `init` 그리고 `test` 는 알파카 자체적인 설정 블럭이다. `kafka`, `ui4kafka`, `k8dashboard`, `prometheus`, `grafana` 는 알파카가 의존하는 외부 패키지를 위한 설정 블럭이다.
 
-지금부터는 테스트를 위한 간단한 설정 파일을 만들어 가면서 설정 파일 작성 방법을 소개하겠다. 이 설정 파일은 로컬에서 minikube 배포판을 이용하고, 파일은 `configs/test.yaml` 에 저장하는 것으로 가정하겠다. 파일의 최초 내용은 아래와 같다.
+지금부터는 테스트를 위한 간단한 설정 파일을 만들어 가면서 설정 파일 작성 방법을 소개하겠다. 이 설정 파일은 로컬에서 minikube 배포판을 이용하고, 파일은 `configs/myrel.yaml` 에 저장하는 것으로 가정하겠다. 파일의 최초 내용은 아래와 같다.
 
 ```yaml
 k8s_dist: minikube
@@ -243,7 +243,7 @@ k8s_dist: minikube
 이 설정 파일이 완성되면 다음과 같이 설치하게 될 것이다.
 
 ```
-helm install -f configs/test.yaml myrel alpaka/
+helm install -f configs/myrel.yaml myrel alpaka/
 ```
 
 이 경우 배포 이름은 `myrel` 이 된다. 
@@ -487,7 +487,7 @@ init:
 한 번 등록된 커넥터는 운영을 하면서 필요에 따라 설정을 바꿔야하는 경우도 빈번한데, 이 경우 지금까지 처럼 설정 파일에서 커넥터 설정을 바꿔주고 아래와 같이 Helm 의 업그레이드를 이용하면 적용된다.
 
 ```
-helm upgrade -f configs/test.yaml test alpaka/
+helm upgrade -f configs/myrel.yaml test alpaka/
 ```
 
 일반적으로는 이렇게 하면 **설정파일 변경 -> ConfigMap 재생성 -> 관련 쿠버네티스 리소스 재생성** 식으로 진행되는데, 수정하지 않은 커넥트까지 불필요한 재시작을 겪게된다. 이에 알파카는 업그레이드시 사용된 커넥터 설정을 기 등록된 커넥터 설정과 비교하여 변경된 커넥터만 삭제 후 다시 등록하도록 구현되어 있다. 
@@ -908,13 +908,26 @@ alpaka/alpaka   0.0.2           3.3.1           Yet another Kafka deployment cha
 앞서 작성해 둔 예제 설정 파일을 이용하면 다음과 같이 설치할 수 있다.
 
 ```bash
-helm install -f configs/test.yaml myrel alpaka/alpaka 
+helm install -f configs/myrel.yaml myrel alpaka/alpaka 
 ```
 
-`alpaka/alpaka` 는 `저장소/차트명` 이다. 버전을 명시하여 설치할 수도 있다.
+저장소에 등록된 패키지에서 설치하려면 다음처럼 한다 (`alpaka/alpaka` 는 `저장소/차트명` 이다). 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/_k3s.yaml k3s alpaka/alpaka --version 0.0.2
+helm install -f configs/myrel.yaml myrel alpaka/alpaka --version 0.0.2
+```
+
+폐쇄망처럼 외부 접속이 곤란한 경우 `alpaka/chartrepo` 아래에 있는 특정 버전의 패키지 파일에서 직접 설치할 수도 있다.
+
+```bash
+helm install -f config/myrel.yaml myrel chartrepo/alpaka-0.0.3.tgz
+```
+
+혹은 다음처럼 패키지 파일내 `charts/` 디렉토리만 로컬로 복사하여 이용할 수도 있다.
+
+```bash
+tar xzvf chartrepo/alpaka-0.0.3.tgz alpaka/charts
+helm install -f config/myrel.yaml myrel alpaka/
 ```
 
 #### 로컬 코드에서 설치하기
@@ -938,7 +951,7 @@ helm dependency update
 외부 의존 차트를 다 받았으면, 다시 상위 디렉토리로 이동 하여 다음과 같이 로컬 코드에서 설치한다.
 
 ```bash
-helm install -f configs/test.yaml myrel alpaka/
+helm install -f configs/myrel.yaml myrel alpaka/
 ```
 
 > `alpaka/` 는 차트가 있는 디렉토리 명이다.
@@ -1003,6 +1016,7 @@ myrel-kafka-headless:9092
 
 export TOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=myrel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
 kubectl exec -it $TOOL_POD -n default -- bash
+
 # 테스트용 MySQL
 
 root 사용자 암호

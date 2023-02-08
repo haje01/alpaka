@@ -73,8 +73,7 @@ echo "$ING_URL:9093"
 암호: admindjemals (admin어드민)
 {{- end }}
 {{- end }} 
-
-{{- if .Values.test.enabled }}
+{{ if .Values.test.enabled }}
 # 테스트용 MySQL 
 
 root 사용자 암호
@@ -86,5 +85,5 @@ MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace {{ include "common.names.na
 export TEST_JOB=$(kubectl get job -n {{ .Release.Namespace }}  -l "app.kubernetes.io/component=test,app.kubernetes.io/instance=myrel" -o jsonpath="{.items[0].metadata.name}") 
 kubectl logs -f job/$TEST_JOB
 
-{{ end -}}
+{{ end }}
 ---
