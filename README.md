@@ -980,61 +980,40 @@ helm upgrade -f configs/_mkb.yaml mkb alpaka
 > `helm status myrel` 명령으로 다시 볼 수 있다.
 
 ```markdown
+Release "myrel" has been upgraded. Happy Helming!
 NAME: myrel
-LAST DEPLOYED: Fri Jan 27 17:33:50 2023
+LAST DEPLOYED: Wed Feb  8 18:09:37 2023
 NAMESPACE: default
 STATUS: deployed
-REVISION: 1
-TEST SUITE: None
+REVISION: 5
 NOTES:
-# 쿠버네티스 배포판
-  minikube
+# 설정 파일에 기술된 쿠버네티스 배포판
+
+minikube
 
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace default -l app.kubernetes.io/instance=myrel
+kubectl get pods --namespace default -l app.kubernetes.io/instance=myrel
 
-# 카프카 브로커 호스트명
+# 카프카 브로커 URL
 
-  myrel-kafka
-
-  Ingress (AWS ALB) 주소:
-  export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
+myrel-kafka-headless:9092
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=myrel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it $ATOOL_POD -n default -- bash
+export TOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=myrel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+kubectl exec -it $TOOL_POD -n default -- bash
+# 테스트용 MySQL
 
-# 쿠버네티스 대쉬보드
+root 사용자 암호
 
-  접속 URL:
-  echo "$ING_URL:8443"
+MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default myrel-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 
+# 테스트 로그 확인
 
-# 카프카 UI
-  접속 URL:
-  echo "$ING_URL:8989"
+export TEST_JOB=$(kubectl get job -n default  -l "app.kubernetes.io/component=test,app.kubernetes.io/instance=myrel" -o jsonpath="{.items[0].metadata.name}")
+kubectl logs -f job/$TEST_JOB
 
-# 프로메테우스
-
-프로메테우스 접속:
-
-    접속 URL:
-    echo "$ING_URL:9090"
-
-얼러트매니저 접속:
-
-    접속 URL:
-    echo "$ING_URL:9093"
-
-# 그라파나
-
-  접속 URL:
-  echo "$ING_URL:3000"
-
-  유저: admin
-  암호: admindjemals (admin어드민)
 ```
 
 #### 웹 접속하기 
