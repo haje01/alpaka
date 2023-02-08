@@ -1,4 +1,5 @@
 {{ $full_name := include "common.names.fullname" . }}
+{{ $rel_name := .Release.Name }}
 {{ $rev := .Release.Revision }}
 {{- with .Values.test }}
 {{- if .enabled }}
@@ -6,6 +7,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ $full_name }}-test-{{ $rev }}
+  labels: 
+    app.kubernetes.io/component: test
+    app.kubernetes.io/instance: {{ $rel_name }}
 spec:
   template:
     spec:

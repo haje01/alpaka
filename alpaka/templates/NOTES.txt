@@ -1,37 +1,42 @@
-# 쿠버네티스 배포판 
-  {{ .Values.k8s_dist }}
+
+# 설정 파일에 기술된 쿠버네티스 배포판 
+
+{{ .Values.k8s_dist }}
 
 # 설치된 파드 리스트
 
-  kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
 
-# 카프카 브로커 호스트명
+# 카프카 브로커 URL
 
-  {{ .Release.Name }}-kafka
-
-  Ingress (AWS ALB) 주소:
-  export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
+{{ .Release.Name }}-kafka-headless:9092
 
 {{- if .Values.tool.enabled }}
 
 # 알파카 Tool 에 접속
 
-  export ATOOL_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it $ATOOL_POD -n {{ .Release.Namespace}} -- bash
+export TOOL_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+kubectl exec -it $TOOL_POD -n {{ .Release.Namespace}} -- bash
 {{- end }}
 
-{{ if .Values.k8dashboard.enabled -}}
-# 쿠버네티스 대쉬보드
+{{- if eq .Values.k8s_dist "eks" }}
+# Ingress (AWS ALB) 주소:
 
-  접속 URL:
-  echo "$ING_URL:8443"
+export ING_URL=$(k get ingress | sed -n 2p | awk '{print $4}')
+
+{{ if .Values.k8dashboard.enabled -}}
+# 쿠버네티스 대쉬보드 
+
+접속 URL:
+echo "$ING_URL:8443"
 
 {{- end }}
 
 {{ if .Values.ui4kafka.enabled }}
-# 카프카 UI
-  접속 URL:
-  echo "$ING_URL:8989"
+# Ui for Kafka
+
+접속 URL:
+echo "$ING_URL:8989"
 
 {{- end }}
 
@@ -40,21 +45,21 @@
 
 {{- if .Values.prometheus.enabled }}
 
-프로메테우스 접속:
+프로메테우스:
 
 {{- $port:=.Values.prometheus.prometheus.service.ports.http | toString }}
 
-    접속 URL:
-    echo "$ING_URL:{{ $port }}"
+접속 URL:
+echo "$ING_URL:{{ $port }}"
 
 {{- end }}
 
 {{- if .Values.prometheus.alertmanager.enabled }}
 
-얼러트매니저 접속:
+얼러트매니저:
 
-    접속 URL:
-    echo "$ING_URL:9093"
+접속 URL:
+echo "$ING_URL:9093"
 
 {{- end }}
 {{- end }}
@@ -62,22 +67,24 @@
 {{ if .Values.grafana.enabled -}}
 # 그라파나
 
-  접속 URL:
-  echo "$ING_URL:3000"
+접속 URL:echo "$ING_URL:3000"
 
-  유저: admin 
-  암호: admindjemals (admin어드민)
+유저: admin 
+암호: admindjemals (admin어드민)
 {{- end }}
+{{- end }} 
 
-{{ if .Values.test.enabled }}
+{{- if .Values.test.enabled }}
 # 테스트용 MySQL 
 
 root 사용자 암호
 
-  MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace {{ include "common.names.namespace" . }} {{ template "mysql.secretName" .Subcharts.mysql }} -o jsonpath="{.data.mysql-root-password}" | base64 -d)
+MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace {{ include "common.names.namespace" . }} {{ template "mysql.secretName" .Subcharts.mysql }} -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 
 # 테스트 로그 확인
 
-  kubectl logs job/test
+export TEST_JOB=$(kubectl get job -n {{ .Release.Namespace }}  -l "app.kubernetes.io/component=test,app.kubernetes.io/instance=myrel" -o jsonpath="{.items[0].metadata.name}") 
+kubectl logs -f job/$TEST_JOB
 
-{{- end }}
+{{ end }}
+---
