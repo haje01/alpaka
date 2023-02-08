@@ -135,7 +135,7 @@ tool:
   podAnnotations: {}
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -194,6 +194,19 @@ ui4kafka:
     operator: "Equal"
     value: "ctrl"
     effect: "NoSchedule"
+
+
+ksqldb:
+  enabled: false
+  ksqldb:
+    nameOverride: RELEASE-ksqldb
+    kafka:
+      enabled: false 
+      bootstrapServer: PLAINTEXT://RELEASE-kafka-headless:9092
+    schema-registry: 
+      enabled: false 
+    kafka-connect:
+      enabled: false 
 
 
 # 그라파나 설정
@@ -278,7 +291,7 @@ init:
   enabled: false 
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -308,7 +321,7 @@ test:
   # 테스트 컨테이너
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
   # 커넥트 컨테이너 
   connect:
