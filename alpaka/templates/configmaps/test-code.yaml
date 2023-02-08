@@ -74,10 +74,10 @@ data:
             cmd.append(timeout)
         data = f'{{`{{"ksql": "{sql}" {props}}}`}}'
         cmd += [
-            "-X", "POST", f"http://test-ksqldb:8088/{mode}",
+            "-X", "POST", f"http://{{ .Release.Name }}-ksqldb:8088/{mode}",
             "-H", "'content-type: application/vnd.ksql.v1+json; charset=utf-8'",
             "-d", data]
-        print(' '.join(cmd))
+        # print(' '.join(cmd))
         ignore_err = True if timeout is not None else False
         ret = subprocess.run(cmd, check=True, capture_output=True)
         return ret.stdout.decode('utf8')
