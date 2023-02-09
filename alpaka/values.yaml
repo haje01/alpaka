@@ -210,7 +210,7 @@ ksqldb:
   resources:
     limits:
       # 차트 기본 설정인 2000Mi 가 부족해 OOMKilled 발생
-      memory: 3000Mi
+      memory: 4000Mi
 
 
 # 그라파나 설정
