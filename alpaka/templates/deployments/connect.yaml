@@ -10,20 +10,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullname }}-connect-{{ $cnt.type }}
+  name: {{ $fullname }}-{{ $cnt.type }}
   labels: 
     {{- $labels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+    app.kubernetes.io/component: kafka-{{ $cnt.type }}
 spec:
   replicas: {{ $cnt.replicaCount | default 1 }}
   selector:
     matchLabels: 
       {{- $matchLabels | nindent 6 }}
-      app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+      app.kubernetes.io/component: kafka-{{ $cnt.type }}
   template:
     metadata:
       labels: {{ $labels | nindent 8 }}
-        app.kubernetes.io/component: kafka-connect-{{ $cnt.type }}
+        app.kubernetes.io/component: kafka-{{ $cnt.type }}
     spec:
       containers:
       - name: {{ $cnt.type }}-connect
@@ -43,6 +43,6 @@ spec:
       volumes:
         - name: conn-cfg
           configMap:
-            name: {{ $fullname }}-connect-{{ $cnt.type }}-cfg
+            name: {{ $fullname }}-{{ $cnt.type }}-cfg
 {{- end }}
 {{- end }}

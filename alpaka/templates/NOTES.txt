@@ -82,11 +82,12 @@ MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace {{ include "common.names.na
 
 # 테스트 로그 확인
 
-export TEST_JOB=$(kubectl get job -n {{ .Release.Namespace }}  -l "app.kubernetes.io/component=test,app.kubernetes.io/instance=myrel" -o jsonpath="{.items[0].metadata.name}") 
-kubectl logs -f job/$TEST_JOB
+export TEST_POD=$(kubectl get pod -n {{ .Release.Namespace }}  -l "job-name={{ .Release.Name }}-alpaka-test-run-{{ .Release.Revision }}" -o jsonpath="{.items[0].metadata.name}") 
+kubectl logs -f $TEST_POD
 
 {{- end }}
 {{- if.Values.ksqldb.enabled }}
+
 # ksqlDB 접속 
 
 export KSQL_POD=$(kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/name=ksqldb,app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")

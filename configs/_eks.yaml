@@ -139,12 +139,12 @@
 
 
 # # 카프카 DB 관련 커넥터 설정
-# dbcon:
+# srccon:
 #   enabled: true
 #   replicaCount: 1
 #   kafkaClientPort: 9092
 #   container:
-#     image: "haje01/kafka-dbcon"
+#     image: "haje01/kafka-srccon"
 #     tag: 0.0.1
 #     pullPolicy: IfNotPresent
 #   timezone: Asia/Seoul
@@ -160,8 +160,8 @@
 #           bootstrapServers: eks-kafka-headless:9092
 #           zookeeper: eks-zookeeper-headless:2181
 #           kafkaConnect:
-#             - name: dbcon
-#               address: http://eks-alpaka-dbcon:8083
+#             - name: srccon
+#               address: http://eks-alpaka-srccon:8083
 #           metrics:
 #             port: 5556
 #             type: JMX
@@ -244,8 +244,8 @@ ui4kafka:
           bootstrapServers: eks-kafka-headless:9092
           zookeeper: eks-zookeeper-headless:2181
           kafkaConnect:
-            - name: dbcon
-              address: http://eks-alpaka-dbcon:8083
+            - name: srccon
+              address: http://eks-alpaka-srccon:8083
           metrics:
             port: 5556
             type: JMX

@@ -5,10 +5,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $full_name }}-connect-test-jdbcsrc
+  name: {{ $full_name }}-test-srccon
   labels: 
     {{- $labels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
+    app.kubernetes.io/component: kafka-test-srccon
 spec:
   type: ClusterIP
   ports:
@@ -17,5 +17,22 @@ spec:
     targetPort: connector
   selector: 
     {{- $matchLabels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
+    app.kubernetes.io/component: kafka-test-srccon
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $full_name }}-test-sinkcon
+  labels: 
+    {{- $labels | nindent 4 }}
+    app.kubernetes.io/component: kafka-test-sinkcon
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 8083
+    targetPort: connector
+  selector: 
+    {{- $matchLabels | nindent 4 }}
+    app.kubernetes.io/component: kafka-test-sinkcon
 {{- end }}

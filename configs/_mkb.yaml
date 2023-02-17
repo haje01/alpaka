@@ -12,8 +12,8 @@ ui4kafka:
           bootstrapServers: mkb-kafka-headless:9092
           zookeeper: mkb-zookeeper-headless:2181
           kafkaConnect:
-            - name: dbcon
-              address: http://mkb-alpaka-dbcon:8083
+            - name: srccon
+              address: http://mkb-alpaka-srccon:8083
           metrics:
             port: 5556
             type: JMX
