@@ -1,18 +1,18 @@
 #
-#  k3s 사용시
+#  k3d 사용시
 #
-k8s_dist: k3s
+k8s_dist: k3d
 
 ui4kafka:
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: k3s-kafka
-          bootstrapServers: k3s-kafka-headless:9092
-          zookeeper: k3s-zookeeper-headless:2181
+        - name: k3d-kafka
+          bootstrapServers: k3d-kafka-headless:9092
+          zookeeper: k3d-zookeeper-headless:2181
           kafkaConnect:
             - name: srccon
-              address: http://k3s-alpaka-srccon:8083
+              address: http://k3d-alpaka-srccon:8083
           metrics:
             port: 5556
             type: JMX
@@ -25,11 +25,11 @@ prometheus:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - k3s-kminion:8080
+            - k3d-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - k3s-zookeeper-metrics:9141
+            - k3d-zookeeper-metrics:9141
 
 grafana:
   datasources:
@@ -39,18 +39,18 @@ grafana:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://k3s-prometheus-prometheus:9090
+        url: http://k3d-prometheus-prometheus:9090
         isDefault: true
   dashboardsConfigMaps:
-    - configMapName: k3s-alpaka-grafana-cluster
+    - configMapName: k3d-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: k3s-alpaka-grafana-topic
+    - configMapName: k3d-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: k3s-alpaka-grafana-groups
+    - configMapName: k3d-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: k3s-alpaka-grafana-zookeeper
+    - configMapName: k3d-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: k3s-alpaka-grafana-jvm
+    - configMapName: k3d-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -58,11 +58,11 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["k3s-kafka-headless:9092"]
+        brokers: ["k3d-kafka-headless:9092"]
     exporter:
-      host: "k3s-kminion"
+      host: "k3d-kminion"
 
 
 ingress:
   annotations:
-    kubernetes.io/ingress.class: traefik
+    ingress.kubernetes.io/ssl-redirect: "false"
