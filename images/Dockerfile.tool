@@ -15,8 +15,10 @@ RUN apt-get update \
     && apt-get install -y python3-pip \
     && apt-get install -y git \
     && apt-get install -y mariadb-client \
+    && apt-get install -y unzip \
     && apt-get install -y locales
 
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install
 RUN printf 'export LANGUAGE=ko_KR.UTF-8\nexport LANG=ko_KR.UTF-8\n' >> /root/.bashrc
 
 RUN echo 'set encoding=utf-8' >> /etc/vim/vimrc.local 
@@ -28,3 +30,7 @@ RUN curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/
 # for test
 RUN git clone https://github.com/haje01/kfktest.git && cd kfktest && pip3 install -r requirements.txt && pip3 install -e .
 
+RUN echo alias ll='ls -alh'
+RUN echo alias kcat='kafkacat'
+
+RUN pip install retry

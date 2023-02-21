@@ -6,12 +6,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $full_name }}-test-{{ $rev }}
+  name: {{ $full_name }}-test-run-{{ $rev }}
   labels: 
     app.kubernetes.io/component: test
     app.kubernetes.io/instance: {{ $rel_name }}
 spec:
   template:
+    metadata:
     spec:
       containers:
       - name: {{ $full_name }}-test
@@ -19,17 +20,28 @@ spec:
         {{- if .container.pullPolicy }}
         imagePullPolicy: {{ .container.pullPolicy | default "IfNotPresent" }}
         {{- end }}
-        command: ["/bin/sh", "-c", "init_mysql.sh && jdbcsrc_reg_mysql.sh && wait-ksqldb.sh && run_test.sh"]
+        env:
+        {{- range $ev := .envs }}
+        - name: {{ $ev.name }}
+          value: {{ $ev.value }} 
+        {{- end }}
+        command: ["/bin/sh", "-c", "rm_s3dir.sh && init_mysql.sh && srccon_reg_mysql.sh && wait_ksqldb.sh && run_test.sh"]
         volumeMounts:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/init_mysql.sh
           subPath: init_mysql.sh
         - name: {{ $full_name }}-test-cmd
-          mountPath: /usr/local/bin/jdbcsrc_reg_mysql.sh
-          subPath: jdbcsrc_reg_mysql.sh
+          mountPath: /usr/local/bin/srccon_reg_mysql.sh
+          subPath: srccon_reg_mysql.sh
         - name: {{ $full_name }}-test-cmd
-          mountPath: /usr/local/bin/wait-ksqldb.sh
-          subPath: wait-ksqldb.sh          
+          mountPath: /usr/local/bin/sinkcon_reg_mysql.sh
+          subPath: sinkcon_reg_mysql.sh
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/wait_ksqldb.sh
+          subPath: wait_ksqldb.sh          
+        - name: {{ $full_name }}-test-cmd
+          mountPath: /usr/local/bin/rm_s3dir.sh
+          subPath: rm_s3dir.sh          
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/run_test.sh
           subPath: run_test.sh

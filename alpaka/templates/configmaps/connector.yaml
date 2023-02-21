@@ -5,7 +5,7 @@
 {{ $full_name := include "common.names.fullname" . }}
 {{ $rel_name := .Release.Name }}
 {{- range $cnt := .Values.kafka_connect.connects }}
-{{- $cnt_url := printf "http://%s-connect-%s:8083" $full_name $cnt.type }}
+{{- $cnt_url := printf "http://%s-%s:8083" $full_name $cnt.type }}
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -20,15 +20,16 @@ data:
         # Debezium 을 위한 권한
         GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tester'@'%';
       "
-    jdbcsrc_reg_mysql.sh: |
-      echo "> jdbcsrc_reg_mysql.sh"
+
+    srccon_reg_mysql.sh: |
+      echo "> srccon_reg_mysql.sh"
       # 커넥트 준비될 때까지 대기 
-      until $(curl --output /dev/null --silent --head --fail http://{{ $full_name }}-connect-test-jdbcsrc:8083); do
+      until $(curl --output /dev/null --silent --head --fail http://{{ $full_name }}-test-srccon:8083); do
           echo "waiting for connect."
           sleep 5
       done    
       # 커넥터 등록
-      curl -s -X POST http://{{ $full_name }}-connect-test-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
+      curl -s -X POST http://{{ $full_name }}-test-srccon:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "jdbc_source_mysql",
         "config": {
             "mode": "bulk",
@@ -45,14 +46,58 @@ data:
             "tables.whitelist": "person"
           }
         }' | jq
-    wait-ksqldb.sh: |
+
+    sinkcon_reg_mysql.sh: |
+      #!/bin/bash
+      echo "> sinkcon_reg_mysql.sh"
+      # 커넥트 준비될 때까지 대기 
+      until $(curl --output /dev/null --silent --head --fail http://{{ $full_name }}-test-sinkcon:8083); do
+          echo "waiting for connect."
+          sleep 5
+      done    
+      # 커넥터 등록
+      curl -s -X POST http://{{ $full_name }}-test-sinkcon:8083/connectors -H "Content-Type: application/json" -d '{
+        "name": "s3_sink",
+        "config": {
+            "topics": "mysql-person",
+            "tasks.max": 1,
+            "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+            "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+            "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+            "key.converter.schemas.enable": false,
+            "value.converter.schemas.enable": false,
+            "flush.size": 5000,
+            "rotate.schedule.interval.ms": 5000,
+            "s3.bucket.name": "{{ .Values.test.s3sync.bucket}}",
+            "s3.region": "{{ .Values.test.s3sync.region}}",
+            "topics.dir": "{{ .Values.test.s3sync.topics_dir}}",
+            "partitioner.class": "io.confluent.connect.storage.partitioner.TimeBasedPartitioner",
+            "path.format": "'"'"'year'"'"'=YYYY/'"'"'month'"'"'=MM/'"'"'day'"'"'=dd",
+            "partition.duration.ms": 60000,
+            "timestamp.extractor": "Wallclock",
+            "s3.compression.type": "gzip",
+            "locale": "ko_KR",
+            "timezone": "Asia/Seoul"
+          }
+        }' | jq
+
+    wait_ksqldb.sh: |
       echo "> run wait_ksqldb.sh"
       until $(curl --output /dev/null --silent --fail http://{{ .Release.Name }}-ksqldb:8088); do
           echo "waiting for ksqlDB."
           sleep 5
       done  
-    # 테스트 실행 파일
+
+    rm_s3dir.sh: |
+      echo "> run rm_s3dir.sh"
+      # 이전 테스트 결과 S3 경로 지우기 (주의: 지울 경로 꼭 확인!)
+      echo "aws s3 rm s3://{{ required "test.s3sync.bucket must be entered" .Values.test.s3sync.bucket}}/{{ required "test.s3sync.topics_dir must be entered" .Values.test.s3sync.topics_dir }} --recursive"
+      # aws s3 rm s3://{{ .Values.test.s3sync.bucket}}/{{ .Values.test.s3sync.topics_dir }} --recursive
+      
     run_test.sh: |
+      # 테스트 실행 파일
       sleep 5
       echo "> run_test.sh"
       cd tests && pytest -s -p no:cacheprovider .

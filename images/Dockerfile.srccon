@@ -1,0 +1,37 @@
+# 소스 커넥터로 외부(DB) 데이터를 가져오기 위한 이미지
+FROM bitnami/kafka:latest
+
+USER root
+RUN apt-get update \
+    && apt-get install -y curl \
+    && apt-get install -y dnsutils \
+    && apt-get install -y netcat \
+    && apt-get install -y unzip \
+    && apt-get install -y vim \
+    && apt-get install -y iputils-ping \
+    && apt-get install -y jq
+
+RUN mkdir -p /opt/bitnami/kafka/plugins
+
+COPY files/debezium-connector-mysql-2.1.1.Final-plugin.tar.gz /usr/share/java/dbzm-mysql.tar.gz
+COPY files/debezium-connector-sqlserver-2.1.1.Final-plugin.tar.gz /usr/share/java/dbzm-mssql.tar.gz
+COPY files/mysql-connector-j_8.0.31-1debian11_all.deb /usr/share/java/mysql-conn.deb
+COPY files/kafka-connect-jdbc-10.5.2-haje01.zip /usr/share/java/jdbc_src_conn.zip
+
+# 플러그인 설치
+RUN cd /usr/share/java \
+    && tar xzvf dbzm-mysql.tar.gz \
+    && rm dbzm-mysql.tar.gz \
+    && tar xzvf dbzm-mssql.tar.gz \
+    && rm dbzm-mssql.tar.gz \
+    && dpkg -i mysql-conn.deb \
+    && rm mysql-conn.deb \
+    && unzip jdbc_src_conn.zip \
+    && rm jdbc_src_conn.zip \
+    # 이렇게 안해주면 발견하지 못함 (?!)
+    && mv mysql-connector-j-8.0.31.jar kafka-connect-jdbc-10.5.2-haje01/
+
+
+# 추가적으로 두 번째 설정 파일 지정 가능
+# 예: /opt/bitnami/kafka/config/mongo.properties
+CMD /opt/bitnami/kafka/bin/connect-distributed.sh /opt/bitnami/kafka/config/connect-distributed.properties

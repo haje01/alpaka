@@ -189,9 +189,9 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 카프카의 커넥터 (Connector) 는 다양한 데이터 소스에서 데이터를 가져오거나, 외부로 내보내는 데 사용되는 일종의 플러그인이다. 커넥터는 카프카 커넥트 (Connect) 장비에 등록되어 동작하는데, 알파카에서는 기본적으로 [Confluent JDBC 커넥터](https://docs.confluent.io/kafka-connectors/jdbc/current/index.html) 및 [Debezium](https://debezium.io/) 이 설치된 DB 용 커넥트 이미지를 제공한다.
 
 
-기본 DB 커넥트 이미지는 도커 허브의 [haje01/kafka-dbcon](https://hub.docker.com/repository/docker/haje01/kafka-dbcon/general) 으로 올라가 있기에 이것을 사용하면 된다. 
+기본 DB 커넥트 이미지는 도커 허브의 [haje01/kafka-srccon](https://hub.docker.com/repository/docker/haje01/kafka-srccon/general) 으로 올라가 있기에 이것을 사용하면 된다. 
 
-> 만약 독자적인 DB 커넥터 이미지가 필요하면 `images/Dockerfile.dbcon` 및 `images/build_dbcon.sh` 파일을 참고하여 만들도록 하자.
+> 만약 독자적인 DB 커넥터 이미지가 필요하면 `images/Dockerfile.srccon` 및 `images/build_srccon.sh` 파일을 참고하여 만들도록 하자.
 
 
 ## 설정 파일 만들기 
@@ -311,11 +311,11 @@ kafka_connect:
   enabled: true       # 커넥트를 사용하면 true.
   # 커넥트 정보
   connects:           # 이 블록아래 커넥트를 종류별로 기술 
-  - type: jdbcsrc        # 커넥트 타입 정보. 여기서는 JDBC 소스 커넥터 타입 
+  - type: srccon        # 커넥트 타입 정보. 여기서는 JDBC 소스 커넥터 타입 
     replicaCount: 1      # 커넥트 파드 수
     # 컨테이너 정보 
     container:                     
-      image: "haje01/kafka-dbcon"    # 컨테이너 이미지 
+      image: "haje01/kafka-srccon"   # 컨테이너 이미지 
       tag: latest                    # 이미지 태그 
       pullPolicy: IfNotPresent       # 이지미 풀 정책 
     timezone: Asia/Seoul # 커넥트 파드의 타임존 
@@ -399,17 +399,17 @@ connects:
 위 설정 예제의 경우 초기화 파드 `/usr/local/bin` 디렉토리 아래 다음과 같은 세가지 파일이 생성된다.
 
 ```
-jdbcsrc-mydb_log-log1.sh
-jdbcsrc-mydb_log-log2.sh
-jdbcsrc-mydb_code-code.sh
+srccon-mydb_log-log1.sh
+srccon-mydb_log-log2.sh
+srccon-mydb_code-code.sh
 ```
 
 각 파일의 내용은 다음과 같다. 
 
-`jdbcsrc-mydb_log-log1.sh`
+`srccon-mydb_log-log1.sh`
 ```
-curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
-    "name": "jdbcsrc-mydb_log-log1.sh",
+curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+    "name": "srccon-mydb_log-log1.sh",
     "config": {
         "connection.password": "mypass",
         "connection.url": "jdbc:mysql://mysql-db-addr;databaseName=mydb",
@@ -423,10 +423,10 @@ curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-
 }' | jq
 ```
 
-`jdbcsrc-mydb_log-log2.sh`
+`srccon-mydb_log-log2.sh`
 ```
-curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
-    "name": "jdbcsrc-mydb_log-log2.sh",
+curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+    "name": "srccon-mydb_log-log2.sh",
     "config": {
         "connection.password": "mypass",
         "connection.url": "jdbc:mysql://mysql-db-addr;databaseName=mydb",
@@ -440,10 +440,10 @@ curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-
 }' | jq
 ```
 
-`jdbcsrc-mydb_code-code.sh`
+`srccon-mydb_code-code.sh`
 ```
-curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-Type: application/json" -d '{
-    "name": "jdbcsrc-mydb_code-code.sh",
+curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+    "name": "srccon-mydb_code-code.sh",
     "config": {
         "connection.password": "mypass",
         "connection.url": "jdbc:mysql://mysql-db-addr;databaseName=mydb",
@@ -467,9 +467,9 @@ curl -s -X POST http://myrel-alpaka-connect-jdbcsrc:8083/connectors -H "Content-
 ```yaml
 init:
   commands:
-  - jdbcsrc-mydb_log-log1.sh
-  - jdbcsrc-mydb_log-log2.sh
-  - jdbcsrc-mydb_code-code.sh
+  - srccon-mydb_log-log1.sh
+  - srccon-mydb_log-log2.sh
+  - srccon-mydb_code-code.sh
 ```
 
 그런데, 매번 이렇게 등록 스크립트를 기술해 주는 것은 불편하고 틀리기도 쉽다. 이에 모든 커넥터 등록 스크립트를 실행해주는 스크립트가 자동으로 생성되니 아래와 같이 이것을 이용하면 편리하다. 
@@ -477,12 +477,12 @@ init:
 ```yaml
 init:
   commands:
-  - test-alpaka-jdbcsrc-all.sh
+  - test-alpaka-srccon-all.sh
 ```
 
 > `test.enabled` 가 `true` 인 경우 이 모든 커넥터 등록 스크립트가 생성되지 않으니 호출하지 않도록 하자.
 
-이 스크립트의 파일명은 `[배포 이름]-alpaka-[커넥트 타입]-all.sh` 형식이다. 위 경우 `test` 배포에서 `jdbcsrc` 커넥트 아래에 만들어진 모든 등록 쉘스크립트가 이 안에 리스팅되어 실행되게 된다.
+이 스크립트의 파일명은 `[배포 이름]-alpaka-[커넥트 타입]-all.sh` 형식이다. 위 경우 `test` 배포에서 `srccon` 커넥트 아래에 만들어진 모든 등록 쉘스크립트가 이 안에 리스팅되어 실행되게 된다.
 
 한 번 등록된 커넥터는 운영을 하면서 필요에 따라 설정을 바꿔야하는 경우도 빈번한데, 이 경우 지금까지 처럼 설정 파일에서 커넥터 설정을 바꿔주고 아래와 같이 Helm 의 업그레이드를 이용하면 적용된다.
 
@@ -565,12 +565,12 @@ ui4kafka:
         bootstrapServers: myrel-kafka-headless:9092  # 카프카 브로커의 헤드리스 서비스 
         zookeeper: myrel-zookeeper-headless:2181     # 주키퍼의 헤드리스 서비스 
         kafkaConnect:
-        # jdbcsrc 커넥트 정보 
-        - name: jdbcsrc
-          address: http://myrel-alpaka-jdbcsrc:8083
+        # srccon 커넥트 정보 
+        - name: srccon
+          address: http://myrel-alpaka-srccon:8083
 ```
 
-> `test.enabled` 가 `true` 인 경우 jdbcsrc 커넥트의 주소는 `address: http://myrel-alpaka-test-jdbcsrc:8083` 를 이용해야 한다.
+> `test.enabled` 가 `true` 인 경우 srccon 커넥트의 주소는 `address: http://myrel-alpaka-test-srccon:8083` 를 이용해야 한다.
 
 UI for Kafka 차트는 최초에 [Provectus 의 것](https://github.com/provectus/kafka-ui)을 이용하였으나, Helm 패키지 설치에 문제가 있어 [포크한 것](https://github.com/haje01/kafka-ui) 을 이용하였다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
@@ -966,6 +966,7 @@ helm install -f configs/myrel.yaml myrel alpaka/
 
 - 관련 패키지 (그라파나, 프로메테우스, UI for Kafka, 쿠버네티스 대쉬보드) 웹 접속 테스트
 - MySQL DB 에 있는 정보를 JDBC 소스 커넥터를 통해 카프카로 가져오기 테스트
+- 카프카 토픽을 S3 싱크 커넥터를 통해 AWS S3 로 올리기 테스트 (AWS 계정 정보 필요)
 - 기본적인 ksqlDB 동작 테스트 
 
 앞으로 좀 더 다양한 테스트가 추가될 수 있을 것이다.

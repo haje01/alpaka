@@ -135,7 +135,7 @@ tool:
   podAnnotations: {}
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.3
+    tag: 0.0.4
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -158,7 +158,7 @@ kafka_connect:
     # - type: jdbcsrc
     #   replicaCount: 1
     #   container:
-    #     image: "haje01/kafka-dbcon"
+    #     image: "haje01/kafka-srccon"
     #     tag: latest
     #     pullPolicy: IfNotPresent
     #   timezone: Asia/Seoul
@@ -295,7 +295,7 @@ init:
   enabled: false 
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.3
+    tag: 0.0.4
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -325,14 +325,30 @@ test:
   # 테스트 컨테이너
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.3
+    tag: 0.0.4
     pullPolicy: IfNotPresent
   # 커넥트 컨테이너 
   connect:
-    container:
-      image: "haje01/kafka-dbcon"
-      tag: 0.0.3
-      pullPolicy: IfNotPresent
+    containers:
+      # 소스 커넥터
+      srccon:
+        image: "haje01/kafka-srccon"
+        tag: 0.0.3
+        pullPolicy: IfNotPresent
+      # 싱크 커넥터 
+      sinkcon:
+        image: "haje01/kafka-sinkcon"
+        tag: 0.0.3
+        pullPolicy: IfNotPresent
+  s3sync: {}
+    # bucket: S3 싱크가 저장될 버킷
+    # topics_dir: S3 싱크가 저장될 버킷내 디렉토리 
+    # region: S3 싱크가 저장될 리전
+  envs: []
+  # - name: AWS 액세스 키
+  #   value: 
+  # - name: AWS 시크릿 키
+  #   value: 
   resources: {}
   nodeSelector: {}
   tolerations: []

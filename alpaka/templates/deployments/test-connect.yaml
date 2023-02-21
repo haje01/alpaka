@@ -8,30 +8,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullname }}-connect-test-jdbcsrc
+  name: {{ $fullname }}-test-srccon
   labels: 
     {{- $labels | nindent 4 }}
-    app.kubernetes.io/component: kafka-connect-test-jdbcsrc
+    app.kubernetes.io/component: kafka-test-srccon
 spec:
   replicas: {{ .Values.test.replicaCount | default 1 }}
   selector:
     matchLabels: 
       {{- $matchLabels | nindent 6 }}
-      app.kubernetes.io/component: kafka-connect-test-jdbcsrc
+      app.kubernetes.io/component: kafka-test-srccon
   template:
     metadata:
       labels: {{ $labels | nindent 8 }}
-        app.kubernetes.io/component: kafka-connect-test-jdbcsrc
+        app.kubernetes.io/component: kafka-test-srccon
     spec:
       containers:
-      - name: test-jdbcsrc-connect
-        image: {{ .Values.test.connect.container.image }}:{{ .Values.test.connect.container.tag }}
-        imagePullPolicy: {{ .Values.test.connect.container.pullPolicy | default "IfNotPresent" }}
+      - name: test-srccon-connect
+        image: {{ .Values.test.connect.containers.srccon.image }}:{{ .Values.test.connect.containers.srccon.tag }}
+        imagePullPolicy: {{ .Values.test.connect.containers.srccon.pullPolicy | default "IfNotPresent" }}
         command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
         args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
         env:
-          - name: TZ
-            value: {{ .Values.test.timezone | default "UTC" }}
+        - name: TZ
+          value: {{ .Values.test.timezone | default "UTC" }}
+        {{- range $ev := .Values.test.envs }}
+        - name: {{ $ev.name }}
+          value: {{ $ev.value }} 
+        {{- end }}
         ports:
           - name: connector
             containerPort: 8083
@@ -41,5 +45,47 @@ spec:
       volumes:
         - name: conn-cfg
           configMap:
-            name: {{ $fullname }}-connect-test-jdbcsrc-cfg
+            name: {{ $fullname }}-test-srccon-cfg
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-test-sinkcon
+  labels: 
+    {{- $labels | nindent 4 }}
+    app.kubernetes.io/component: kafka-test-sinkcon
+spec:
+  replicas: {{ .Values.test.replicaCount | default 1 }}
+  selector:
+    matchLabels: 
+      {{- $matchLabels | nindent 6 }}
+      app.kubernetes.io/component: kafka-test-sinkcon
+  template:
+    metadata:
+      labels: {{ $labels | nindent 8 }}
+        app.kubernetes.io/component: kafka-test-sinkcon
+    spec:
+      containers:
+      - name: test-sinkcon-connect
+        image: {{ .Values.test.connect.containers.sinkcon.image }}:{{ .Values.test.connect.containers.sinkcon.tag }}
+        imagePullPolicy: {{ .Values.test.connect.containers.sinkcon.pullPolicy | default "IfNotPresent" }}
+        command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
+        args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
+        env:
+        - name: TZ
+          value: {{ .Values.test.timezone | default "UTC" }}
+        {{- range $ev := .Values.test.envs }}
+        - name: {{ $ev.name }}
+          value: {{ $ev.value }} 
+        {{- end }}
+        ports:
+          - name: connector
+            containerPort: 8083
+        volumeMounts:
+          - name: conn-cfg
+            mountPath: /opt/bitnami/kafka/config
+      volumes:
+        - name: conn-cfg
+          configMap:
+            name: {{ $fullname }}-test-sinkcon-cfg
 {{- end }}
