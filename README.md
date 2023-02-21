@@ -34,10 +34,10 @@ minikube start --cpus=4 --memory=10g --disk-size=40g
 
 #### k3d 이용시 
 
-워커노드 5 대, 노드별 메모리 2GB 예:
+워커노드 2 대, 노드별 메모리 8GB, Ingress 이용의 예:
 
 ```
-k3d cluster create --agents=5 --agents-memory=2gb
+k3d cluster create -p "80:80@loadbalancer" --agents 2 --agents-memory=8gb
 ```
 
 ### 클라우드 쿠버네티스 환경 (AWS EKS) 관련
@@ -791,8 +791,18 @@ ingress:
     # # minikube 설치용
     # kubernetes.io/ingress.class: nginx
 
-    # # K3S (K3D) 설치용
+    # # k3s 설치용
     # kubernetes.io/ingress.class: traefik
+
+    # # k3d 설치용
+    # ingress.kubernetes.io/ssl-redirect: "false"
+
+    # # AWS EKS 설치용
+    # kubernetes.io/ingress.class: alb
+    # alb.ingress.kubernetes.io/group.name: public
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 9090}]'
 
 ```
 
