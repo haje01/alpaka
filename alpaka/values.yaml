@@ -331,15 +331,16 @@ test:
     tag: 0.0.4
     pullPolicy: IfNotPresent
   # 커넥트 컨테이너 
-  connect:
-    containers:
-      # 소스 커넥터
-      srccon:
+  connects:
+    # 소스 커넥터
+    srccon:
+      container:
         image: "haje01/kafka-srccon"
         tag: 0.0.3
         pullPolicy: IfNotPresent
-      # 싱크 커넥터 
-      sinkcon:
+    # 싱크 커넥터 
+    sinkcon:
+      container:
         image: "haje01/kafka-sinkcon"
         tag: 0.0.3
         pullPolicy: IfNotPresent
