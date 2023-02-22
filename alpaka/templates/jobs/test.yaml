@@ -25,7 +25,7 @@ spec:
         - name: {{ $ev.name }}
           value: {{ $ev.value }} 
         {{- end }}
-        command: ["/bin/sh", "-c", "rm_s3dir.sh && init_mysql.sh && srccon_reg_mysql.sh && wait_ksqldb.sh && run_test.sh"]
+        command: ["/bin/sh", "-c", "rm_s3dir.sh && init_mysql.sh && srccon_reg_mysql.sh && wait_ksqldb.sh && run_test.sh && sleep infinity"]
         volumeMounts:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/init_mysql.sh
