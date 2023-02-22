@@ -341,7 +341,7 @@ test:
     # 싱크 커넥터 
     sinkcon:
       container:
-        image: "haje01/kafka-srccon"
+        image: "haje01/kafka-sinkcon"
         tag: 0.0.3
         pullPolicy: IfNotPresent
   s3sync: {}
