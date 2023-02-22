@@ -14,6 +14,10 @@ spec:
   template:
     metadata:
     spec:
+      {{- if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ $full_name }}-test
         image: {{ .container.image }}:{{ .container.tag }}

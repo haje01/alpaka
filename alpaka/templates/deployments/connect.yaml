@@ -25,6 +25,10 @@ spec:
       labels: {{ $labels | nindent 8 }}
         app.kubernetes.io/component: kafka-{{ $cnt.type }}
     spec:
+      {{- if .Values.kafka_connect.nodeSelector }}
+      nodeSelector:
+        {{- toYaml $cnt.nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ $cnt.type }}-connect
         image: {{ $cnt.container.image }}:{{ $cnt.container.tag }}

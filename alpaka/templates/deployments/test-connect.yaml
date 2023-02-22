@@ -42,6 +42,10 @@ spec:
         volumeMounts:
           - name: conn-cfg
             mountPath: /opt/bitnami/kafka/config
+      {{- with .Values.test.connect.containers.srccon.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: conn-cfg
           configMap:
@@ -84,6 +88,10 @@ spec:
         volumeMounts:
           - name: conn-cfg
             mountPath: /opt/bitnami/kafka/config
+      {{- with .Values.test.connect.containers.srccon.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: conn-cfg
           configMap:

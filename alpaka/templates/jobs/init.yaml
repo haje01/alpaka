@@ -7,6 +7,10 @@ metadata:
 spec:
   template:
     spec:
+      {{- if .Values.init.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.init.nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ $full_name }}-init
         image: {{ .Values.init.container.image }}:{{ .Values.init.container.tag }}

@@ -947,6 +947,7 @@ helm dependency update
 > - `kminion` - `policy/v1beta` 의 호환성 문제
 > - `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러 발생](https://github.com/bitnami/charts/issues/14070)
 > - `provectus/kafka-ui` - 차트 저장소가 사라짐
+> - `ksqldb` - `nodeSelector` 를 지원하지 않음 
 
 외부 의존 차트를 다 받았으면, 다시 상위 디렉토리로 이동 하여 다음과 같이 로컬 코드에서 설치한다.
 
@@ -1086,6 +1087,75 @@ kubectl delete pvc --all
 ```
 
 ## 기타
+
+### 파드를 적절한 노드에 배포하기 
+
+하나 이상의 노드로 구성된 클러스터의 경우 어떤 노드에 어떤 파드가 위치할지가 중요한 경우가 있다. 
+
+[이곳](https://waspro.tistory.com/582) 을 참고하면 쿠버네티스 클러스터 노드는 크게 다음과 같은 역할로 분류할 수 있다:
+
+- 마스터 - K8S 를 관리하는 컨트롤러 배포
+- 인프라 - 인프라적인 에코 시스템 (모니터링, 로깅, 트레이싱 등)
+- 워커 - 실제 앱이 배포 
+- 잉그레스 - Ingress 컨트롤러 배포
+
+예를 들어 알파카의 경우 카프카 브로커는 워커 노드에, 프로메테우스 및 그라파나는 인프라 노드, 그리고 K8S 컨트롤러는 마스터 노드에 배포되는 것이 맞을 것이다. 
+
+> 그렇지클러스터가 4 대 미만의 노드로 구성되는 경우, 다음처럼 한 노드가 하나 이상의 역할을 하도록 서비스 특성에 맞게 구성될 수도 있겠다. 아래는 2 대인 경우 예시이다.
+> 
+> - `node-01` - 마스터 + 인프라 역할
+> - `node-02` - 워커 + 잉그레스 역할
+
+이 경우 각 노드에 아래와 같이 라벨을 부여하고 
+
+```
+kubectl label nodes node-01 type=infra
+kubectl label nodes node-02 type=worker
+```
+
+설정 파일에서 다음처럼 `nodeSelector` 를 기술하면 파드가 역할에 맞는 노드에 배포될 것이다 (실제 사용하는 패키지에 대해서만 기술하면 된다).
+
+```
+kafka:
+  nodeSelector:
+    type: worker
+  metrics:
+    kafka:
+      nodeSelector:
+        type: worker
+
+ui4kafka:
+  nodeSelector:
+    type: infra
+
+prometheus:
+  prometheus:
+    nodeSelector:
+      type: infra
+  operator:
+    nodeSelector:
+      type: infra
+  alertmanager:
+    nodeSelector:
+      type: infra
+  blackboxExporter:
+    nodeSelector:
+      type: infra
+
+grafana:
+  grafana:
+    nodeSelector:
+      type: infra
+
+kafka_connect:
+  nodeSelector:
+    type: infra
+  connects:
+  - type: srccon
+    nodeSelector:
+      type: infra
+
+```
 
 ### alpaka 레포지토리 갱신
 
