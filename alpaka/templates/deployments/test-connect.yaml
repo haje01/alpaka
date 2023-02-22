@@ -25,8 +25,8 @@ spec:
     spec:
       containers:
       - name: test-srccon-connect
-        image: {{ .Values.test.connect.containers.srccon.image }}:{{ .Values.test.connect.containers.srccon.tag }}
-        imagePullPolicy: {{ .Values.test.connect.containers.srccon.pullPolicy | default "IfNotPresent" }}
+        image: {{ .Values.test.connects.srccon.container.image }}:{{ .Values.test.connects.srccon.container.tag }}
+        imagePullPolicy: {{ .Values.test.connects.srccon.container.pullPolicy | default "IfNotPresent" }}
         command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
         args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
         env:
@@ -71,8 +71,8 @@ spec:
     spec:
       containers:
       - name: test-sinkcon-connect
-        image: {{ .Values.test.connect.containers.sinkcon.image }}:{{ .Values.test.connect.containers.sinkcon.tag }}
-        imagePullPolicy: {{ .Values.test.connect.containers.sinkcon.pullPolicy | default "IfNotPresent" }}
+        image: {{ .Values.test.connects.sinkcon.container.image }}:{{ .Values.test.connects.sinkcon.container.tag }}
+        imagePullPolicy: {{ .Values.test.connects.sinkcon.container.pullPolicy | default "IfNotPresent" }}
         command: ['/opt/bitnami/kafka/bin/connect-distributed.sh']
         args: ['/opt/bitnami/kafka/config/connect-distributed.properties']
         env:
