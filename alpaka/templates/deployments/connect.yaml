@@ -25,7 +25,7 @@ spec:
       labels: {{ $labels | nindent 8 }}
         app.kubernetes.io/component: kafka-{{ $cnt.type }}
     spec:
-      {{- if .Values.kafka_connect.nodeSelector }}
+      {{- if $cnt.nodeSelector }}
       nodeSelector:
         {{- toYaml $cnt.nodeSelector | nindent 8 }}
       {{- end }}
