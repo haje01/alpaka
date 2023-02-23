@@ -3,14 +3,14 @@ entries:
   alpaka:
   - apiVersion: v2
     appVersion: 3.3.1
-    created: "2023-02-08T18:04:25.008931691+09:00"
+    created: "2023-02-23T16:20:25.997713192+09:00"
     dependencies:
     - name: kafka
       repository: https://charts.bitnami.com/bitnami
       version: 20.0.x
     - condition: ksqldb.enabled
       name: ksqldb
-      repository: https://ricardo-aires.github.io/helm-charts/
+      repository: https://raw.githubusercontent.com/haje01/ricardo-helm-charts/main
       version: 0.2.x
     - alias: prometheus
       condition: prometheus.enabled
@@ -40,7 +40,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: 9.4.5
     description: Yet another Kafka deployment chart.
-    digest: 3f18af34574646434867a327f980faade78924fac6535f42da34479716871178
+    digest: ad27d1ee97a0283f07ae6d944d3afd5370920ee8155d96c6149635917717325d
     name: alpaka
     type: application
     urls:
@@ -48,7 +48,7 @@ entries:
     version: 0.0.3
   - apiVersion: v2
     appVersion: 3.3.1
-    created: "2023-02-08T18:04:24.978157803+09:00"
+    created: "2023-02-23T16:20:25.965065179+09:00"
     dependencies:
     - name: kafka
       repository: https://charts.bitnami.com/bitnami
@@ -89,7 +89,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: 3.3.1
-    created: "2023-02-08T18:04:24.938155019+09:00"
+    created: "2023-02-23T16:20:25.931778366+09:00"
     dependencies:
     - name: kafka
       repository: https://charts.bitnami.com/bitnami
@@ -123,4 +123,4 @@ entries:
     urls:
     - alpaka-0.0.1.tgz
     version: 0.0.1
-generated: "2023-02-08T18:04:24.895989336+09:00"
+generated: "2023-02-23T16:20:25.900145253+09:00"
