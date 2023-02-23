@@ -37,8 +37,12 @@ minikube start --cpus=4 --memory=10g --disk-size=40g
 워커노드 2 대, 노드별 메모리 8GB, Ingress 이용의 예:
 
 ```
-k3d cluster create -p "80:80@loadbalancer" --agents 2 --agents-memory=8gb
+K3D_FIX_DNS=1 k3d cluster create -p "80:80@loadbalancer" --agents 2 --agents-memory=8gb
 ```
+
+> K3D_FIX_DNS 가 없으면 생성된 클러스터내 파드에서 인터넷 접속 안되는 문제가 있다.
+> ( https://github.com/k3d-io/k3d/issues/209 )
+
 
 ### 클라우드 쿠버네티스 환경 (AWS EKS) 관련
 
@@ -234,7 +238,7 @@ test:           # 클러스터 설치 후 테스트 설정
 
 `k8s_dist`, `kminion`, `ingress`, `kafka_connect`, `init` 그리고 `test` 는 알파카 자체적인 설정 블럭이다. `kafka`, `ui4kafka`, `k8dashboard`, `prometheus`, `grafana` 는 알파카가 의존하는 외부 패키지를 위한 설정 블럭이다.
 
-지금부터는 테스트를 위한 간단한 설정 파일을 만들어 가면서 설정 파일 작성 방법을 소개하겠다. 이 설정 파일은 로컬에서 minikube 배포판을 이용하고, 파일은 `configs/myrel.yaml` 에 저장하는 것으로 가정하겠다. 파일의 최초 내용은 아래와 같다.
+지금부터는 테스트를 위한 간단한 설정 파일을 만들어 가면서 설정 파일 작성 방법을 소개하겠다. 이 설정 파일은 로컬에서 minikube 배포판을 이용하고, 파일은 `configs/rel.yaml` 에 저장하는 것으로 가정하겠다. 파일의 최초 내용은 아래와 같다.
 
 ```yaml
 k8s_dist: minikube
@@ -243,10 +247,10 @@ k8s_dist: minikube
 이 설정 파일이 완성되면 다음과 같이 설치하게 될 것이다.
 
 ```
-helm install -f configs/myrel.yaml myrel alpaka/
+helm install -f configs/rel-mkb.yaml rel alpaka/
 ```
 
-이 경우 배포 이름은 `myrel` 이 된다. 
+이 경우 배포 이름은 `rel` 이 된다. 
 
 이제 각 설정 블럭을 차례대로 설명하겠다. 알파카 차트나 알파카 변수 파일 `alpaka/values.yaml` 에 기본값이 지정되어 있고 설정 파일에 관련 내용이 없으면 기본값이 이용된다.
 
@@ -408,7 +412,7 @@ srccon-mydb_code-code.sh
 
 `srccon-mydb_log-log1.sh`
 ```
-curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://rel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "srccon-mydb_log-log1.sh",
     "config": {
         "connection.password": "mypass",
@@ -425,7 +429,7 @@ curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: app
 
 `srccon-mydb_log-log2.sh`
 ```
-curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://rel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "srccon-mydb_log-log2.sh",
     "config": {
         "connection.password": "mypass",
@@ -442,7 +446,7 @@ curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: app
 
 `srccon-mydb_code-code.sh`
 ```
-curl -s -X POST http://myrel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
+curl -s -X POST http://rel-alpaka-srccon:8083/connectors -H "Content-Type: application/json" -d '{
     "name": "srccon-mydb_code-code.sh",
     "config": {
         "connection.password": "mypass",
@@ -487,7 +491,7 @@ init:
 한 번 등록된 커넥터는 운영을 하면서 필요에 따라 설정을 바꿔야하는 경우도 빈번한데, 이 경우 지금까지 처럼 설정 파일에서 커넥터 설정을 바꿔주고 아래와 같이 Helm 의 업그레이드를 이용하면 적용된다.
 
 ```
-helm upgrade -f configs/myrel.yaml test alpaka/
+helm upgrade -f configs/rel.yaml test alpaka/
 ```
 
 일반적으로는 이렇게 하면 **설정파일 변경 -> ConfigMap 재생성 -> 관련 쿠버네티스 리소스 재생성** 식으로 진행되는데, 수정하지 않은 커넥트까지 불필요한 재시작을 겪게된다. 이에 알파카는 업그레이드시 사용된 커넥터 설정을 기 등록된 커넥터 설정과 비교하여 변경된 커넥터만 삭제 후 다시 등록하도록 구현되어 있다. 
@@ -519,10 +523,10 @@ ksqldb:
 ksqldb:
   enabled: true 
   ksqldb:
-    nameOverride: myrel-ksqldb
+    nameOverride: rel-ksqldb
     kafka:
       enabled: false 
-      bootstrapServer: PLAINTEXT://myrel-kafka-headless:9092  
+      bootstrapServer: PLAINTEXT://rel-kafka-headless:9092  
 ```
 
 ksqlDB 차트는 [여기](https://ricardo-aires.github.io/helm-charts/charts/ksqldb/) 에서 확인할 수 있다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
@@ -561,16 +565,16 @@ ui4kafka:
   yamlApplicationConfig:  
     kafka:            
       clusters:
-      - name: myrel-kafka   # 카프카 클러스터 이름 
-        bootstrapServers: myrel-kafka-headless:9092  # 카프카 브로커의 헤드리스 서비스 
-        zookeeper: myrel-zookeeper-headless:2181     # 주키퍼의 헤드리스 서비스 
+      - name: rel-kafka   # 카프카 클러스터 이름 
+        bootstrapServers: rel-kafka-headless:9092  # 카프카 브로커의 헤드리스 서비스 
+        zookeeper: rel-zookeeper-headless:2181     # 주키퍼의 헤드리스 서비스 
         kafkaConnect:
         # srccon 커넥트 정보 
         - name: srccon
-          address: http://myrel-alpaka-srccon:8083
+          address: http://rel-alpaka-srccon:8083
 ```
 
-> `test.enabled` 가 `true` 인 경우 srccon 커넥트의 주소는 `address: http://myrel-alpaka-test-srccon:8083` 를 이용해야 한다.
+> `test.enabled` 가 `true` 인 경우 srccon 커넥트의 주소는 `address: http://rel-alpaka-test-srccon:8083` 를 이용해야 한다.
 
 UI for Kafka 차트는 최초에 [Provectus 의 것](https://github.com/provectus/kafka-ui)을 이용하였으나, Helm 패키지 설치에 문제가 있어 [포크한 것](https://github.com/haje01/kafka-ui) 을 이용하였다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
 
@@ -651,11 +655,11 @@ prometheus:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - myrel-kminion:8080
+            - rel-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - myrel-zookeeper-metrics:9141
+            - rel-zookeeper-metrics:9141
 ```
 
 프로메테우스 차트는 [bitnami 의 kube-prometheus](https://github.com/bitnami/charts/tree/main/bitnami/kube-prometheus) 를 사용한다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
@@ -716,18 +720,18 @@ grafana:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://myrel-prometheus-prometheus:9090
+        url: http://rel-prometheus-prometheus:9090
         isDefault: true
   dashboardsConfigMaps:
-    - configMapName: myrel-alpaka-grafana-cluster
+    - configMapName: rel-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: myrel-alpaka-grafana-topic
+    - configMapName: rel-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: myrel-alpaka-grafana-groups
+    - configMapName: rel-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: myrel-alpaka-grafana-zookeeper
+    - configMapName: rel-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: myrel-alpaka-grafana-jvm
+    - configMapName: rel-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 ```
 
@@ -763,9 +767,9 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["myrel-kafka-headless:9092"]
+        brokers: ["rel-kafka-headless:9092"]
     exporter:
-      host: "myrel-kminion"
+      host: "rel-kminion"
 ```
 
 KMnion 차트는 [여기](https://github.com/redpanda-data/kminion/tree/master/charts) 에서 확인할 수 있다. 로컬 Helm 저장소에 등록하였다면 차트의 기본값은 다음처럼 확인할 수 있다.
@@ -918,26 +922,26 @@ alpaka/alpaka   0.0.2           3.3.1           Yet another Kafka deployment cha
 앞서 작성해 둔 예제 설정 파일을 이용하면 다음과 같이 설치할 수 있다.
 
 ```bash
-helm install -f configs/myrel.yaml myrel alpaka/alpaka 
+helm install -f configs/rel.yaml rel alpaka/alpaka 
 ```
 
 저장소에 등록된 패키지에서 설치하려면 다음처럼 한다 (`alpaka/alpaka` 는 `저장소/차트명` 이다). 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/myrel.yaml myrel alpaka/alpaka --version 0.0.2
+helm install -f configs/rel.yaml rel alpaka/alpaka --version 0.0.2
 ```
 
 폐쇄망처럼 외부 접속이 곤란한 경우 `alpaka/chartrepo` 아래에 있는 특정 버전의 패키지 파일에서 직접 설치할 수도 있다.
 
 ```bash
-helm install -f config/myrel.yaml myrel chartrepo/alpaka-0.0.3.tgz
+helm install -f config/rel.yaml rel chartrepo/alpaka-0.0.3.tgz
 ```
 
 혹은 다음처럼 패키지 파일내 `charts/` 디렉토리만 로컬로 복사하여 이용할 수도 있다.
 
 ```bash
 tar xzvf chartrepo/alpaka-0.0.3.tgz alpaka/charts
-helm install -f config/myrel.yaml myrel alpaka/
+helm install -f config/rel.yaml rel alpaka/
 ```
 
 #### 로컬 코드에서 설치하기
@@ -957,11 +961,12 @@ helm dependency update
 > - `kminion` - `policy/v1beta` 의 호환성 문제
 > - `bitnami/kube-prometheus` - Ingress 에서 `hostname` 에 `*` 를 주면 [에러 발생](https://github.com/bitnami/charts/issues/14070)
 > - `provectus/kafka-ui` - 차트 저장소가 사라짐
+> - `ksqldb` - `nodeSelector` 를 지원하지 않음 
 
 외부 의존 차트를 다 받았으면, 다시 상위 디렉토리로 이동 하여 다음과 같이 로컬 코드에서 설치한다.
 
 ```bash
-helm install -f configs/myrel.yaml myrel alpaka/
+helm install -f configs/rel.yaml rel alpaka/
 ```
 
 > `alpaka/` 는 차트가 있는 디렉토리 명이다.
@@ -1001,44 +1006,47 @@ helm upgrade -f configs/_mkb.yaml mkb alpaka
 
 설치가 성공하면 노트가 출력되는데 이를 활용에 참고하도록 하자. 아래는 예제 설정 파일을 통해 설치한 경우의 노트이다.
 
-> `helm status myrel` 명령으로 다시 볼 수 있다.
+> `helm status rel` 명령으로 다시 볼 수 있다.
 
 ```markdown
-Release "myrel" has been upgraded. Happy Helming!
-NAME: myrel
-LAST DEPLOYED: Wed Feb  8 18:09:37 2023
+NAME: rel
+LAST DEPLOYED: Thu Feb 23 13:45:44 2023
 NAMESPACE: default
 STATUS: deployed
-REVISION: 5
+REVISION: 1
 NOTES:
 # 설정 파일에 기술된 쿠버네티스 배포판
 
-minikube
+k3d
 
 # 설치된 파드 리스트
 
-kubectl get pods --namespace default -l app.kubernetes.io/instance=myrel
+kubectl get pods --namespace default -l app.kubernetes.io/instance=rel
 
 # 카프카 브로커 URL
 
-myrel-kafka-headless:9092
+rel-kafka-headless:9092
 
 # 알파카 Tool 에 접속
 
-export TOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=myrel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
+export TOOL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/instance=rel,app.kubernetes.io/component=alpaka-tool" -o jsonpath="{.items[0].metadata.name}")
 kubectl exec -it $TOOL_POD -n default -- bash
 
 # 테스트용 MySQL
 
 root 사용자 암호
 
-MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default myrel-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
+MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default rel-test-mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
 
 # 테스트 로그 확인
 
-export TEST_JOB=$(kubectl get job -n default  -l "app.kubernetes.io/component=test,app.kubernetes.io/instance=myrel" -o jsonpath="{.items[0].metadata.name}")
-kubectl logs -f job/$TEST_JOB
+export TEST_POD=$(kubectl get pod -n default  -l "job-name=rel-alpaka-test-run-1" -o jsonpath="{.items[0].metadata.name}")
+kubectl logs -f $TEST_POD
 
+# ksqlDB 접속
+
+export KSQL_POD=$(kubectl get pods -n default -l "app.kubernetes.io/name=ksqldb,app.kubernetes.io/instance=rel" -o jsonpath="{.items[0].metadata.name}")
+kubectl exec -it $KSQL_POD -n default -- ksql
 ```
 
 #### 웹 접속하기 
@@ -1096,6 +1104,122 @@ kubectl delete pvc --all
 ```
 
 ## 기타
+
+### 파드를 적절한 노드에 배포하기 
+
+하나 이상의 노드로 구성된 클러스터의 경우 어떤 노드에 어떤 파드가 위치할지가 중요한 경우가 있다. 
+
+[이곳](https://waspro.tistory.com/582) 을 참고하면 쿠버네티스 클러스터 노드는 크게 다음과 같은 역할로 분류할 수 있다:
+
+- 마스터 - K8S 를 관리하는 컨트롤러 배포
+- 인프라 - 인프라적인 에코 시스템 (모니터링, 로깅, 트레이싱 등)
+- 워커 - 실제 앱이 배포 
+- 잉그레스 - Ingress 컨트롤러 배포
+
+예를 들어 알파카의 경우 카프카 브로커는 워커 노드에, 프로메테우스 및 그라파나는 인프라 노드, 그리고 K8S 컨트롤러는 마스터 노드에 배포되는 것이 맞을 것이다. 
+
+여기에서는 편의상 두 개 노드의 예로 설명하겠는데, 이처럼 역할별로 노드를 배정하기에 부족한 경우 다음처럼 하나의 노드가 하나 이상의 역할을 하도록 구성될 수도 있겠다.
+ 
+- `agent-01` - 인프라 + 알파 역할
+- `agent-02` - 워커 + 알파 역할
+
+> 로컬에서 멀티 노드 배포 테스트를 하기 위해서는 k3d 를 이용하면 편리할 것이다.
+
+
+이 경우 각 노드에 아래와 같이 라벨을 부여하고,
+
+```
+kubectl label nodes agent-01 type=infra
+kubectl label nodes agent-02 type=worker
+```
+
+각 노드별로 아래와 같이 파드가 배포되기를 원한다고 하자.
+- agent-01 (인프라)
+  - 프로메테우스
+  - 그라파나
+  - UI for Kafka
+  - 쿠버네티스 대쉬보드
+  - KMinion
+  - ksqlDB
+  - 툴 컨테이너
+- agent-02 (워커)
+  - 주키퍼
+  - 카프카 브로커
+  - 카프카 커넥터
+  - 초기화 및 테스트 관련
+
+설정 파일에서 다음처럼 `nodeSelector` 를 추가 기술하면 파드가 역할에 맞는 노드에 배포될 것이다 (실제 사용하는 패키지에 대해서만 기술하면 된다).
+
+```
+kafka:
+  nodeSelector:
+    type: worker
+  metrics:
+    kafka:
+      nodeSelector:
+        type: worker
+
+ui4kafka:
+  nodeSelector:
+    type: infra
+
+prometheus:
+  prometheus:
+    nodeSelector:
+      type: infra
+  operator:
+    nodeSelector:
+      type: infra
+  alertmanager:
+    nodeSelector:
+      type: infra
+  blackboxExporter:
+    nodeSelector:
+      type: infra
+
+grafana:
+  grafana:
+    nodeSelector:
+      type: infra
+
+kminion:
+  nodeSelector:
+    type: infra
+
+k8dashboard:
+  nodeSelector:
+    type: infra
+
+kafka_connect:
+  connects:
+  - type: srccon
+    nodeSelector:
+      type: worker
+
+ksqldb:
+  nodeSelector:
+    type: infra
+
+tool:
+  nodeSelector:
+    type: infra
+
+init:
+  nodeSelector:
+    type: worker
+
+test:
+  nodeSelector:
+    type: worker
+  connects: 
+    srccon:
+      nodeSelector:
+        type: worker
+    sinkcon:
+      nodeSelector:
+        type: worker
+
+```
 
 ### alpaka 레포지토리 갱신
 

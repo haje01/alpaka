@@ -37,16 +37,16 @@ spec:
       {{- if .Values.tool.dnsConfig }}                                                                         
       dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.tool.dnsConfig "context" $) | nindent 8 }}
       {{- end }}
-      {{- with .Values.tool.nodeSelector -}}
+      {{- with .Values.tool.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 -}}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tool.affinity -}}
+      {{- with .Values.tool.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 -}}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tool.tolerations -}}
+      {{- with .Values.tool.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 -}}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
 {{- end -}}

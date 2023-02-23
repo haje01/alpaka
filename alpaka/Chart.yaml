@@ -29,7 +29,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
   - name: ksqldb 
     version: 0.2.x
-    repository: https://ricardo-aires.github.io/helm-charts/
+    repository: https://raw.githubusercontent.com/haje01/ricardo-helm-charts/main
     condition: ksqldb.enabled
   - name: kube-prometheus
     version: 8.3.x
@@ -54,6 +54,7 @@ dependencies:
     condition: k8dashboard.enabled
   - name: kafka-ui
     version: 0.4.x
+    # 차트 저장소가 사라짐 
     repository: https://raw.githubusercontent.com/haje01/kafka-ui/master/charts/kafka-ui
     alias: ui4kafka
     condition: ui4kafka.enabled

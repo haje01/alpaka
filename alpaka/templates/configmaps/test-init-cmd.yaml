@@ -8,12 +8,12 @@ data:
     init_mysql.sh: |
       echo "> init_mysql.sh"
       # MySQL 준비될 때까지 대기 
-      while ! mysqladmin ping -h {{ .Release.Name }}-mysql-headless --silent; do
+      while ! mysqladmin ping -h {{ .Release.Name }}-test-mysql-headless --silent; do
           echo "waiting for mysql."
           sleep 5
       done     
       # 테스트용 DB 및 유저 만들기 
-      mysql -h {{ .Release.Name }}-mysql-headless -u root -p{{ .Values.mysql.auth.password }} -e "
+      mysql -h {{ .Release.Name }}-test-mysql-headless -u root -p{{ .Values.mysql.auth.password }} -e "
         CREATE DATABASE IF NOT EXISTS test;
         CREATE USER IF NOT EXISTS 'tester'@'%' IDENTIFIED BY 'testerpass';
         GRANT ALL PRIVILEGES ON test.* TO 'tester'@'%';
@@ -33,7 +33,7 @@ data:
         "name": "jdbc_source_mysql",
         "config": {
             "mode": "bulk",
-            "connection.url": "jdbc:mysql://{{ .Release.Name }}-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
+            "connection.url": "jdbc:mysql://{{ .Release.Name }}-test-mysql-headless:3306/test?serverTimezone=Asia/Seoul",
             "connection.user": "root",
             "connection.password": "{{ .Values.mysql.auth.password }}",
             "key.converter": "org.apache.kafka.connect.storage.StringConverter",
