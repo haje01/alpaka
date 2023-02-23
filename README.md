@@ -1129,8 +1129,8 @@ kubectl delete pvc --all
 이 경우 각 노드에 아래와 같이 라벨을 부여하고,
 
 ```
-kubectl label nodes agent-01 type=infra
-kubectl label nodes agent-02 type=worker
+kubectl label nodes agent-01 alpaka/node-type=infra
+kubectl label nodes agent-02 alpaka/node-type=worker
 ```
 
 각 노드별로 아래와 같이 파드가 배포되기를 원한다고 하자.
@@ -1153,71 +1153,71 @@ kubectl label nodes agent-02 type=worker
 ```
 kafka:
   nodeSelector:
-    type: worker
+    alpaka/node-type: worker
   metrics:
     kafka:
       nodeSelector:
-        type: worker
+        alpaka/node-type: worker
 
 ui4kafka:
   nodeSelector:
-    type: infra
+    alpaka/node-type: infra
 
 prometheus:
   prometheus:
     nodeSelector:
-      type: infra
+      alpaka/node-type: infra
   operator:
     nodeSelector:
-      type: infra
+      alpaka/node-type: infra
   alertmanager:
     nodeSelector:
-      type: infra
+      alpaka/node-type: infra
   blackboxExporter:
     nodeSelector:
-      type: infra
+      alpaka/node-type: infra
 
 grafana:
   grafana:
     nodeSelector:
-      type: infra
+      alpaka/node-type: infra
 
 kminion:
   nodeSelector:
-    type: infra
+    alpaka/node-type: infra
 
 k8dashboard:
   nodeSelector:
-    type: infra
+    alpaka/node-type: infra
 
 kafka_connect:
   connects:
   - type: srccon
     nodeSelector:
-      type: worker
+      alpaka/node-type: worker
 
 ksqldb:
   nodeSelector:
-    type: infra
+    alpaka/node-type: infra
 
 tool:
   nodeSelector:
-    type: infra
+    alpaka/node-type: infra
 
 init:
   nodeSelector:
-    type: worker
+    alpaka/node-type: worker
 
 test:
   nodeSelector:
-    type: worker
+    alpaka/node-type: worker
   connects: 
     srccon:
       nodeSelector:
-        type: worker
+        alpaka/node-type: worker
     sinkcon:
       nodeSelector:
-        type: worker
+        alpaka/node-type: worker
 
 ```
 
