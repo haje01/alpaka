@@ -1,19 +1,21 @@
 #
-#  minikube 사용시
+#  minikube 설정 템플릿 (이것을 복사해서 커스터마이징)
 #
-
+# - 여기에 없는 설정은 values.yaml 을 참고
+# - RELEASE 는 배포명으로 대체
+#
 k8s_dist: minikube
 
 ui4kafka:
   yamlApplicationConfig:
     kafka:
       clusters:
-        - name: mkb-kafka
-          bootstrapServers: mkb-kafka-headless:9092
-          zookeeper: mkb-zookeeper-headless:2181
+        - name: RELEASE-kafka
+          bootstrapServers: RELEASE-kafka-headless:9092
+          zookeeper: RELEASE-zookeeper-headless:2181
           kafkaConnect:
             - name: srccon
-              address: http://mkb-alpaka-srccon:8083
+              address: http://RELEASE-alpaka-srccon:8083
           metrics:
             port: 5556
             type: JMX
@@ -26,11 +28,11 @@ prometheus:
         - job_name: kminion-metrics
           static_configs:
           - targets:
-            - mkb-kminion:8080
+            - RELEASE-kminion:8080
         - job_name: zookeeper
           static_configs:
           - targets:
-            - mkb-zookeeper-metrics:9141
+            - RELEASE-zookeeper-metrics:9141
 
 grafana:
   datasources:
@@ -40,18 +42,18 @@ grafana:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://mkb-prometheus-prometheus:9090
+        url: http://RELEASE-prometheus-prometheus:9090
         isDefault: true
   dashboardsConfigMaps:
-    - configMapName: mkb-alpaka-grafana-cluster
+    - configMapName: RELEASE-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
-    - configMapName: mkb-alpaka-grafana-topic
+    - configMapName: RELEASE-alpaka-grafana-topic
       fileName: kminion-topic_rev1.json
-    - configMapName: mkb-alpaka-grafana-groups
+    - configMapName: RELEASE-alpaka-grafana-groups
       fileName: kminion-groups_rev1.json
-    - configMapName: mkb-alpaka-grafana-zookeeper
+    - configMapName: RELEASE-alpaka-grafana-zookeeper
       fileName: zookeeper-by-prometheus_rev4.json
-    - configMapName: mkb-alpaka-grafana-jvm
+    - configMapName: RELEASE-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
 
 
@@ -59,12 +61,19 @@ kminion:
   kminion:
     config:
       kafka:
-        brokers: ["mkb-kafka-headless:9092"]
+        brokers: ["RELEASE-kafka-headless:9092"]
     exporter:
-      host: "mkb-kminion"
+      host: "RELEASE-kminion"
 
 
 ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /
+
+
+ksqldb:
+  ksqldb:
+    nameOverride: RELEASE-ksqldb
+    kafka:
+      bootstrapServer: PLAINTEXT://RELEASE-kafka-headless:9092
