@@ -1154,6 +1154,9 @@ kubectl label nodes agent-02 alpaka/node-type=worker
 kafka:
   nodeSelector:
     alpaka/node-type: worker
+  zookeeper:
+    nodeSelector:
+      alpaka/node-type: worker
   metrics:
     kafka:
       nodeSelector:
