@@ -30,7 +30,7 @@ RUN curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/
 # for test
 RUN git clone https://github.com/haje01/kfktest.git && cd kfktest && pip3 install -r requirements.txt && pip3 install -e .
 
-RUN echo alias ll='ls -alh'
-RUN echo alias kcat='kafkacat'
+RUN echo 'alias ll="ls -alh"' >> ~/.bashrc
+RUN echo 'alias kcat="kafkacat"' >> ~/.bashrc
 
 RUN pip install retry
