@@ -876,9 +876,9 @@ init:
   - init_database.sh
 ```
 
-### 설치 후 테스트 설정 
+### 설치 후 진행할 테스트 설정 
 
-알파카는 설치 후 잘 동작하는지 확인을 위해 기본적인 테스트 코드를 제공한다. 이 코드는 툴 컨테이너 이미지에 포함되어 있다. 설정은 대략 다음과 같은 구조를 가진다.
+알파카는 설치 후 잘 동작하는지 확인을 위해 기본적인 테스트 코드를 제공한다. 자세한 것은 아래의 **설치 후 활용 / 테스트** 부분을 참고하고, 여기에서는 테스트 설정에 관해서만 설명하겠다. 설정은 대략 다음과 같은 구조를 가진다.
 
 ```yaml
 test:
@@ -888,14 +888,45 @@ test:
     image: "haje01/alpaka-tool"
     tag: 0.0.5
     pullPolicy: IfNotPresent
+  # 테스트용 카프카 커넥트별 정보
+  connects:
+    # 소스 커넥트 정보
+    srccon:
+      container:
+        image: "haje01/kafka-srccon"
+        tag: 0.0.3
+        pullPolicy: IfNotPresent
+    # 싱크 커넥트 정보 
+    sinkcon:
+      container:
+        image: "haje01/kafka-sinkcon"
+        tag: 0.0.3
+        pullPolicy: IfNotPresent
+  # S3 싱크 커넥터 테스트 정보 
+  s3sink:
+    enabled: false
+    # bucket: S3 싱크 커넥터가 사용할 버킷
+    # topics_dir: S3 싱크 커넥터가 사용할 버킷내 디렉토리 
+    # region: S3 싱크 커넥터가 사용할 AWS 리전
+  envs: []
+  # - name: AWS_ACCESS_KEY_ID
+  #   value: 액세스 키값
+  # - name: AWS_SECRET_ACCESS_KEY 
+  #   value: 시크릿 키값
+  # - name: AWS_DEFAULT_REGION
+  #   value: ap-northeast-2
 ```
 
-테스트는 설치 후 자동으로 진행된다. 만약 테스트를 원하지 않으면 아래와 같이 설정파일에 기술한다.
+테스트는 설치 후 자동으로 진행되는데, 만약 모든 테스트를 원하지 않으면 아래와 같이 설정파일에 기술한다.
 
 ```yaml
 test:
   enabled: false
 ```
+
+테스트는 크게 관련 툴 테스트, 카프카 브로커 및 커넥트 테스트로 나뉜다. 카프카 커넥트 테스트는 소스 커넥트 `srccon` 와 싱크 커넥트 `sinkcon` 로 구분하여 기술한다. 현재는 각각 JDBC 소스 커넥터 및 S3 싱크 커넥터 테스트를 수행한다. 
+
+S3 싱크 커넥터 테스트를 위해서는 `s3sink` 블럭에 `enabled: true` 로 하고, AWS 환경 변수를 기입하여야 한다. 이 때 주의할 점은 `bucket`으로 지정한 S3 버킷 아래 `topics_dir` 디렉토리의 내용물은 지워지게 된다는 점이다. 만약 이 정보를 잘못 설정하면 **원치 않는 경로의 파일들이 지워질 수 있다!**
 
 ## 설치, 활용, 삭제
 
@@ -975,13 +1006,13 @@ helm install -f configs/rel.yaml rel alpaka/
 
 #### 테스트
 
-설치 후 앞서 설정에서 설명했던 대로 자동으로 기본 테스트가 돌아가는데, 이를 위해 테스트를 위한 잡, 파드 및 MySQL DB 서비스가 설치되게 된다.
+앞서 설명했던 것처럼 `test.enabled` 가 `true` 인 경우 설치 후 자동으로 기본 테스트가 돌아가는데, 이를 위해 테스트를 위한 잡, 파드 및 MySQL DB 가 설치되게 된다.
 
 `[배포 이름]-alpaka-test-[임의 문자열]` 형식의 파드가 테스트를 위한 것으로, 이것은 [배포 이름]-alpaka-test` 형식의 Job 을 통해 시작된 것이다. 현재 다음과 같은 테스트를 진행한다.
 
 - 관련 패키지 (그라파나, 프로메테우스, UI for Kafka, 쿠버네티스 대쉬보드) 웹 접속 테스트
 - MySQL DB 에 있는 정보를 JDBC 소스 커넥터를 통해 카프카로 가져오기 테스트
-- 카프카 토픽을 S3 싱크 커넥터를 통해 AWS S3 로 올리기 테스트 (AWS 계정 정보 필요)
+- 카프카 토픽을 S3 싱크 커넥터를 통해 AWS S3 로 올리기 테스트
 - 기본적인 ksqlDB 동작 테스트 
 
 앞으로 좀 더 다양한 테스트가 추가될 수 있을 것이다.

@@ -55,7 +55,8 @@ data:
           echo "waiting for connect."
           sleep 5
       done    
-      # 커넥터 등록
+      {{- if .Values.test.s3sink.enabled }}
+      # S3 싱크 커넥터 등록
       curl -s -X POST http://{{ $full_name }}-test-sinkcon:8083/connectors -H "Content-Type: application/json" -d '{
         "name": "s3_sink",
         "config": {
@@ -70,9 +71,9 @@ data:
             "value.converter.schemas.enable": false,
             "flush.size": 5000,
             "rotate.schedule.interval.ms": 5000,
-            "s3.bucket.name": "{{ .Values.test.s3sync.bucket}}",
-            "s3.region": "{{ .Values.test.s3sync.region}}",
-            "topics.dir": "{{ .Values.test.s3sync.topics_dir}}",
+            "s3.bucket.name": "{{ .Values.test.s3sink.bucket}}",
+            "s3.region": "{{ .Values.test.s3sink.region}}",
+            "topics.dir": "{{ .Values.test.s3sink.topics_dir}}",
             "partitioner.class": "io.confluent.connect.storage.partitioner.TimeBasedPartitioner",
             "path.format": "'"'"'year'"'"'=YYYY/'"'"'month'"'"'=MM/'"'"'day'"'"'=dd",
             "partition.duration.ms": 60000,
@@ -82,6 +83,7 @@ data:
             "timezone": "Asia/Seoul"
           }
         }' | jq
+      {{- end }}
 
     wait_ksqldb.sh: |
       echo "> run wait_ksqldb.sh"
@@ -90,11 +92,13 @@ data:
           sleep 5
       done  
 
-    rm_s3dir.sh: |
-      echo "> run rm_s3dir.sh"
-      # 이전 테스트 결과 S3 경로 지우기 (주의: 지울 경로 꼭 확인!)
-      echo "aws s3 rm s3://{{ required "test.s3sync.bucket must be entered" .Values.test.s3sync.bucket}}/{{ required "test.s3sync.topics_dir must be entered" .Values.test.s3sync.topics_dir }} --recursive"
-      # aws s3 rm s3://{{ .Values.test.s3sync.bucket}}/{{ .Values.test.s3sync.topics_dir }} --recursive
+    # {{- if .Values.test.s3sink.enabled }}
+    # rm_s3dir.sh: |
+    #   echo "> run rm_s3dir.sh"
+    #   # 이전 테스트 결과 S3 경로 지우기 (주의: 지울 경로 꼭 확인!)
+    #   echo "aws s3 rm s3://{{ required "test.s3sink.bucket must be entered" .Values.test.s3sink.bucket}}/{{ required "test.s3sink.topics_dir must be entered" .Values.test.s3sink.topics_dir }} --recursive"
+    #   # aws s3 rm s3://{{ .Values.test.s3sink.bucket}}/{{ .Values.test.s3sink.topics_dir }} --recursive
+    # {{- end }}
       
     run_test.sh: |
       # 테스트 실행 파일

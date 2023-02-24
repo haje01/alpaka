@@ -385,7 +385,7 @@ test:
     image: "haje01/alpaka-tool"
     tag: 0.0.6
     pullPolicy: IfNotPresent
-  # 커넥트 컨테이너 
+  # 테스트용 카프카 커넥트별 정보
   connects:
     # 소스 커넥터
     srccon:
@@ -403,10 +403,12 @@ test:
         image: "haje01/kafka-sinkcon"
         tag: 0.0.3
         pullPolicy: IfNotPresent
-  s3sync: {}
-    # bucket: S3 싱크가 저장될 버킷
-    # topics_dir: S3 싱크가 저장될 버킷내 디렉토리 
-    # region: S3 싱크가 저장될 리전
+  # S3 싱크 커넥터 테스트 정보 
+  s3sink:
+    enabled: false
+    # bucket: S3 싱크 커넥터가 사용할 버킷
+    # topics_dir: S3 싱크 커넥터가 사용할 버킷내 디렉토리 
+    # region: S3 싱크 커넥터가 사용할 AWS 리전
   envs: []
   # - name: AWS_ACCESS_KEY_ID
   #   value: 액세스 키값
