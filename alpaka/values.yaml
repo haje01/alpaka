@@ -135,7 +135,7 @@ tool:
   podAnnotations: {}
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.5
+    tag: 0.0.6
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -298,7 +298,7 @@ init:
   enabled: false 
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.5
+    tag: 0.0.6
     pullPolicy: IfNotPresent
   resources: {}
   nodeSelector: {}
@@ -329,7 +329,7 @@ test:
   # 테스트 컨테이너
   container:
     image: "haje01/alpaka-tool"
-    tag: 0.0.5
+    tag: 0.0.6
     pullPolicy: IfNotPresent
   # 커넥트 컨테이너 
   connects:
