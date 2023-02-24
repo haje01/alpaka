@@ -29,7 +29,7 @@ spec:
         - name: {{ $ev.name }}
           value: {{ $ev.value }} 
         {{- end }}
-        command: ["/bin/sh", "-c", "rm_s3dir.sh && init_mysql.sh && srccon_reg_mysql.sh && wait_ksqldb.sh && run_test.sh"]
+        command: ["/bin/sh", "-c", "init_mysql.sh && srccon_reg_mysql.sh && wait_ksqldb.sh && run_test.sh"]
         volumeMounts:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/init_mysql.sh
@@ -37,15 +37,17 @@ spec:
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/srccon_reg_mysql.sh
           subPath: srccon_reg_mysql.sh
+        {{- if .s3sink.enabled }}
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/sinkcon_reg_mysql.sh
           subPath: sinkcon_reg_mysql.sh
+        {{- end }}
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/wait_ksqldb.sh
           subPath: wait_ksqldb.sh          
-        - name: {{ $full_name }}-test-cmd
-          mountPath: /usr/local/bin/rm_s3dir.sh
-          subPath: rm_s3dir.sh          
+        # - name: {{ $full_name }}-test-cmd
+        #   mountPath: /usr/local/bin/rm_s3dir.sh
+        #   subPath: rm_s3dir.sh          
         - name: {{ $full_name }}-test-cmd
           mountPath: /usr/local/bin/run_test.sh
           subPath: run_test.sh
