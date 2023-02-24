@@ -26,10 +26,14 @@ data:
     @retry(tries=5, delay=5)
     def xs3rmdir():
         """S3 버킷내 테스트 용 임시 디렉토리 결과 디렉토리 제거."""
+        {{- if .Values.test.s3sink.enabled }}
         print("[ ] xs3rmdir")
-        ret = exec(['aws', 's3', 'rm', 's3://{{ required "test.s3sync.bucket must be entered" .Values.test.s3sync.bucket }}/{{ required "test.s3sync.topics_dir must be entered" .Values.test.s3sync.topics_dir}}', '--recursive'])
+        ret = exec(['aws', 's3', 'rm', 's3://{{ required "test.s3sink.bucket must be entered" .Values.test.s3sink.bucket }}/{{ required "test.s3sink.topics_dir must be entered" .Values.test.s3sink.topics_dir}}', '--recursive'])
         print("[v] xs3rmdir")
         return ret
+        {{- else }}
+        pass
+        {{- end }}
 
     def kafka_topics(cmds):
         return exec(['kafka-topics.sh', '--bootstrap-server={{ $broker }}'] + cmds)
@@ -69,8 +73,10 @@ data:
         # 업로드 대기 
         print("Waiting enough for the S3 to finish.")
         time.sleep(20)
+        ## S3 싱크 커넥터 테스트
+        {{- if .Values.test.s3sink.enabled }}
         # S3 에서 받기
-        exec(['aws', 's3', 'sync', 's3://{{ .Values.test.s3sync.bucket }}/{{ .Values.test.s3sync.topics_dir }}', '/tmp/alpaka'])
+        exec(['aws', 's3', 'sync', 's3://{{ .Values.test.s3sink.bucket }}/{{ .Values.test.s3sink.topics_dir }}', '/tmp/alpaka'])
         # 압축 풀기
         exec(['find', '/tmp/alpaka', '-name', '*.gz', '-exec', 'gunzip', '{}', ';'])
         # json 파일 내리기
@@ -78,7 +84,7 @@ data:
         # 파티션 수와 같은 파일 존재
         lines = [l for l in ret.split('\n') if len(l) > 0]
         assert len(lines) == 8
-
+        {{- end }}
 
   test_ksql.py: |
     import json 
