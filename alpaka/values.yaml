@@ -154,14 +154,68 @@ tool:
 kafka_connect:
   enabled: false
   connects: []
-    ## connects 아래 필요한 커넥트 정보를 기술
-    # - type: jdbcsrc
-    #   replicaCount: 1
-    #   container:
-    #     image: "haje01/kafka-srccon"
-    #     tag: latest
-    #     pullPolicy: IfNotPresent
-    #   timezone: Asia/Seoul
+  # # 소스 커넥트 예시
+  # - type: srccon 
+  #   replicaCount: 
+  #   container:
+  #     image: "haje01/kafka-srccon"
+  #     tag: 0.0.3
+  #     pullPolicy: IfNotPresent
+  #   nodeSelector: 
+  #     alpaka/node-type: worker
+  #   timezone: Asia/Seoul 
+  #   # 커넥트 공유 변수
+  #   values:
+  #     db_ip: my-mssql-db-addr
+  #     db_name: person
+  #     db_user: myuser
+  #     db_pass: mypass
+  #   connector_groups:
+  #   # 모카 로그 그룹 
+  #   - name: mocca_log
+  #     # 커넥터 공통 설정
+  #     common:
+  #       connector.class: io.confluent.connect.jdbc.JdbcSourceConnector
+  #       tasks.max: "1"
+  #       connection.url: "jdbc:sqlserver://{{ .Values.db_ip }};databaseName={{ .Values.db_name }}"
+  #       connection.password: "{{ .Values.db_pass }}"
+  #       connection.attempts: 288       # retry정책: 288번(24시간) # default: 3
+  #       connection.backoff.ms: 300000  # retry정책: 5분마다       # default: 10초
+  #       db.timezone: "Asia/Seoul"
+  #       value.converter: "org.apache.kafka.connect.json.JsonConverter"
+  #       value.converter.schemas.enable: false
+  #       poll.interval.ms: 20000        # default: 60000ms (1분)
+  #       batch.max.rows: 2000           # default: 100개
+  #       transaction.isolation.ms: READ_UNCOMMITED  # sql server default: READ_COMMITED
+  #     # 커넥터별 설정 
+  #     connectors:
+  #     - name: "T_PurchaseLog"
+  #       config:
+  #         topic.prefix: kst_T_PurchaseLog4
+  #         mode: incrementing
+  #         incrementing.column.name: LogNo4
+  #         poll.interval.ms: 30000
+  #         query:  # connect_offset 처리 대신 where로 수집대상범위 설정
+  #           "select * from
+  #           (
+  #           select * from T_PurchaseLog4
+  #           where RegDate >= CONVERT(DATETIME, '2022-11-29 00:00:00.000')
+  #           )AS T"
+  #         numeric.mapping: "best_fit" # Numeric 컬럼 처리
+
+  #     - name: "T_PurchaseProcessLog"
+  #       config:
+  #         topic.prefix: kst_T_PurchaseProcessLog
+  #         mode: incrementing
+  #         incrementing.column.name: LogNo
+  #         query:  # connect_offset 처리 대신 where로 수집대상범위 설정
+  #           "select * from
+  #           (
+  #           select * from T_PurchaseProcessLog
+  #           where RegDate >= CONVERT(DATETIME, '2022-11-29 00:00:00.000')
+  #           )AS T"
+  #         numeric.mapping: "best_fit" # Numeric 컬럼 처리
+
 
 
 # UI for 카프카 설정
@@ -335,12 +389,16 @@ test:
   connects:
     # 소스 커넥터
     srccon:
+      # nodeSelector:
+      #   alpaka/node-type: worker
       container:
         image: "haje01/kafka-srccon"
         tag: 0.0.3
         pullPolicy: IfNotPresent
     # 싱크 커넥터 
     sinkcon:
+      # nodeSelector:
+      #   alpaka/node-type: worker
       container:
         image: "haje01/kafka-sinkcon"
         tag: 0.0.3
@@ -350,10 +408,12 @@ test:
     # topics_dir: S3 싱크가 저장될 버킷내 디렉토리 
     # region: S3 싱크가 저장될 리전
   envs: []
-  # - name: AWS 액세스 키
-  #   value: 
-  # - name: AWS 시크릿 키
-  #   value: 
+  # - name: AWS_ACCESS_KEY_ID
+  #   value: 액세스 키값
+  # - name: AWS_SECRET_ACCESS_KEY 
+  #   value: 시크릿 키값
+  # - name: AWS_DEFAULT_REGION
+  #   value: ap-northeast-2
   resources: {}
   nodeSelector: {}
   tolerations: []
