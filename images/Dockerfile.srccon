@@ -16,7 +16,7 @@ RUN mkdir -p /opt/bitnami/kafka/plugins
 COPY files/debezium-connector-mysql-2.1.1.Final-plugin.tar.gz /usr/share/java/dbzm-mysql.tar.gz
 COPY files/debezium-connector-sqlserver-2.1.1.Final-plugin.tar.gz /usr/share/java/dbzm-mssql.tar.gz
 COPY files/mysql-connector-j_8.0.31-1debian11_all.deb /usr/share/java/mysql-conn.deb
-COPY files/kafka-connect-jdbc-10.5.2-haje01.zip /usr/share/java/jdbc_src_conn.zip
+COPY files/haje01-kafka-connect-jdbc-10.5.2+0.0.1.zip /usr/share/java/jdbc_src_conn.zip
 
 # 플러그인 설치
 RUN cd /usr/share/java \
