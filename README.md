@@ -320,7 +320,7 @@ kafka_connect:
     # 컨테이너 정보 
     container:                     
       image: "haje01/kafka-srccon"   # 컨테이너 이미지 
-      tag: latest                    # 이미지 태그 
+      tag: 0.0.5                     # 이미지 태그 
       pullPolicy: IfNotPresent       # 이지미 풀 정책 
     timezone: Asia/Seoul # 커넥트 파드의 타임존 
     # 커넥트 레벨에서 공유될 변수 값 리스트 
@@ -894,7 +894,7 @@ test:
     srccon:
       container:
         image: "haje01/kafka-srccon"
-        tag: 0.0.3
+        tag: 0.0.5
         pullPolicy: IfNotPresent
     # 싱크 커넥트 정보 
     sinkcon:
