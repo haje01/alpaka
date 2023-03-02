@@ -9,6 +9,7 @@
 - UI for Kafka
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
+- Loki 
 - Kubernetes Dashboard
 
 추가적으로 테스트 및 운영에 필요한 툴 컨테이너가 설치된다.
@@ -226,6 +227,8 @@ k8dashboard:    # 쿠버네티스 대쉬보드 설정
 prometheus:     # 프로메테우스 설정
 
 grafana:        # 그라파나 설정 
+
+loki:           # 그라파나 로키 설정
 
 kminion:        # 그라파나 용 KMinion 대쉬보드 설정 
 
@@ -762,7 +765,7 @@ kminion:
 
 예제의 경우 다음과 같은 내용이 될 것이다.
 
-```
+```yaml
 kminion:
   kminion:
     config:
@@ -777,6 +780,25 @@ KMnion 차트는 [여기](https://github.com/redpanda-data/kminion/tree/master/c
 ```
 helm show values kminion/kminion
 ```
+
+#### 그라파나 로키 설정 
+
+그라파나 로키는 텍스트 로그를 수집/저장하기 위한 툴이다. 알파카에서는 다양한 서비스의 로그를 중앙 집중형으로 관리하기 위해서 로키의 설치를 지원한다 (기본은 꺼져있음). 굳이 로키를 설치하지 않아도 쿠버네티스의 로깅을 이용하여 로그를 확인할 수 있으나, 많은 노드에서 다양한 서비스가 장기간 서비스되는 경우 로키를 설치하면 로그 모니터링이 더 편리할 것이다. 
+
+그라파나 로키는 다양한 컴포넌트를 이용하여 구성되었기에 설정이 꽤 복잡할 수 있다. 일반적으로는 다음과 같이 로그 보유 기간 (Retention) 정도만 지정하여 이용할 수 있다.
+
+```yaml
+loki:
+  enabled: true
+  retention_period: 72h  # 3일간 로그 보관 
+```
+
+더 자세한 것은 `alpaka/values.yaml` 및 차트의 변수 파일을 참고하자. 로컬 Helm 저장소에 등록하였다면 차트의 기본값을 다음처럼 확인할 수 있다.
+
+```
+helm show values bitnami/grafana-loki
+```
+
 
 ### 공용 인그레스 설정
 

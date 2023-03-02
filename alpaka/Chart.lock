@@ -10,7 +10,10 @@ dependencies:
   version: 8.3.0
 - name: grafana
   repository: https://charts.bitnami.com/bitnami
-  version: 8.2.27
+  version: 8.2.28
+- name: grafana-loki
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.5.9
 - name: kminion
   repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
   version: 0.10.0
@@ -23,5 +26,5 @@ dependencies:
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
   version: 9.4.5
-digest: sha256:d1cded1a5b6a7b05517473f92573a7e833efdfaadc8f5f25bb0806bceea43810
-generated: "2023-02-22T15:44:16.677812343+09:00"
+digest: sha256:b7015bb97580f5e249c60f09daed7269bdc390ecd046e8ce15d4053a024a4453
+generated: "2023-03-02T14:24:23.481820631+09:00"
