@@ -31,6 +31,7 @@ RUN cd /usr/share/java \
     # 이렇게 안해주면 발견하지 못함 (?!)
     && mv mysql-connector-j-8.0.31.jar haje01-kafka-connect-jdbc-10.5.2+0.0.1/
 
+RUN echo 'alias ll="ls -alh"' >> ~/.bashrc
 
 # 추가적으로 두 번째 설정 파일 지정 가능
 # 예: /opt/bitnami/kafka/config/mongo.properties

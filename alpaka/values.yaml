@@ -159,7 +159,7 @@ kafka_connect:
   #   replicaCount: 
   #   container:
   #     image: "haje01/kafka-srccon"
-  #     tag: 0.0.5
+  #     tag: 0.0.6
   #     pullPolicy: IfNotPresent
   #   nodeSelector: 
   #     alpaka/node-type: worker
@@ -568,7 +568,7 @@ test:
       nodeSelector: {}
       container:
         image: "haje01/kafka-srccon"
-        tag: 0.0.5
+        tag: 0.0.6
         pullPolicy: IfNotPresent
     # 싱크 커넥터 
     sinkcon:
