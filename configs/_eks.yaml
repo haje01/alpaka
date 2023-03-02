@@ -72,6 +72,13 @@ grafana:
         access: proxy
         url: http://RELEASE-prometheus-prometheus:9090
         isDefault: true
+      ## 그라파나 로키 사용시 
+      # - name: Loki
+      #   type: loki
+      #   access: proxy
+      #   url: http://RELEASE-loki-gateway
+      # jsonData:
+      #   maxLines: 1000
   dashboardsConfigMaps:
     - configMapName: RELEASE-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
@@ -83,6 +90,12 @@ grafana:
       fileName: zookeeper-by-prometheus_rev4.json
     - configMapName: RELEASE-alpaka-grafana-jvm
       fileName: altassian-overview_rev1.json
+
+
+## 그라파나 로키 사용시 
+# loki:
+#   enabled: true
+#   retention_period: 48h
 
 
 kminion:

@@ -39,9 +39,14 @@ dependencies:
     alias: prometheus
     condition: prometheus.enabled
   - name: grafana
-    version: 8.x.x
+    version: 8.2.x
     repository: https://charts.bitnami.com/bitnami
     condition: grafana.enabled
+  - name: grafana-loki
+    version: 2.5.x
+    repository: https://charts.bitnami.com/bitnami
+    alias: loki
+    condition: loki.enabled
   - name: kminion
     version: 0.10.x
     # policy/v1beta 의 호환성 문제

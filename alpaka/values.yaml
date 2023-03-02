@@ -322,6 +322,182 @@ kminion:
     #   prometheus.io/probe: kminion
 
 
+grafana-loki:
+  enabled: false 
+  loki:
+    # 여기서 차트 설정을 오버라이드 
+    configuration: |
+      auth_enabled: false
+
+      server:
+        http_listen_port: {{ .Values.loki.containerPorts.http }}
+
+      common:
+        compactor_address: http://{{ include "grafana-loki.compactor.fullname" . }}:{{ .Values.compactor.service.ports.http }}
+
+      distributor:
+        ring:
+          kvstore:
+            store: memberlist
+
+      memberlist:
+        join_members:
+          - {{ include "grafana-loki.gossip-ring.fullname" . }}
+
+      ingester:
+        lifecycler:
+          ring:
+            kvstore:
+              store: memberlist
+            replication_factor: 1
+        chunk_idle_period: 30m
+        chunk_block_size: 262144
+        chunk_encoding: snappy
+        chunk_retain_period: 1m
+        max_transfer_retries: 0
+        wal:
+          dir: {{ .Values.loki.dataDir }}/wal
+
+      limits_config:
+        enforce_metric_name: false
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
+        max_cache_freshness_per_query: 10m
+        split_queries_by_interval: 15m
+
+      schema_config:
+        configs:
+        {{- if .Values.loki.schema_configs }}
+          {{- toYaml .Values.loki.schema_configs | nindent 8 }}
+        {{- else }}
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+        {{- end }}
+
+      storage_config:
+        boltdb_shipper:
+          shared_store: filesystem
+          active_index_directory: {{ .Values.loki.dataDir }}/loki/index
+          cache_location: {{ .Values.loki.dataDir }}/loki/cache
+          cache_ttl: 168h
+          {{- if .Values.indexGateway.enabled }}
+          index_gateway_client:
+            server_address: {{ (printf "dns:///%s:9095" (include "grafana-loki.index-gateway.fullname" .)) }}
+          {{- end }}
+        filesystem:
+          directory: {{ .Values.loki.dataDir }}/chunks
+        index_queries_cache_config:
+          {{- if .Values.memcachedindexqueries.enabled }}
+          memcached:
+            batch_size: 100
+            parallelism: 100
+          memcached_client:
+            consistent_hash: true
+            addresses: dns+{{ include "grafana-loki.memcached-index-queries.host" . }}
+            service: http
+          {{- end }}
+
+      chunk_store_config:
+        max_look_back_period: 0s
+        {{- if .Values.memcachedchunks.enabled }}
+        chunk_cache_config:
+          memcached:
+            batch_size: 100
+            parallelism: 100
+          memcached_client:
+            consistent_hash: true
+            addresses: dns+{{ include "grafana-loki.memcached-chunks.host" . }}
+        {{- end }}
+        {{- if .Values.memcachedindexwrites.enabled }}
+        write_dedupe_cache_config:
+          memcached:
+            batch_size: 100
+            parallelism: 100
+          memcached_client:
+            consistent_hash: true
+            addresses: dns+{{ include "grafana-loki.memcached-index-writes.host" . }}
+        {{- end }}
+
+      table_manager:
+        retention_deletes_enabled: true
+        retention_period: {{ default "0s" .Values.loki.retention_period }}
+
+      query_range:
+        align_queries_with_step: true
+        max_retries: 5
+        cache_results: true
+        results_cache:
+          cache:
+            {{- if .Values.memcachedfrontend.enabled }}
+            memcached_client:
+              consistent_hash: true
+              addresses: dns+{{ include "grafana-loki.memcached-frontend.host" . }}
+              max_idle_conns: 16
+              timeout: 500ms
+              update_interval: 1m
+            {{- else }}
+            embedded-cache:
+              enabled: true
+              max_size_items: 1024
+              validity: 24h
+            {{- end }}
+      {{- if not .Values.queryScheduler.enabled }}
+      frontend_worker:
+        frontend_address: {{ include "grafana-loki.query-frontend.fullname" . }}:{{ .Values.queryFrontend.service.ports.grpc }}
+      {{- end }}
+
+      frontend:
+        log_queries_longer_than: 5s
+        compress_responses: true
+        tail_proxy_url: http://{{ include "grafana-loki.querier.fullname" . }}:{{ .Values.querier.service.ports.http }}
+
+      compactor:
+        shared_store: filesystem
+
+      ruler:
+        storage:
+          type: local
+          local:
+            directory: {{ .Values.loki.dataDir }}/conf/rules
+        ring:
+          kvstore:
+            store: memberlist
+        rule_path: /tmp/loki/scratch
+        alertmanager_url: https://alertmanager.xx
+        external_url: https://alertmanager.xx
+
+
+# loki:
+#   enabled: false
+#   loki:
+#     auth_enabled: false 
+#     commonConfig:
+#       replication_factor: 1
+#     storage:
+#       type: filesystem
+#   singleBinary:
+#     replicas: 1
+#   monitoring:
+#     lokiCanary:
+#       enabled: false
+#   test:
+#     enabled: false
+#   schema_config:
+#     configs:
+#     - from: 2022-01-11
+#       store: boltdb-shipper
+#       object_store: filesystem
+#       schema: v12
+#       index:
+#         prefix: loki_index_
+#         period: 168h
+
+
 # 공용 ingress 설정
 ingress:
   enabled: true
@@ -389,16 +565,14 @@ test:
   connects:
     # 소스 커넥터
     srccon:
-      # nodeSelector:
-      #   alpaka/node-type: worker
+      nodeSelector: {}
       container:
         image: "haje01/kafka-srccon"
         tag: 0.0.5
         pullPolicy: IfNotPresent
     # 싱크 커넥터 
     sinkcon:
-      # nodeSelector:
-      #   alpaka/node-type: worker
+      nodeSelector: {}
       container:
         image: "haje01/kafka-sinkcon"
         tag: 0.0.3

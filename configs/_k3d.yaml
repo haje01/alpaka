@@ -75,6 +75,13 @@ grafana:
         access: proxy
         url: http://RELEASE-prometheus-prometheus:9090
         isDefault: true
+      ## 그라파나 로키 사용시 
+      # - name: Loki
+      #   type: loki
+      #   access: proxy
+      #   url: http://RELEASE-loki-gateway
+      # jsonData:
+      #   maxLines: 1000
   dashboardsConfigMaps:
     - configMapName: RELEASE-alpaka-grafana-cluster
       fileName: kminion-cluster_rev1.json
@@ -97,6 +104,42 @@ kminion:
         brokers: ["RELEASE-kafka-headless:9092"]
     exporter:
       host: "RELEASE-kminion"
+
+
+## 그라파나 로키 사용시 
+# loki:
+#   enabled: true
+#   retention_period: 48h
+#   compactor:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   gateway:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   indexGateway:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   distributor:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   ingester:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   querier:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   queryFrontend:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   queryScheduler:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   ruler:
+#     nodeSelector:
+#       alpaka/node-type: infra
+#   tableManager:
+#     nodeSelector:
+#       alpaka/node-type: infra
 
 
 k8dashboard:
