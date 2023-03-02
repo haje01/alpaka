@@ -922,7 +922,7 @@ test:
     sinkcon:
       container:
         image: "haje01/kafka-sinkcon"
-        tag: 0.0.3
+        tag: 0.0.4
         pullPolicy: IfNotPresent
   # S3 싱크 커넥터 테스트 정보 
   s3sink:
@@ -969,7 +969,7 @@ helm repo add alpaka https://raw.githubusercontent.com/haje01/alpaka/master/char
 ```bash
 $ helm search repo alpaka
 NAME            CHART VERSION   APP VERSION     DESCRIPTION
-alpaka/alpaka   0.0.3           3.3.1           Yet another Kafka deployment chart.
+alpaka/alpaka   0.0.4           3.3.1           Yet another Kafka deployment chart.
 ```
 
 앞서 작성해 둔 예제 설정 파일을 이용하면 다음과 같이 설치할 수 있다.
@@ -981,19 +981,19 @@ helm install -f configs/mymkb.yaml my alpaka/alpaka
 저장소에 등록된 패키지에서 설치하려면 다음처럼 한다 (`alpaka/alpaka` 는 `저장소/차트명` 이다). 버전을 명시하여 설치할 수도 있다.
 
 ```bash
-helm install -f configs/mymkb.yaml my alpaka/alpaka --version 0.0.3
+helm install -f configs/mymkb.yaml my alpaka/alpaka --version 0.0.4
 ```
 
 폐쇄망처럼 외부 접속이 곤란한 경우 `alpaka/chartrepo` 아래에 있는 특정 버전의 패키지 파일에서 직접 설치할 수도 있다.
 
 ```bash
-helm install -f config/mymkb.yaml my chartrepo/alpaka-0.0.3.tgz
+helm install -f config/mymkb.yaml my chartrepo/alpaka-0.0.4.tgz
 ```
 
 혹은 다음처럼 패키지 파일내 `charts/` 디렉토리만 로컬로 복사하여 이용할 수도 있다.
 
 ```bash
-tar xzvf chartrepo/alpaka-0.0.3.tgz alpaka/charts
+tar xzvf chartrepo/alpaka-0.0.4.tgz alpaka/charts
 helm install -f config/mymkb.yaml my alpaka/
 ```
 
@@ -1285,7 +1285,7 @@ test:
 helm package alpaka/
 ```
 
-그러면 `alpaka-0.0.3.tgz` 와 같은 패키지 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 옮긴 후, `chartrepo` 디렉토리에서 인덱스 파일을 생성한다 (하나 이상의 패키지 파일이 있어도 괜찮다).
+그러면 `alpaka-0.0.4.tgz` 와 같은 패키지 파일이 생성되는데, 이것을 `chartrepo` 디렉토리로 옮긴 후, `chartrepo` 디렉토리에서 인덱스 파일을 생성한다 (하나 이상의 패키지 파일이 있어도 괜찮다).
 
 ```bash
 helm repo index .
