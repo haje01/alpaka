@@ -9,7 +9,7 @@
 - UI for Kafka
 - Prometheus (+ KMinion)
 - Grafana (+ 각종 대쉬보드)
-- Loki 
+- Grafana Loki 
 - Kubernetes Dashboard
 
 추가적으로 테스트 및 운영에 필요한 툴 컨테이너가 설치된다.
