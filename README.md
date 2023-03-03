@@ -4,7 +4,7 @@
 
 - Kafka
 - Zookeeper
-- Kafka 용 JDBC 커넥터
+- Kafka 용 JDBC 소스 커넥터 + S3 싱크 커넥터
 - ksqlDB
 - UI for Kafka
 - Prometheus (+ KMinion)
