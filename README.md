@@ -189,14 +189,14 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 > 만약 독자적인 툴 이미지가 필요하면 `images/Dockerfile.tool` 및 `images/build_tool.sh` 파일을 참고하여 만들도록 하자.
 
-#### DB 커넥트 이미지 
+#### 커넥트 이미지 
 
-카프카의 커넥터 (Connector) 는 다양한 데이터 소스에서 데이터를 가져오거나, 외부로 내보내는 데 사용되는 일종의 플러그인이다. 커넥터는 카프카 커넥트 (Connect) 장비에 등록되어 동작하는데, 알파카에서는 기본적으로 [Confluent JDBC 커넥터](https://docs.confluent.io/kafka-connectors/jdbc/current/index.html) 및 [Debezium](https://debezium.io/) 이 설치된 DB 용 커넥트 이미지를 제공한다.
+카프카의 커넥터 (Connector) 는 다양한 데이터 소스에서 데이터를 가져오거나, 외부로 내보내는 데 사용되는 일종의 플러그인이다. 커넥터는 카프카 커넥트 (Connect) 파드에 등록되어 동작하는데, 이를 위해 알파카에서는 기본적으로 두 가지 이미지를 이용한다. 하나는 외부 데이터를 카프카로 가져오는 소스 커넥터를 위한 이미지로 [Confluent JDBC 커넥터](https://docs.confluent.io/kafka-connectors/jdbc/current/index.html) 및 [Debezium](https://debezium.io/) 등이 설치되어 있다. 다른 하나는 카프카 토픽의 내용을 외부로 내보내기 위한 싱크 커넥터를 위한 이미지로 현재는 S3 Sink 가 설치되어 있다.
 
 
-기본 DB 커넥트 이미지는 도커 허브의 [haje01/kafka-srccon](https://hub.docker.com/repository/docker/haje01/kafka-srccon/general) 으로 올라가 있기에 이것을 사용하면 된다. 
+소스 커넥트용 이미지는 도커 허브의 [haje01/kafka-srccon](https://hub.docker.com/repository/docker/haje01/kafka-srccon/general) 에, 싱크 커넥트용 이미지는 [haje01/kafka-srccon](https://hub.docker.com/repository/docker/haje01/kafka-srccon/general) 에 있는 것을 사용하면 된다. 
 
-> 만약 독자적인 DB 커넥터 이미지가 필요하면 `images/Dockerfile.srccon` 및 `images/build_srccon.sh` 파일을 참고하여 만들도록 하자.
+> 만약 기본 이미지외 독자적인 커넥트 이미지가 필요하면 `images/Dockerfile.srccon` 및 `images/build_srccon.sh` 파일을 참고하여 만들고 설정을 바꾸어서 이용하면 된다.
 
 
 ## 설정 파일 만들기 
