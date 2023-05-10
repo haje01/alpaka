@@ -1,0 +1,3 @@
+[submodule "alpaka-cfg"]
+	path = alpaka-cfg
+	url = https://gitlabai.webzen.com/wai/alpaka-cfg.git
