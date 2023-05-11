@@ -1,3 +1,0 @@
-[submodule "deploy-cfg"]
-	path = deploy-cfg
-	url = https://gitlabai.webzen.com/wai/alpaka-cfg.git
