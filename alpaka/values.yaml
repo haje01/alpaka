@@ -575,7 +575,7 @@ test:
       nodeSelector: {}
       container:
         image: "haje01/kafka-sinkcon"
-        tag: 0.0.3
+        tag: 0.0.4
         pullPolicy: IfNotPresent
   # S3 싱크 커넥터 테스트 정보 
   s3sink:

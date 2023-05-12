@@ -14,6 +14,7 @@ RUN apt-get update \
 RUN mkdir -p /opt/bitnami/kafka/plugins
 
 COPY files/confluentinc-kafka-connect-s3-10.3.0.zip /usr/share/java/confluentinc-kafka-connect-s3.zip
+COPY files/topicless-timebasedpartitioner.jar /usr/share/java/
 
 # 플러그인 설치
 RUN cd /usr/share/java \
