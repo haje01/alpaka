@@ -10,21 +10,21 @@ dependencies:
   version: 8.3.0
 - name: grafana
   repository: https://charts.bitnami.com/bitnami
-  version: 8.2.28
+  version: 8.2.33
 - name: grafana-loki
   repository: https://charts.bitnami.com/bitnami
-  version: 2.5.9
+  version: 2.5.10
 - name: kminion
   repository: https://raw.githubusercontent.com/haje01/kminion/master/charts/patched
   version: 0.10.0
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard/
-  version: 6.0.0
+  version: 6.0.7
 - name: kafka-ui
   repository: https://raw.githubusercontent.com/haje01/kafka-ui/master/charts/kafka-ui
   version: 0.4.6
 - name: mysql
   repository: https://charts.bitnami.com/bitnami
   version: 9.4.5
-digest: sha256:b7015bb97580f5e249c60f09daed7269bdc390ecd046e8ce15d4053a024a4453
-generated: "2023-03-02T14:24:23.481820631+09:00"
+digest: sha256:9bf7006ff3d302d5cda89f55db8f73ed43216398d889667c01e7e1602179903a
+generated: "2023-05-12T13:25:17.612943272+09:00"

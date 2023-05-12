@@ -20,7 +20,6 @@ RUN cd /usr/share/java \
     && unzip confluentinc-kafka-connect-s3.zip \
     && rm confluentinc-kafka-connect-s3.zip
 
-
 # 추가적으로 두 번째 설정 파일 지정 가능
 # 예: /opt/bitnami/kafka/config/mongo.properties
 CMD /opt/bitnami/kafka/bin/connect-distributed.sh /opt/bitnami/kafka/config/connect-distributed.properties
