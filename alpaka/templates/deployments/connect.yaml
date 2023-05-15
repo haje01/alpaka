@@ -38,6 +38,10 @@ spec:
         env:
           - name: TZ
             value: {{ $cnt.timezone | default "UTC" }}
+          {{- range $ev := $cnt.envs }}
+          - name: {{ $ev.name }}
+            value: {{ $ev.value }} 
+          {{- end }}
         ports:
           - name: connector
             containerPort: 8083
