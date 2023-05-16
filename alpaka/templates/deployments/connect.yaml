@@ -5,7 +5,7 @@
 {{ $fullname := include "common.names.fullname" . }}
 {{ $labels := include "common.labels.standard" . }}
 {{ $matchLabels := include "common.labels.matchLabels" . }}
-{{- range $cnt := .Values.kafka_connect.connects -}}
+{{- range $cnt := .Values.kafka_connect.connects }}
 ---
 apiVersion: apps/v1
 kind: Deployment
