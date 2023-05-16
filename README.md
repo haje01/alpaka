@@ -327,7 +327,7 @@ kafka_connect:
       pullPolicy: IfNotPresent       # 이지미 풀 정책 
     timezone: Asia/Seoul # 커넥트 파드의 타임존 
     # 필요한 경우 컨테이너에 건낼 환경변수 지정
-    envs: {}
+    envs: []
     # 커넥트 레벨에서 공유될 변수 값 리스트 
     values:                    
       db_host: mysql-db-addr      # DBMS 호스트 주소
