@@ -673,6 +673,8 @@ prometheus:
 helm show values bitnami/kube-prometheus
 ```
 
+> 만약, 프로메테우스를 설치하지 않으면 `kafka.zookeeper.metrics.enabled=false` 로 설정하자. 그렇지 않으면 프로메테우스 관련 CRD 가 없어 에러가 발생하게 된다.
+
 ### 그라파나 설정 
 
 [그라파나](https://grafana.com/)는 프로메테우스가 수집한 메트릭을 시각화할 수 있는 도구이다. 설정은 대략 다음과 같은 구조를 가진다.
@@ -986,7 +988,7 @@ helm install -f configs/mymkb.yaml my alpaka/alpaka
 helm install -f configs/mymkb.yaml my alpaka/alpaka --version 0.0.4
 ```
 
-폐쇄망처럼 외부 접속이 곤란한 경우 `alpaka/chartrepo` 아래에 있는 특정 버전의 패키지 파일에서 직접 설치할 수도 있다.
+폐쇄망처럼 외부 접속이 곤란한 경우 `alpaka/chartrepo` 아래에 있는 특정 버전의 패키지 파일에서 직접 설치할 수도 있다 (이 경우 차트 저장소의 등록이 필요없다).
 
 ```bash
 helm install -f config/mymkb.yaml my chartrepo/alpaka-0.0.4.tgz

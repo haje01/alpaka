@@ -322,7 +322,7 @@ kminion:
     #   prometheus.io/probe: kminion
 
 
-grafana-loki:
+loki:
   enabled: false 
   loki:
     # 여기서 차트 설정을 오버라이드 
